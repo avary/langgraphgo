@@ -1,20 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>快速开始 - LangGraphGo 文档</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>Getting Started - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.cn/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         .doc-container {
@@ -105,10 +103,10 @@
         <div class="nav-container">
             <a href="../index.html" class="logo">LangGraphGo</a>
             <ul class="nav-links">
-                <li><a href="../showcases.html">案例</a></li>
-                <li><a href="../docs.html" style="color: var(--primary-color);">文档</a></li>
-                <li><a href="../examples.html">示例</a></li>
-                <li><a href="../en/docs/getting-started.html">English</a></li>
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/getting-started.html">中文</a></li>
             </ul>
             <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
                 <i class="fab fa-github"></i> GitHub
@@ -119,37 +117,38 @@
     <div class="doc-container">
         <aside class="sidebar">
             <ul class="sidebar-nav">
-                <li><a href="getting-started.html" class="active">快速开始</a></li>
-                <li><a href="core-concepts.html">核心概念</a></li>
-                <li><a href="guides.html">指南</a></li>
-                <li><a href="api.html">API 参考</a></li>
+                <li><a href="getting-started.html" class="active">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
                 <li
                     style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                    专题指南</li>
-                <li><a href="guide-basics.html" style="padding-left: 1rem;">基础构建块</a></li>
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
                 <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
                 <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
-                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">预构建 Agent</a></li>
-                <li><a href="guide-streaming.html" style="padding-left: 1rem;">流式传输</a></li>
-                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">记忆与时间旅行</a></li>
-                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">高级特性</a></li>
-                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG 管道</a></li>
-                <li><a href="guide-hitl.html" style="padding-left: 1rem;">人工介入 (HITL)</a></li>
-                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">多 Agent 系统</a></li>
-                <li><a href="guide-state-management.html" style="padding-left: 1rem;">状态管理</a></li>
-                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">监控与调试</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
             </ul>
         </aside>
         <main class="content">
-            <h1>快速开始</h1>
-            <p>LangGraphGo 是一个用于构建有状态、多角色 LLM 应用程序的 Go 语言库，基于 LangChainGo 构建。它旨在实现与 Python LangGraph 库的功能对齐。</p>
+            <h1>Getting Started</h1>
+            <p>LangGraphGo is a Go library for building stateful, multi-actor LLM applications, built on LangChainGo. It
+                aims to align with the functionality of the Python LangGraph library.</p>
 
-            <h2>安装</h2>
-            <p>使用 <code>go get</code> 安装库：</p>
+            <h2>Installation</h2>
+            <p>Install the library using <code>go get</code>:</p>
             <pre><code class="language-bash">go get github.com/smallnest/langgraphgo</code></pre>
 
-            <h2>基本示例</h2>
-            <p>下面是一个简单的示例，展示了如何创建一个基本的聊天图：</p>
+            <h2>Basic Example</h2>
+            <p>Here is a simple example showing how to create a basic chat graph:</p>
             <pre><code class="language-go">package main
 
 import (
@@ -166,24 +165,24 @@ func main() {
     ctx := context.Background()
     model, _ := openai.New()
 
-    // 1. 创建图
+    // 1. Create graph
     g := graph.NewMessageGraph()
 
-    // 2. 添加节点
+    // 2. Add node
     g.AddNode("generate", func(ctx context.Context, state interface{}) (interface{}, error) {
         messages := state.([]llms.MessageContent)
         response, _ := model.GenerateContent(ctx, messages)
         return append(messages, llms.TextParts("ai", response.Choices[0].Content)), nil
     })
 
-    // 3. 定义边
+    // 3. Define edges
     g.AddEdge("generate", graph.END)
     g.SetEntryPoint("generate")
 
-    // 4. 编译
+    // 4. Compile
     runnable, _ := g.Compile()
 
-    // 5. 调用
+    // 5. Invoke
     initialState := []llms.MessageContent{
         llms.TextParts("human", "Hello, LangGraphGo!"),
     }
@@ -192,12 +191,16 @@ func main() {
     fmt.Println(result)
 }</code></pre>
 
-            <h2>特性概览</h2>
+            <h2>Features Overview</h2>
             <ul>
-                <li><strong>核心运行时</strong>: 支持并行执行、运行时配置，并与 langchaingo 无缝兼容。</li>
-                <li><strong>持久化</strong>: 提供 Redis, Postgres, SQLite 等 Checkpointers，支持状态保存和恢复。</li>
-                <li><strong>高级能力</strong>: 状态 Schema、智能消息合并、子图、流式传输等。</li>
-                <li><strong>开发者体验</strong>: 图可视化、人工介入 (HITL) 支持、可观测性。</li>
+                <li><strong>Core Runtime</strong>: Supports parallel execution, runtime configuration, and seamless
+                    compatibility with langchaingo.</li>
+                <li><strong>Persistence</strong>: Provides Checkpointers like Redis, Postgres, SQLite, supporting state
+                    saving and restoration.</li>
+                <li><strong>Advanced Capabilities</strong>: State Schema, smart message merging, subgraphs, streaming,
+                    etc.</li>
+                <li><strong>Developer Experience</strong>: Graph visualization, Human in the Loop (HITL) support,
+                    observability.</li>
             </ul>
         </main>
     </div>
@@ -205,7 +208,7 @@ func main() {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-    <script src="../script.js"></script>
+    <script src="../../script.js"></script>
 </body>
 
 </html>

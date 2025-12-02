@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Features Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-advanced-features.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" class="active" style="padding-left: 1rem;">Advanced
+                        Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>Advanced Features</h1>
+            <p>After mastering the basics, LangGraphGo provides a series of advanced features to help you build more
+                complex, robust, and maintainable AI systems.</p>
+
+            <h2>1. Parallel Execution</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>In many tasks, multiple steps can be performed simultaneously. For example, when writing an article, you
+                can search for three different topics at the same time. Parallel execution can significantly reduce
+                total latency.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>LangGraphGo's runtime automatically detects parallel opportunities. If a node has multiple outgoing edges
+                pointing to different nodes (Fan-out), or multiple nodes have no dependencies and all meet execution
+                conditions, the runtime will execute them concurrently in Goroutines.</p>
+            <p>The results of concurrent execution need to be merged. This is why the Reducer in the State Schema is so
+                important. The Reducer defines how to safely merge partial states generated concurrently into the main
+                state.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// Simple Fan-out pattern
+g.AddEdge("start", "search_topic_a")
+g.AddEdge("start", "search_topic_b")
+g.AddEdge("start", "search_topic_c")
+
+// Fan-in pattern: aggregate results after all searches complete
+g.AddEdge("search_topic_a", "aggregator")
+g.AddEdge("search_topic_b", "aggregator")
+g.AddEdge("search_topic_c", "aggregator")
+
+// Runtime will automatically execute search_topic_a, b, c in parallel
+// aggregator will only execute when they are all done (or based on specific logic)</code></pre>
+
+            <h2>2. Subgraphs</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>As applications grow complex, a single large graph becomes hard to manage. Subgraphs allow you to
+                modularize your graph. You can call another compiled graph just like calling a normal node.</p>
+            <p>This not only helps with code organization but also supports multi-agent collaboration patterns, where
+                each agent is an independent subgraph.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>A compiled graph (<code>CompiledGraph</code>) implements the same interface as a node function (accepts
+                Context and State, returns State). Therefore, it can be directly added as a node to a parent graph.</p>
+            <p>Note that the State Schema of the parent graph and subgraph need to be compatible, or conversion is
+                needed.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// 1. Define subgraph (Researcher Agent)
+researchGraph := graph.NewStateGraph(...)
+// ... Build researchGraph ...
+researchRunnable := researchGraph.Compile()
+
+// 2. Define parent graph (Main Assistant)
+mainGraph := graph.NewStateGraph(...)
+
+// 3. Add subgraph as a node to parent graph
+mainGraph.AddNode("research_agent", researchRunnable)
+
+// 4. Define flow
+mainGraph.AddEdge("classify_input", "research_agent")</code></pre>
+
+            <h2>3. Visualization</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>"A picture is worth a thousand words". For complex logic graphs, code is often less intuitive than
+                diagrams. LangGraphGo has built-in Mermaid.js format export, allowing you to see the graph structure
+                directly.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>The graph object traverses its internal node and edge structure to generate a string description
+                conforming to Mermaid syntax.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">exporter := graph.NewExporter(g)
+mermaidChart := exporter.DrawMermaid()
+fmt.Println(mermaidChart)
+// Output example:
+// graph TD
+//   start --> node_a
+//   node_a --> node_b
+//   ...</code></pre>
+            <p>You can copy the output to <a href="https://mermaid.live" target="_blank">Mermaid Live Editor</a> to view
+                the chart.</p>
+
+            <h2>4. Runtime Configuration</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Without changing graph structure and code, we often need to adjust runtime behavior. For example, using
+                different LLM models for different users, or passing a User ID for logging.</p>
+            <p>The <code>Config</code> object provides a standard way to pass this metadata.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>The <code>Config</code> object is passed in the graph execution context. Any node can access the current
+                configuration via <code>graph.GetConfig(ctx)</code>.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// Pass config when invoking
+config := &graph.Config{
+    Configurable: map[string]interface{}{
+        "user_id": "123",
+        "model":   "gpt-4",
+    },
+}
+runnable.InvokeWithConfig(ctx, input, config)
+
+// Access config in node
+func myNode(ctx context.Context, state interface{}) (interface{}, error) {
+    config := graph.GetConfig(ctx)
+    userID := config.Configurable["user_id"]
+    // ...
+}</code></pre>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

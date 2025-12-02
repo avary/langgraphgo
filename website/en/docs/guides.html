@@ -1,19 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>指南 - LangGraphGo 文档</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>Guides - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.cn/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         .doc-container {
@@ -116,10 +114,10 @@
         <div class="nav-container">
             <a href="../index.html" class="logo">LangGraphGo</a>
             <ul class="nav-links">
-                <li><a href="../showcases.html">案例</a></li>
-                <li><a href="../docs.html" style="color: var(--primary-color);">文档</a></li>
-                <li><a href="../examples.html">示例</a></li>
-                <li><a href="../en/docs/guides.html">English</a></li>
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guides.html">中文</a></li>
             </ul>
             <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
                 <i class="fab fa-github"></i> GitHub
@@ -130,95 +128,97 @@
     <div class="doc-container">
         <aside class="sidebar">
             <ul class="sidebar-nav">
-                <li><a href="getting-started.html">快速开始</a></li>
-                <li><a href="core-concepts.html">核心概念</a></li>
-                <li><a href="guides.html" class="active">指南</a></li>
-                <li><a href="api.html">API 参考</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
                 <li
                     style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                    专题指南</li>
-                <li><a href="guide-basics.html" style="padding-left: 1rem;">基础构建块</a></li>
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
                 <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs
                         MessageGraph</a></li>
-                <li><a href="guide-streaming.html" style="padding-left: 1rem;">流式传输</a></li>
-                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">记忆与时间旅行</a></li>
-                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">高级特性</a></li>
-                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG 管道</a></li>
-                <li><a href="guide-hitl.html" style="padding-left: 1rem;">人工介入 (HITL)</a></li>
-                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">多 Agent 系统</a></li>
-                <li><a href="guide-state-management.html" style="padding-left: 1rem;">状态管理</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
             </ul>
         </aside>
         <main class="content">
-            <h1>指南</h1>
-            <p>深入学习 LangGraphGo 的核心功能和最佳实践。</p>
+            <h1>Guides</h1>
+            <p>Deep dive into LangGraphGo's core features and best practices.</p>
 
             <div class="guide-list">
                 <a href="guide-basics.html" class="guide-card">
-                    <h3><i class="fas fa-shapes"></i> 基础构建块</h3>
-                    <p>学习集成 LLM、定义边和条件路由。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-shapes"></i> Basic Building Blocks</h3>
+                    <p>Learn to integrate LLMs, define edges, and conditional routing.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-stategraph-vs-messagegraph.html" class="guide-card">
                     <h3><i class="fas fa-project-diagram"></i> StateGraph vs MessageGraph</h3>
-                    <p>了解何时使用通用图，何时使用消息图。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <p>Understand when to use generic graphs vs message graphs.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-createagent-vs-createreactagent.html" class="guide-card">
                     <h3><i class="fas fa-robot"></i> CreateAgent vs CreateReactAgent</h3>
-                    <p>对比两种预构建 Agent 的方法，选择适合你的构建器。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <p>Compare two prebuilt agent methods and choose the right builder for you.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-streaming.html" class="guide-card">
-                    <h3><i class="fas fa-stream"></i> 流式传输</h3>
-                    <p>实时获取图执行的中间结果和 LLM Token。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-stream"></i> Streaming</h3>
+                    <p>Get intermediate results and LLM tokens in real-time.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-memory-timetravel.html" class="guide-card">
-                    <h3><i class="fas fa-history"></i> 记忆与时间旅行</h3>
-                    <p>管理对话历史，查看和修改过去的状态。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-history"></i> Memory & Time Travel</h3>
+                    <p>Manage conversation history, inspect and modify past states.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-advanced-features.html" class="guide-card">
-                    <h3><i class="fas fa-layer-group"></i> 高级特性</h3>
-                    <p>并行执行、子图嵌套和图可视化。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-layer-group"></i> Advanced Features</h3>
+                    <p>Parallel execution, subgraph nesting, and graph visualization.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-rag.html" class="guide-card">
-                    <h3><i class="fas fa-search"></i> RAG 管道</h3>
-                    <p>构建完整的检索增强生成系统。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-search"></i> RAG Pipeline</h3>
+                    <p>Build complete Retrieval Augmented Generation systems.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-hitl.html" class="guide-card">
-                    <h3><i class="fas fa-user-check"></i> 人工介入 (HITL)</h3>
-                    <p>中断图执行，等待人工审批或输入。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-user-check"></i> Human in the Loop (HITL)</h3>
+                    <p>Interrupt graph execution, wait for human approval or input.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-multi-agent.html" class="guide-card">
-                    <h3><i class="fas fa-users-cog"></i> 多 Agent 系统</h3>
-                    <p>探索 Swarm 和 Supervisor 模式。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-users-cog"></i> Multi-Agent Systems</h3>
+                    <p>Explore Swarm and Supervisor patterns.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-state-management.html" class="guide-card">
-                    <h3><i class="fas fa-database"></i> 状态管理</h3>
-                    <p>掌握 State Schema、Reducers 和 Checkpointing。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-database"></i> State Management</h3>
+                    <p>Master State Schema, Reducers, and Checkpointing.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-prebuilt-agents.html" class="guide-card">
-                    <h3><i class="fas fa-robot"></i> 预构建 Agent</h3>
-                    <p>使用 CreateReactAgent 和 CreateSupervisor 快速构建。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-robot"></i> Prebuilt Agents</h3>
+                    <p>Quickly build using CreateReactAgent and CreateSupervisor.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
                 <a href="guide-monitoring.html" class="guide-card">
-                    <h3><i class="fas fa-chart-line"></i> 监控与调试</h3>
-                    <p>使用 Listeners 监控事件，以及持久化执行。</p>
-                    <div class="read-more">阅读指南 &rarr;</div>
+                    <h3><i class="fas fa-chart-line"></i> Monitoring & Debugging</h3>
+                    <p>Monitor events using Listeners, and durable execution.</p>
+                    <div class="read-more">Read Guide &rarr;</div>
                 </a>
             </div>
         </main>
     </div>
 
-    <script src="../script.js"></script>
+    <script src="../../script.js"></script>
 </body>
 
 </html>

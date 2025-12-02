@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Building Blocks Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-basics.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" class="active" style="padding-left: 1rem;">Basic Building Blocks</a>
+                </li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs
+                        MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs
+                        CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>Basic Building Blocks</h1>
+            <p>Building powerful AI applications is like building with blocks. LangGraphGo provides a set of lean yet
+                powerful core primitives that allow you to flexibly orchestrate complex logic. This guide will deep dive
+                into these basic building blocks: Nodes, Edges, and Conditional Routing.</p>
+
+            <h2>1. Nodes: Execution Units</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>In any workflow system, "what to do" is the most fundamental question. Nodes are the execution units in
+                LangGraphGo, responsible for specific computational tasks. Whether it's calling a Large Language Model
+                (LLM), querying a database, executing code, or simply formatting data, it's all done within nodes.</p>
+            <p>The design philosophy for nodes is <strong>functional</strong> and <strong>stateless</strong> (as much as
+                possible). They receive the current state as input and return state updates as output. This design makes
+                nodes easy to test, reuse, and parallelize.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>Under the hood, a node is defined as a function that accepts <code>context.Context</code> and input
+                state, and returns output state and an error. The LangGraphGo runtime is responsible for scheduling
+                these functions, handling concurrency, and managing state passing.</p>
+
+            <h3>Code Showcase: Integrating LLM</h3>
+            <p>The most common node type is calling an LLM. LangGraphGo integrates seamlessly with
+                <code>langchaingo</code>, making it very simple to use various LLMs within nodes.
+            </p>
+            <pre><code class="language-go">import (
+    "context"
+    "github.com/tmc/langchaingo/llms"
+    "github.com/tmc/langchaingo/llms/openai"
+)
+
+// Define a node function that calls LLM
+func callLLM(ctx context.Context, state interface{}) (interface{}, error) {
+    // 1. Extract message history from state
+    messages := state.([]llms.MessageContent)
+    
+    // 2. Initialize LLM (usually initialized once outside graph construction)
+    model, err := openai.New()
+    if err != nil {
+        return nil, err
+    }
+    
+    // 3. Call LLM to generate response
+    response, err := model.GenerateContent(ctx, messages)
+    if err != nil {
+        return nil, err
+    }
+    
+    // 4. Return new message, which will be appended to state via Reducer
+    return append(messages, llms.TextParts("ai", response.Choices[0].Content)), nil
+}
+
+// Add node to graph
+g.AddNode("chatbot", callLLM)</code></pre>
+
+            <h2>2. Edges: Control Flow</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>After defining "what to do", we need to define "in what order". Edges define the connection relationship
+                between nodes, i.e., the control flow. The simplest edge is a normal edge, representing deterministic
+                sequential execution.</p>
+            <p>By combining simple edges, you can build complex Directed Acyclic Graphs (DAGs) or even Cyclic Graphs,
+                which are crucial for implementing Agent cyclic reasoning (Think-Act-Observe).</p>
+
+            <h3>Implementation Principle</h3>
+            <p>The graph data structure maintains an adjacency list. When a node finishes execution, the runtime looks
+                up the outgoing edges of that node and adds downstream nodes to the execution queue. If a node has
+                multiple outgoing edges, downstream nodes will be scheduled in parallel.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// Define linear flow: A -> B -> C -> END
+g.AddEdge("node_a", "node_b")
+g.AddEdge("node_b", "node_c")
+g.AddEdge("node_c", graph.END) // END is a special virtual node representing graph execution end</code></pre>
+
+            <h2>3. Conditional Edges: Dynamic Routing</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Real-world logic is often not linear. Agents need to dynamically decide what to do next based on LLM
+                output, tool execution results, or external inputs. For example, if the LLM decides to call a tool, jump
+                to the tool node; if the LLM decides to reply directly, end.</p>
+            <p>Conditional edges introduce <strong>routing logic</strong>. They allow checking state at runtime and
+                choosing the next node based on the check result.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>Conditional edges are associated with a <strong>routing function</strong>. When the source node finishes
+                execution, the runtime calls this routing function. The routing function returns the name of the target
+                node (string). The runtime dynamically hands over control to the corresponding node based on this return
+                value.</p>
+
+            <h3>Code Showcase: Tool Call Routing</h3>
+            <p>Here is a routing logic in the classic ReAct pattern: check if the LLM has issued a tool call request.
+            </p>
+            <pre><code class="language-go">// Routing function: decide whether to execute tool or end
+func routeToolOrEnd(ctx context.Context, state interface{}) string {
+    messages := state.([]llms.MessageContent)
+    lastMessage := messages[len(messages)-1]
+    
+    // Check if the last message contains tool calls
+    if len(lastMessage.ToolCalls) > 0 {
+        return "tools" // Jump to tool execution node
+    }
+    return graph.END // Otherwise end
+}
+
+// Add conditional edge
+// From "llm_node", decide where to go based on routeToolOrEnd return value
+g.AddConditionalEdge("llm_node", routeToolOrEnd)
+
+// Optional: Explicitly define path mapping, helpful for visualization and validation
+g.AddConditionalEdge("llm_node", routeToolOrEnd, map[string]string{
+    "tools": "tools",
+    graph.END: graph.END,
+})</code></pre>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

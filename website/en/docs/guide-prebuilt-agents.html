@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prebuilt Agents Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-prebuilt-agents.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" class="active" style="padding-left: 1rem;">Prebuilt Agents</a>
+                </li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>Prebuilt Agents</h1>
+            <p>While LangGraphGo provides low-level capabilities to build arbitrary graphs, for many common tasks, we
+                don't need to start from scratch. LangGraphGo provides a series of prebuilt Agent factory functions that
+                encapsulate best practices, allowing you to get started quickly.</p>
+
+            <h2>1. ReAct Agent</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>ReAct (Reason + Act) is one of the most popular Agent patterns. It allows LLM to reason and call tools to
+                acquire information before generating a response. This loop (Think -> Act -> Observe -> Think) enables
+                Agents to solve problems requiring external knowledge or computational power.</p>
+
+            <h3>Implementation Principle</h3>
+            <p><code>CreateReactAgent</code> internally builds a graph with two main nodes:</p>
+            <ul>
+                <li><strong>Agent Node</strong>: Calls LLM, deciding whether to reply to user or call tools based on
+                    current state.</li>
+                <li><strong>Tools Node</strong>: Executes tool calls requested by LLM and returns results to Agent.</li>
+            </ul>
+            <p>These two nodes are connected by conditional edges, forming a closed loop until LLM decides to end.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">import "github.com/smallnest/langgraphgo/prebuilt"
+
+// 1. Define Tools
+tools := []llms.Tool{
+    // ... Your tool definitions ...
+}
+
+// 2. Create Agent
+// This function automatically builds graph, adds nodes and edges
+agent := prebuilt.CreateReactAgent(model, tools)
+
+// 3. Run
+res, err := agent.Invoke(ctx, input)</code></pre>
+
+            <h2>2. General Agent (CreateAgent)</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Sometimes you need more flexible configuration than ReAct, such as customizing System Message, adding
+                Checkpointer, or modifying State Schema. <code>CreateAgent</code> provides a more general entry point.
+            </p>
+
+            <h3>Implementation Principle</h3>
+            <p>It uses Go's Option pattern to receive configuration. The underlying logic is similar to ReAct but allows
+                more customization.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">agent := prebuilt.CreateAgent(
+    model,
+    tools,
+    // Custom System Message
+    prebuilt.WithSystemMessage("You are an assistant focused on math problems."),
+    // Enable Persistence
+    prebuilt.WithCheckpointer(checkpointer),
+)</code></pre>
+
+            <h2>3. Supervisor</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>As described in the "Multi-Agent Systems" guide, Supervisor is used to coordinate multiple Worker Agents.
+                The prebuilt <code>CreateSupervisor</code> saves you from manually writing complex routing logic.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>It creates a specialized Supervisor node, which uses a special Prompt to guide the LLM to output the name
+                of the next Worker. It also handles state passing and result aggregation.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">supervisor := prebuilt.CreateSupervisor(
+    model,
+    []string{"Researcher", "Writer", "Reviewer"}, // Worker List
+    prebuilt.WithSupervisorSystemMessage("Manage researchers, writers, and reviewers..."),
+)</code></pre>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

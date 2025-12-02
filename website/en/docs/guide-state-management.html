@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Management Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-state-management.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" class="active" style="padding-left: 1rem;">State
+                        Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>State Management</h1>
+            <p>State is the core of LangGraphGo. Unlike many stateless orchestration frameworks, LangGraphGo explicitly
+                defines and manages state. Understanding State Schema and Reducers is key to building complex graphs.
+            </p>
+
+            <h2>1. State Schema & Reducers</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>In a graph, multiple nodes might run in parallel and try to update state. If simply overwriting, it leads
+                to race conditions and data loss. Reducers define how to safely merge updates from different nodes.</p>
+            <p>For example, for chat history, we usually want to append new messages (Append), rather than overwrite old
+                messages (Overwrite).</p>
+
+            <h3>Implementation Principle</h3>
+            <p>State Schema is a Map defining field names and corresponding merge functions (Reducers). When the runtime
+                receives output from a node, it looks up the corresponding Reducer to handle the update.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// Define Schema
+schema := &graph.StateSchema{
+    "messages": graph.AppendReducer, // Message list: Append mode
+    "summary":  graph.OverwriteReducer, // Summary: Overwrite mode
+    "count": func(old, new interface{}) interface{} { // Custom: Accumulate mode
+        return old.(int) + new.(int)
+    },
+}
+
+// Apply Schema to Graph
+g.SetSchema(schema)</code></pre>
+
+            <h2>2. Ephemeral Channels</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Not all state needs to be persisted. Sometimes you need to pass a temporary signal or error message that
+                is valid only for the current step and should disappear in the next. This is similar to local variables
+                in programming languages.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>LangGraphGo provides `EphemeralReducer`. Fields using this Reducer are automatically cleared at the end
+                of each Superstep.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// Register ephemeral field
+schema.RegisterReducer("error_signal", graph.EphemeralReducer)
+
+// Node A sends error
+return map[string]interface{}{"error_signal": "something went wrong"}, nil
+
+// Node B (in same step or immediate next step) can read error_signal
+// But in subsequent steps, error_signal will be empty</code></pre>
+
+            <h2>3. Smart Messages</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>When handling chat history, simple appending is not always enough. For example, when an Agent regenerates
+                a reply, we want to replace the previous old reply instead of appending a new one. Or, we want to update
+                the content of a historical message.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>`MessagesStateGraph` comes with a smart `AddMessages` Reducer. It merges based on message ID: if the new
+                message ID already exists, it updates the old message (Upsert); if not, it appends.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// Use prebuilt MessagesStateGraph
+g := graph.NewMessagesStateGraph()
+
+// First generation
+g.AddNode("ai", func(...) {
+    return []llms.MessageContent{{ID: "msg_1", Content: "Thinking..."}}, nil
+})
+
+// Second generation (Update)
+g.AddNode("ai_update", func(...) {
+    // ID is same, content will be replaced
+    return []llms.MessageContent{{ID: "msg_1", Content: "The answer is 42."}}, nil
+})</code></pre>
+
+            <h2>4. Command API</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Usually, control flow is defined by graph edges. But in some complex scenarios, nodes might need
+                finer-grained control, such as "update state and immediately jump to node X", or "update state and end
+                graph".</p>
+
+            <h3>Implementation Principle</h3>
+            <p>A node can return a special `graph.Command` object. The runtime will prioritize instructions in this
+                object (such as `Goto`, `Update`), overriding default routing logic.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">func myNode(ctx context.Context, state interface{}) (interface{}, error) {
+    // ... Logic check ...
+    
+    // Dynamic jump
+    return graph.Command{
+        Goto: "node_c", // Force jump to node_c
+        Update: map[string]interface{}{"key": "value"}, // Update state simultaneously
+    }, nil
+}</code></pre>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-streaming.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" class="active" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>Streaming</h1>
+            <p>In modern AI applications, user experience is paramount. Users don't want to stare at a spinning loading
+                icon for seconds or even longer while the entire response is being generated. Streaming allows
+                applications to display intermediate results in real-time, greatly improving response speed and
+                interactivity.</p>
+
+            <h2>1. Streaming Mode</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>LangGraphGo's graph execution is inherently step-by-step. After each node finishes execution, the state
+                is updated. Streaming mode allows subscribers to get these state changes in real-time, instead of
+                waiting for the entire graph execution to finish.</p>
+            <p>This is very useful for debugging, progress bar display, and building complex interactive UIs.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>The <code>Stream</code> method returns a Go Channel. At the end of each step (Superstep) of graph
+                execution, the runtime sends the current state snapshot or state increment to this Channel.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// Start streaming execution
+// input: initial input
+// config: run config
+stream, err := runnable.Stream(ctx, input)
+if err != nil {
+    panic(err)
+}
+
+// Consume stream
+for chunk := range stream {
+    // chunk is a map where key is node name and value is output of that node
+    for nodeName, output := range chunk {
+        fmt.Printf("Node [%s] finished, output: %v\n", nodeName, output)
+    }
+}</code></pre>
+
+            <h2>2. Streaming LLM Tokens</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>This is the most common streaming requirement: displaying LLM generated content character by character
+                like a typewriter. This is different from the node-level streaming above; this is fine-grained streaming
+                <strong>inside a node</strong>.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>This relies on the callback mechanism of the underlying LLM driver (such as <code>langchaingo</code>). We
+                need to register a callback function when calling the LLM, and this function is called whenever the LLM
+                generates a new Token. In LangGraphGo, we usually pass this callback function to the node via Context or
+                Config.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// 1. Define node, support streaming callback
+func chatNode(ctx context.Context, state interface{}) (interface{}, error) {
+    messages := state.([]llms.MessageContent)
+    model, _ := openai.New()
+    
+    // Define streaming callback function
+    streamingFunc := func(ctx context.Context, chunk []byte) error {
+        // Here you can send chunk to frontend or print to console
+        fmt.Print(string(chunk)) 
+        return nil
+    }
+    
+    // Pass WithStreamingFunc when calling LLM
+    response, err := model.GenerateContent(ctx, messages, llms.WithStreamingFunc(streamingFunc))
+    if err != nil {
+        return nil, err
+    }
+    
+    return append(messages, llms.TextParts("ai", response.Choices[0].Content)), nil
+}
+
+// ... In main program ...
+fmt.Println("AI Response:")
+runnable.Invoke(ctx, input) // Console will print tokens in real-time
+fmt.Println() // Newline</code></pre>
+
+            <h3>Application in Web Services</h3>
+            <p>When building HTTP APIs, you can combine Go's <code>http.Flusher</code> or Server-Sent Events (SSE) to
+                push these Tokens to the browser in real-time.</p>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Systems Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-multi-agent.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" class="active" style="padding-left: 1rem;">Multi-Agent Systems</a>
+                </li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>Multi-Agent Systems</h1>
+            <p>Monolithic Agents often struggle with overly complex tasks. By decomposing tasks and letting multiple
+                domain-specific Agents collaborate, we can build more powerful and stable systems. LangGraphGo's graph
+                structure is naturally suited for orchestrating multi-agent systems.</p>
+
+            <h2>1. Supervisor Pattern</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>This is the most classic multi-agent organization form. A central "Supervisor" Agent acts as a project
+                manager. It receives user requests, decomposes tasks, and assigns them to subordinate "Worker" Agents
+                (such as Researchers, Coders, Testers). Workers report back to the Supervisor upon completion, and the
+                Supervisor aggregates results or requests rework.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>In LangGraphGo, Supervisor is a special node (usually an LLM), and its output determines the next
+                activated node (Worker). This is implemented via conditional edges. All Worker nodes' output edges point
+                back to the Supervisor, forming a star topology.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// 1. Define Worker Nodes
+g.AddNode("Researcher", researcherAgent)
+g.AddNode("Coder", coderAgent)
+
+// 2. Define Supervisor Node
+// Use prebuilt CreateSupervisor to simplify creation
+supervisor := prebuilt.CreateSupervisor(
+    model,
+    []string{"Researcher", "Coder"},
+    prebuilt.WithSupervisorSystemMessage("You are a tech lead, responsible for coordinating research and coding..."),
+)
+g.AddNode("Supervisor", supervisor)
+
+// 3. Define Routing Logic
+// Supervisor output is an instruction telling the graph which Worker to go to next
+g.AddConditionalEdge("Supervisor", func(ctx context.Context, state interface{}) string {
+    return state.(AgentState).Next // e.g., return "Researcher"
+})
+
+// 4. Define Loop
+// Workers always return to Supervisor after completion
+g.AddEdge("Researcher", "Supervisor")
+g.AddEdge("Coder", "Supervisor")</code></pre>
+
+            <h2>2. Hierarchical Teams</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>When team size grows, flat Supervisor pattern hits bottlenecks. Hierarchical Teams introduce a hierarchy:
+                Supervisor manages subgraphs, and each subgraph itself might be a small group managed by a Supervisor.
+            </p>
+            <p>For example, a "Dev Team" subgraph might contain "Backend" and "Frontend" Agents. The top-level
+                Supervisor only needs to interact with "Dev Team" without caring about specific backend or frontend
+                details.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>Leveraging LangGraphGo's subgraph feature. We encapsulate each team as a `CompiledGraph` and add it as a
+                node to the upper-level graph. To the upper-level graph, the subgraph is just a normal node.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// 1. Build Research Team Subgraph
+researchGraph := graph.NewStateGraph(...)
+// ... Add researcher agents ...
+researchTeam := researchGraph.Compile()
+
+// 2. Build Coding Team Subgraph
+codingGraph := graph.NewStateGraph(...)
+// ... Add coder agents ...
+codingTeam := codingGraph.Compile()
+
+// 3. Build Top-level Graph
+topGraph := graph.NewStateGraph(...)
+topGraph.AddNode("ResearchTeam", researchTeam)
+topGraph.AddNode("CodingTeam", codingTeam)
+topGraph.AddNode("TopSupervisor", topSupervisor)
+
+// ... Define top-level routing ...</code></pre>
+
+            <h2>3. Network / Swarm</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>In decentralized network mode, there is no single manager. Each Agent can hand over tasks to other Agents
+                as needed. This is similar to microservices architecture or human social networks.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>Each Agent node is equipped with routing logic (conditional edges). When Agent A thinks the task is
+                beyond its capability or needs Agent B's assistance, it outputs a special signal triggering a
+                conditional edge jump to Agent B.</p>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

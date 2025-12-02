@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StateGraph vs MessageGraph - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--bg-surface);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-stategraph-vs-messagegraph.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" class="active"
+                        style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs
+                        CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>StateGraph vs MessageGraph</h1>
+            <p>LangGraphGo provides two main ways to build graphs: <code>StateGraph</code> and <code>MessageGraph</code>
+                (or <code>MessagesStateGraph</code>). Choosing which one depends on your application needs and state
+                management complexity.</p>
+
+            <h2>1. StateGraph</h2>
+            <h3>Background & Functionality</h3>
+            <p><code>StateGraph</code> is the most general graph type. It allows you to fully customize the State
+                Schema. You can define any Go struct or Map as state, and specify specific Reducers for each field.</p>
+            <h3>Use Cases</h3>
+            <ul>
+                <li>Managing complex structured data (e.g., order info, user info, multi-step task progress).</li>
+                <li>State is more than just a list of messages, containing other metadata.</li>
+                <li>Need fine-grained control over state updates.</li>
+            </ul>
+            <h3>Code Example</h3>
+            <pre><code class="language-go">// Define custom state struct
+type AgentState struct {
+    Input    string
+    Messages []llms.MessageContent
+    Steps    []string
+}
+
+// Create StateGraph
+g := graph.NewStateGraph(graph.StateSchema{
+    "messages": graph.AppendReducer,
+    "steps":    graph.AppendReducer,
+})
+</code></pre>
+
+            <h2>2. MessageGraph</h2>
+            <h3>Background & Functionality</h3>
+            <p><code>MessageGraph</code> (and its enhanced version <code>MessagesStateGraph</code>) is a specialized
+                form of <code>StateGraph</code>, designed specifically for chat applications. Its State Schema is
+                pre-defined as a list of messages (`[]llms.MessageContent`).</p>
+            <h3>Use Cases</h3>
+            <ul>
+                <li>Building pure chatbots or conversational agents.
+                <li>State only needs to contain conversation history.</li>
+                <li>Want to get started quickly without defining complex Schema.</li>
+            </ul>
+            <h3>Code Example</h3>
+            <pre><code class="language-go">// Create MessageGraph
+// State defaults to []llms.MessageContent
+g := graph.NewMessageGraph()
+
+// Node returns messages directly, automatically appended to history
+g.AddNode("chatbot", func(ctx context.Context, state interface{}) (interface{}, error) {
+    return []llms.MessageContent{...}, nil
+})
+</code></pre>
+
+            <h2>3. Comparison Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>StateGraph</th>
+                        <th>MessageGraph</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>State Flexibility</td>
+                        <td>High (Fully Custom)</td>
+                        <td>Low (Message List Only)</td>
+                    </tr>
+                    <tr>
+                        <td>Learning Curve</td>
+                        <td>Medium</td>
+                        <td>Low</td>
+                    </tr>
+                    <tr>
+                        <td>Typical Use Case</td>
+                        <td>Complex Agents, Business Flows</td>
+                        <td>Chatbots</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

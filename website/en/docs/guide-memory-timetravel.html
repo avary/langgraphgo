@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory & Time Travel Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-memory-timetravel.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" class="active" style="padding-left: 1rem;">Memory & Time
+                        Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>Memory & Time Travel</h1>
+            <p>A core differentiator of LangGraphGo is its deep support for state persistence. This not only enables
+                basic "memory" capabilities but also unlocks powerful "time travel" features, allowing developers to
+                manipulate application history just like Git.</p>
+
+            <h2>1. Memory</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Stateless LLMs cannot remember context. To build chatbots or multi-turn applications, we need to persist
+                state between turns. LangGraphGo offloads this responsibility from the application layer to the
+                framework layer. You don't need to manually manage database reads and writes, just configure a
+                Checkpointer.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>Checkpointer is an interface responsible for saving and loading Checkpoints. A Checkpoint is a complete
+                state snapshot of the graph at the end of a specific step (Superstep). Every time the state updates,
+                LangGraphGo automatically creates a new Checkpoint and saves it to the underlying storage (e.g.,
+                Postgres, Redis, SQLite).</p>
+            <p>Using <code>ThreadID</code>, we can associate a series of Checkpoints with the same conversation thread.
+            </p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// 1. Initialize Checkpointer (using Memory as example, use Postgres/Redis for production)
+checkpointer := memory.NewSaver()
+
+// 2. Enable Checkpointer when compiling graph
+runnable, _ := g.Compile(graph.WithCheckpointer(checkpointer))
+
+// 3. Specify ThreadID when invoking
+config := &graph.Config{
+    ThreadID: "conversation-123",
+}
+
+// First conversation
+runnable.Invoke(ctx, "Hello", config)
+
+// Second conversation, framework automatically loads previous state (memory)
+runnable.Invoke(ctx, "My name is Bob", config)</code></pre>
+
+            <h2>2. Time Travel</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Since we save a snapshot at every step, we can "travel back in time" at any moment. This is valuable for
+                debugging (reproducing errors), human intervention (correcting intermediate steps), and exploratory
+                execution (trying different branches).</p>
+
+            <h3>Implementation Principle</h3>
+            <p>Time travel is essentially state loading based on Checkpoint ID. When you specify a historical
+                <code>CheckpointID</code>, LangGraphGo loads the state at that moment instead of the latest state. If
+                you continue execution from that state, the system creates a new branch (Fork), keeping the original
+                history intact.</p>
+
+            <h3>Code Showcase: Viewing History</h3>
+            <pre><code class="language-go">// List all historical Checkpoints for this thread
+checkpoints, _ := runnable.ListCheckpoints(ctx, config)
+
+for _, cp := range checkpoints {
+    fmt.Printf("Step: %d, ID: %s, Time: %s\n", 
+        cp.Metadata["step"], cp.ID, cp.Timestamp)
+    // You can inspect the state data at that time
+    // fmt.Println(cp.State)
+}</code></pre>
+
+            <h3>Code Showcase: Forking</h3>
+            <pre><code class="language-go">// Suppose we want to go back to the second to last step
+pastCheckpoint := checkpoints[1]
+
+forkConfig := &graph.Config{
+    ThreadID: "conversation-123",
+    CheckpointID: pastCheckpoint.ID, // Specify ID to restore
+}
+
+// Continue execution from past state, this will create a new branch
+runnable.Invoke(ctx, "Let's try a different approach", forkConfig)</code></pre>
+
+            <h3>Code Showcase: Modifying History (UpdateState)</h3>
+            <p>Going further, you can even modify past states. This is useful in human intervention scenarios, for
+                example, when a user corrects an Agent's wrong memory at a certain step.</p>
+            <pre><code class="language-go">// Suppose we found the Agent remembered the wrong name at a Checkpoint
+// We manually update the state
+runnable.UpdateState(ctx, config, map[string]interface{}{
+    "user_name": "Alice", // Correct the name
+})
+
+// If config contains CheckpointID, it modifies history;
+// If not, it modifies the current latest state.
+// After modification, the next Invoke will run based on this corrected state.</code></pre>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

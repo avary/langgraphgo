@@ -319,8 +319,31 @@ footer {
         font-size: 3rem;
     }
 
+    .nav-container {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 1rem;
+        gap: 0;
+        /* Gap handled by margin in nav-links */
+    }
+
+    .logo {
+        margin-right: 0;
+        order: 1;
+    }
+
+    .btn-github {
+        display: flex;
+        order: 2;
+    }
+
     .nav-links {
-        display: none;
-        /* Simple mobile hide for now */
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 0 0 0;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        order: 3;
     }
 }

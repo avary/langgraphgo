@@ -1,19 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>案例 - LangGraphGo</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Showcases - LangGraphGo</title>
+    <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.cn/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         .showcase-grid {
@@ -116,10 +114,10 @@
         <div class="nav-container">
             <a href="index.html" class="logo">LangGraphGo</a>
             <ul class="nav-links">
-                <li><a href="showcases.html" style="color: var(--primary-color);">案例</a></li>
-                <li><a href="docs.html">文档</a></li>
-                <li><a href="examples.html">示例</a></li>
-                <li><a href="en/showcases.html">English</a></li>
+                <li><a href="showcases.html" style="color: var(--primary-color);">Showcases</a></li>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="examples.html">Examples</a></li>
+                <li><a href="../showcases.html">中文</a></li>
             </ul>
             <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
                 <i class="fab fa-github"></i> GitHub
@@ -130,34 +128,35 @@
     <main style="padding-top: 120px; padding-bottom: 80px; min-height: 80vh;">
         <section class="features">
             <div class="section-title">
-                <h2>案例</h2>
-                <p style="color: var(--text-secondary);">使用 LangGraphGo 构建的真实应用。</p>
+                <h2>Showcases</h2>
+                <p style="color: var(--text-secondary);">Real-world applications built with LangGraphGo.</p>
             </div>
 
             <div class="showcase-grid">
                 <!-- DeerFlow -->
                 <div class="showcase-card">
-                    <img src="images/deerflow.png" alt="DeerFlow Screenshot" class="showcase-image"
+                    <img src="../images/deerflow.png" alt="DeerFlow Screenshot" class="showcase-image"
                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgODAwIDQwMCI+PHJlY3Qgd2lkdGg9IjgwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNmM2Y0ZjYiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOWNhM2I4Ij5EZWVyRmxvdyBTY3JlZW5zaG90PC90ZXh0Pjwvc3ZnPg=='">
                     <div class="showcase-content">
-                        <div class="badge">深度研究</div>
+                        <div class="badge">Deep Research</div>
                         <h3 class="showcase-title"><i class="fas fa-robot"></i> DeerFlow</h3>
                         <p class="showcase-desc">
-                            DeerFlow 是一个基于多智能体架构的深度研究系统（ByteDance DeerFlow 的 Go 复刻版）。它通过编排 Planner（规划者）、Researcher（研究员）和
-                            Reporter（报告员）智能体，对给定主题进行深度研究并生成详尽报告。
+                            DeerFlow is a deep research system based on multi-agent architecture (Go port of ByteDance
+                            DeerFlow). It orchestrates Planner, Researcher, and Reporter agents to conduct deep research
+                            on a given topic and generate detailed reports.
                             <br><br>
-                            <strong>特性：</strong> 现代化 Web 界面、实时 SSE 状态更新、支持 CLI。
+                            <strong>Features:</strong> Modern Web Interface, Real-time SSE status updates, CLI support.
                         </p>
                         <div class="code-block">
                             go build -o deerflow ./showcases/deerflow
                             ./deerflow</div>
                         <div class="showcase-actions">
                             <a href="https://deerflow.rpcx.io" target="_blank" class="btn btn-primary">
-                                <i class="fas fa-external-link-alt"></i> 在线演示
+                                <i class="fas fa-external-link-alt"></i> Live Demo
                             </a>
                             <a href="https://github.com/smallnest/langgraphgo/tree/main/showcases/deerflow"
                                 target="_blank" class="btn btn-secondary">
-                                <i class="fab fa-github"></i> 源码
+                                <i class="fab fa-github"></i> Source
                             </a>
                         </div>
                     </div>
@@ -166,23 +165,25 @@
                 <!-- Open Deep Research -->
                 <div class="showcase-card">
                     <div class="showcase-content">
-                        <div class="badge">多 Agent 协作</div>
+                        <div class="badge">Multi-Agent Collaboration</div>
                         <h3 class="showcase-title"><i class="fas fa-search"></i> Open Deep Research</h3>
                         <p class="showcase-desc">
-                            langchain-ai/open_deep_research 的 Go 语言实现。这是一个分层多智能体系统，由 Supervisor 智能体协调多个并行 Researcher
-                            智能体，对复杂问题进行全面研究。
+                            Go implementation of langchain-ai/open_deep_research. This is a hierarchical multi-agent
+                            system where a Supervisor agent coordinates multiple parallel Researcher agents to conduct
+                            comprehensive research on complex questions.
                             <br><br>
-                            <strong>特性：</strong> 并行执行、Tavily 搜索集成、研究压缩、可配置模型。
+                            <strong>Features:</strong> Parallel execution, Tavily search integration, research
+                            compression, configurable models.
                         </p>
                         <div class="code-block">
                             cd showcases/open_deep_research
                             export OPENAI_API_KEY="..."
                             export TAVILY_API_KEY="..."
-                            go run *.go "你的研究问题"</div>
+                            go run *.go "Your research question"</div>
                         <div class="showcase-actions">
                             <a href="https://github.com/smallnest/langgraphgo/tree/main/showcases/open_deep_research"
                                 target="_blank" class="btn btn-secondary">
-                                <i class="fab fa-github"></i> 源码
+                                <i class="fab fa-github"></i> Source
                             </a>
                         </div>
                     </div>
@@ -191,10 +192,12 @@
                 <!-- DeepAgents -->
                 <div class="showcase-card">
                     <div class="showcase-content">
-                        <div class="badge">工具使用</div>
+                        <div class="badge">Tool Usage</div>
                         <h3 class="showcase-title"><i class="fas fa-tools"></i> DeepAgents</h3>
                         <p class="showcase-desc">
-                            一个具备文件系统访问权限和子智能体委派能力的智能体示例。展示了如何让 Agent 使用工具进行文件读写、管理待办事项列表以及处理复杂任务。
+                            An example agent with file system access and sub-agent delegation capabilities. Demonstrates
+                            how to let agents use tools for file reading/writing, managing todo lists, and handling
+                            complex tasks.
                         </p>
                         <div class="code-block">
                             cd showcases/deepagents
@@ -203,7 +206,7 @@
                         <div class="showcase-actions">
                             <a href="https://github.com/smallnest/langgraphgo/tree/main/showcases/deepagents"
                                 target="_blank" class="btn btn-secondary">
-                                <i class="fab fa-github"></i> 源码
+                                <i class="fab fa-github"></i> Source
                             </a>
                         </div>
                     </div>
@@ -220,7 +223,7 @@
             &copy; 2025 LangGraphGo. Open Source.
         </div>
     </footer>
-    <script src="script.js"></script>
+    <script src="../script.js"></script>
 </body>
 
 </html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>核心概念 - LangGraphGo 文档</title>
+    <title>StateGraph vs MessageGraph - LangGraphGo 文档</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.cn/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -75,6 +75,7 @@
         .content p {
             margin-bottom: 1rem;
             color: var(--text-secondary);
+            line-height: 1.6;
         }
 
         .content :not(pre)>code {
@@ -97,6 +98,24 @@
             border-radius: 8px;
             margin-bottom: 1.5rem;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--bg-surface);
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -108,7 +127,7 @@
                 <li><a href="../showcases.html">案例</a></li>
                 <li><a href="../docs.html" style="color: var(--primary-color);">文档</a></li>
                 <li><a href="../examples.html">示例</a></li>
-                <li><a href="../en/docs/core-concepts.html">English</a></li>
+                <li><a href="../en/docs/guide-stategraph-vs-messagegraph.html">English</a></li>
             </ul>
             <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
                 <i class="fab fa-github"></i> GitHub
@@ -120,15 +139,17 @@
         <aside class="sidebar">
             <ul class="sidebar-nav">
                 <li><a href="getting-started.html">快速开始</a></li>
-                <li><a href="core-concepts.html" class="active">核心概念</a></li>
-                <li><a href="guides.html">指南</a></li>
+                <li><a href="core-concepts.html">核心概念</a></li>
+                <li><a href="guides.html" class="active">指南</a></li>
                 <li><a href="api.html">API 参考</a></li>
                 <li
                     style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
                     专题指南</li>
                 <li><a href="guide-basics.html" style="padding-left: 1rem;">基础构建块</a></li>
-                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
-                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" class="active"
+                        style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs
+                        CreateReactAgent</a></li>
                 <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">预构建 Agent</a></li>
                 <li><a href="guide-streaming.html" style="padding-left: 1rem;">流式传输</a></li>
                 <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">记忆与时间旅行</a></li>
@@ -141,73 +162,84 @@
             </ul>
         </aside>
         <main class="content">
-            <h1>核心概念</h1>
+            <h1>StateGraph vs MessageGraph</h1>
+            <p>LangGraphGo 提供了两种主要的图构建方式：<code>StateGraph</code> 和 <code>MessageGraph</code>（或
+                <code>MessagesStateGraph</code>）。选择哪一种取决于你的应用需求和状态管理的复杂性。
+            </p>
 
-            <h2>图 (Graph)</h2>
-            <p>LangGraphGo 的核心是图。图定义了应用程序的工作流。它由节点（Nodes）和边（Edges）组成。</p>
-            <p><code>StateGraph</code> 是最常用的图类型，它允许你定义一个状态 Schema，并在节点之间传递状态。</p>
-
-            <h2>状态 (State)</h2>
-            <p>状态是图在执行过程中维护的数据。每个节点接收当前状态作为输入，并返回状态更新作为输出。</p>
-            <p>LangGraphGo 支持自定义状态 Schema，允许你定义如何合并来自不同节点的更新（例如，覆盖、追加等）。</p>
-
-            <h2>节点 (Nodes)</h2>
-            <p>节点是执行具体逻辑的函数。它们可以是调用 LLM、执行工具、或者只是简单的代码逻辑。</p>
-            <pre><code class="language-go">func MyNode(ctx context.Context, state MyState) (MyState, error) {
-    // 执行逻辑
-    return newState, nil
-}</code></pre>
-
-            <h2>边 (Edges)</h2>
-            <p>边定义了节点之间的控制流。</p>
+            <h2>1. StateGraph</h2>
+            <h3>背景与功能</h3>
+            <p><code>StateGraph</code> 是最通用的图类型。它允许你完全自定义状态的 Schema（结构）。你可以定义任意的 Go 结构体或 Map 作为状态，并为每个字段指定特定的
+                Reducer（合并函数）。</p>
+            <h3>适用场景</h3>
             <ul>
-                <li><strong>普通边</strong>: <code>g.AddEdge("nodeA", "nodeB")</code> - A 执行完后执行 B。</li>
-                <li><strong>条件边</strong>: <code>g.AddConditionalEdges("nodeA", routingFunction)</code> - 根据 A
-                    的输出动态决定下一个节点。</li>
+                <li>需要管理复杂的结构化数据（如订单信息、用户信息、多步骤任务进度）。</li>
+                <li>状态不仅仅是消息列表，还包含其他元数据。</li>
+                <li>需要对状态更新进行细粒度控制。</li>
             </ul>
-
-            <h2>并行执行</h2>
-            <p>当多个节点共享同一个起始节点时，LangGraphGo 会自动并行执行它们。结果将使用图的状态合并器或 Schema 进行合并。</p>
-            <pre><code class="language-go">g.AddEdge("start", "branch_a")
-g.AddEdge("start", "branch_b")
-// branch_a 和 branch_b 将并发运行</code></pre>
-
-            <h2>人工介入 (HITL)</h2>
-            <p>LangGraphGo 支持在图执行过程中暂停，允许人工干预。这对于需要人工批准或输入的场景非常有用。</p>
-            <pre><code class="language-go">config := &graph.Config{
-    InterruptBefore: []string{"human_review"},
+            <h3>代码示例</h3>
+            <pre><code class="language-go">// 定义自定义状态结构
+type AgentState struct {
+    Input    string
+    Messages []llms.MessageContent
+    Steps    []string
 }
-// 执行在 "human_review" 节点前停止</code></pre>
 
-            <h2>Checkpointers</h2>
-            <p>Checkpointers 用于持久化图的状态。这使得你可以保存执行进度，并在稍后恢复（例如，用于长运行的对话或故障恢复）。</p>
-            <p>支持的后端包括 Redis, Postgres, SQLite 等。</p>
-            <pre><code class="language-go">import (
-    "github.com/smallnest/langgraphgo/checkpoint/sqlite"
-    "github.com/smallnest/langgraphgo/graph"
-)
-
-// 1. 初始化 SQLite Checkpoint Store
-store, err := sqlite.NewSqliteCheckpointStore(sqlite.SqliteOptions{
-    Path:      "./checkpoints.db",
-    TableName: "checkpoints",
+// 创建 StateGraph
+g := graph.NewStateGraph(graph.StateSchema{
+    "messages": graph.AppendReducer,
+    "steps":    graph.AppendReducer,
 })
-if err != nil {
-    panic(err)
-}
-defer store.Close()
+</code></pre>
 
-// 2. 配置 Checkpoint 选项
-config := graph.CheckpointConfig{
-    Store:          store,
-    AutoSave:       true,
-    SaveInterval:   2 * time.Second,
-    MaxCheckpoints: 5,
-}
+            <h2>2. MessageGraph</h2>
+            <h3>背景与功能</h3>
+            <p><code>MessageGraph</code>（以及其增强版 <code>MessagesStateGraph</code>）是 <code>StateGraph</code>
+                的一种特化形式，专门为聊天应用设计。它的状态 Schema 被预定义为一个消息列表（<code>[]llms.MessageContent</code>）。</p>
+            <h3>适用场景</h3>
+            <ul>
+                <li>构建纯聊天机器人或对话代理。</li>
+                <li>状态只需要包含对话历史。</li>
+                <li>希望快速上手，无需定义复杂的 Schema。</li>
+            </ul>
+            <h3>代码示例</h3>
+            <pre><code class="language-go">// 创建 MessageGraph
+// 状态默认为 []llms.MessageContent
+g := graph.NewMessageGraph()
 
-// 3. 将配置应用到图
-g := graph.NewCheckpointableMessageGraph()
-g.SetCheckpointConfig(config)</code></pre>
+// 节点直接返回消息，自动追加到历史中
+g.AddNode("chatbot", func(ctx context.Context, state interface{}) (interface{}, error) {
+    return []llms.MessageContent{...}, nil
+})
+</code></pre>
+
+            <h2>3. 对比总结</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>特性</th>
+                        <th>StateGraph</th>
+                        <th>MessageGraph</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>状态灵活性</td>
+                        <td>高（完全自定义）</td>
+                        <td>低（仅限消息列表）</td>
+                    </tr>
+                    <tr>
+                        <td>上手难度</td>
+                        <td>中</td>
+                        <td>低</td>
+                    </tr>
+                    <tr>
+                        <td>典型用例</td>
+                        <td>复杂 Agent、业务流程</td>
+                        <td>聊天机器人</td>
+                    </tr>
+                </tbody>
+            </table>
         </main>
     </div>
 

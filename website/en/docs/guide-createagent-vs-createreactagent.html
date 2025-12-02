@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreateAgent vs CreateReactAgent - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--bg-surface);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-createagent-vs-createreactagent.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs
+                        MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" class="active"
+                        style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>CreateAgent vs CreateReactAgent</h1>
+            <p>LangGraphGo provides two ways to build prebuilt agents: <code>CreateAgent</code> and
+                <code>CreateReactAgent</code>. While both create ReAct-based agents, they differ in flexibility and
+                configuration options.</p>
+
+            <h2>1. CreateReactAgent</h2>
+            <h3>Introduction</h3>
+            <p><code>CreateReactAgent</code> is the most basic builder. It is designed to quickly start a ReAct Agent
+                with minimal configuration.</p>
+            <h3>Features</h3>
+            <ul>
+                <li><strong>Simple to use</strong>: Only requires LLM model and tool list.</li>
+                <li><strong>Zero configuration</strong>: Does not support custom system prompts or state modification
+                    logic.</li>
+                <li><strong>Rapid prototyping</strong>: Suitable for testing tools or building simple demos.</li>
+            </ul>
+            <h3>Code Example</h3>
+            <pre><code class="language-go">// Only requires model and tools
+agent, err := prebuilt.CreateReactAgent(model, tools)
+</code></pre>
+
+            <h2>2. CreateAgent</h2>
+            <h3>Introduction</h3>
+            <p><code>CreateAgent</code> is a more advanced and flexible builder. It uses the Option pattern common in
+                Go, allowing fine-grained control over Agent behavior.</p>
+            <h3>Configuration Options</h3>
+            <ul>
+                <li><code>WithSystemMessage(string)</code>: Set the System Prompt to define the Agent's role and
+                    guidelines.</li>
+                <li><code>WithStateModifier(func)</code>: Allows custom modification of message history before sending
+                    to the model (e.g., filtering out old history or adding specific context).</li>
+                <li><code>WithCheckpointer(CheckpointStore)</code>: Set a checkpointer to enable state persistence and
+                    memory.</li>
+            </ul>
+            <h3>Use Cases</h3>
+            <ul>
+                <li>Production applications.</li>
+                <li>Scenarios requiring specific roles (e.g., "You are a helpful assistant...").</li>
+                <li>Scenarios requiring management of long conversation history or persistent state.</li>
+            </ul>
+            <h3>Code Example</h3>
+            <pre><code class="language-go">// Configure using Option pattern
+agent, err := prebuilt.CreateAgent(
+    model, 
+    tools,
+    prebuilt.WithSystemMessage("You are a professional Golang programming assistant."),
+    prebuilt.WithCheckpointer(checkpointer),
+)
+</code></pre>
+
+            <h2>3. Comparison Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>CreateReactAgent</th>
+                        <th>CreateAgent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Configuration Flexibility</td>
+                        <td>Low</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>System Prompt</td>
+                        <td>Not Supported</td>
+                        <td>Supported (WithSystemMessage)</td>
+                    </tr>
+                    <tr>
+                        <td>State Persistence</td>
+                        <td>Not Supported (Default)</td>
+                        <td>Supported (WithCheckpointer)</td>
+                    </tr>
+                    <tr>
+                        <td>Recommended Use</td>
+                        <td>Simple Testing, Prototyping</td>
+                        <td>Production, Complex Apps</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

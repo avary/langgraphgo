@@ -1,19 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LangGraphGo - 构建强大的 Go 语言 AI Agent</title>
-    <link rel="stylesheet" href="style.css">
+    <title>LangGraphGo - Build Powerful AI Agents in Go</title>
+    <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.cn/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
     </style>
 </head>
@@ -23,10 +21,10 @@
         <div class="nav-container">
             <a href="index.html" class="logo">LangGraphGo</a>
             <ul class="nav-links">
-                <li><a href="showcases.html">案例</a></li>
-                <li><a href="docs.html">文档</a></li>
-                <li><a href="examples.html">示例</a></li>
-                <li><a href="en/index.html">English</a></li>
+                <li><a href="showcases.html">Showcases</a></li>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="examples.html">Examples</a></li>
+                <li><a href="../index.html">中文</a></li>
             </ul>
             <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
                 <i class="fab fa-github"></i> GitHub
@@ -37,61 +35,65 @@
     <main>
         <section class="hero">
 
-            <h1>构建有状态、多角色的<br>LLM 应用程序</h1>
-            <p>基于 LangChainGo 构建，用于开发有状态、多代理 LLM 应用的 Go 语言库。<br>与 LangGraph Python 完全兼容。</p>
+            <h1>Build Stateful, Multi-Agent<br>LLM Applications</h1>
+            <p>Built on LangChainGo, a Go library for developing stateful, multi-actor LLM applications.<br>Fully
+                compatible with LangGraph Python.</p>
             <div class="hero-cta">
-                <a href="docs.html" class="btn btn-primary">开始使用</a>
-                <a href="examples.html" class="btn btn-secondary">查看示例</a>
+                <a href="docs.html" class="btn btn-primary">Get Started</a>
+                <a href="examples.html" class="btn btn-secondary">View Examples</a>
             </div>
         </section>
 
         <section class="features">
             <div class="section-title">
-                <h2>为什么选择 LangGraphGo?</h2>
-                <p style="color: var(--text-secondary);">构建生产级 Agent 所需的一切。</p>
+                <h2>Why Choose LangGraphGo?</h2>
+                <p style="color: var(--text-secondary);">Everything you need to build production-grade agents.</p>
             </div>
             <div class="grid">
                 <div class="card">
                     <div class="card-icon">
                         <i class="fas fa-project-diagram"></i>
                     </div>
-                    <h3>图工作流</h3>
-                    <p>将应用流程定义为节点和边的图，支持循环和复杂交互。</p>
+                    <h3>Graph Workflows</h3>
+                    <p>Define your application flow as a graph of nodes and edges, supporting cycles and complex
+                        interactions.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">
                         <i class="fas fa-memory"></i>
                     </div>
-                    <h3>状态管理</h3>
-                    <p>内置持久层用于保存和恢复状态，支持长对话和记忆功能。</p>
+                    <h3>State Management</h3>
+                    <p>Built-in persistence layer for saving and restoring state, enabling long conversations and
+                        memory.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">
                         <i class="fas fa-users-cog"></i>
                     </div>
-                    <h3>多 Agent 支持</h3>
-                    <p>轻松编排多个 Agent 协同工作以解决复杂任务。</p>
+                    <h3>Multi-Agent Support</h3>
+                    <p>Easily orchestrate multiple agents working together to solve complex tasks.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">
                         <i class="fab fa-golang"></i>
                     </div>
-                    <h3>Go 原生</h3>
-                    <p>地道的 Go 实现，利用 goroutine 和 channel 实现高性能并发执行。</p>
+                    <h3>Go Native</h3>
+                    <p>Idiomatic Go implementation leveraging goroutines and channels for high-performance concurrent
+                        execution.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">
                         <i class="fas fa-undo"></i>
                     </div>
-                    <h3>时间旅行</h3>
-                    <p>通过高级检查点功能检查、修改和重放 Agent 动作。</p>
+                    <h3>Time Travel</h3>
+                    <p>Inspect, modify, and replay agent actions with advanced checkpointing capabilities.</p>
                 </div>
                 <div class="card">
                     <div class="card-icon">
                         <i class="fas fa-stream"></i>
                     </div>
-                    <h3>流式支持</h3>
-                    <p>实时流式传输 Agent 输出，实现响应式用户界面。</p>
+                    <h3>Streaming Support</h3>
+                    <p>Stream agent outputs in real-time for responsive user interfaces.</p>
                 </div>
             </div>
         </section>
@@ -106,7 +108,7 @@
             &copy; 2025 LangGraphGo. Open Source.
         </div>
     </footer>
-    <script src="script.js"></script>
+    <script src="../script.js"></script>
 </body>
 
 </html>

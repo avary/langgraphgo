@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human-in-the-loop Guide - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .doc-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 2rem 4rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 3rem;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 120px;
+            height: fit-content;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .content h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .content h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .content h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .content :not(pre)>code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Menlo', monospace;
+            color: #c7254e;
+        }
+
+        .content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .content pre {
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="nav-container">
+            <a href="../index.html" class="logo">LangGraphGo</a>
+            <ul class="nav-links">
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/guide-hitl.html">中文</a></li>
+            </ul>
+            <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+    </header>
+
+    <div class="doc-container">
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html" class="active">Guides</a></li>
+                <li><a href="api.html">API Reference</a></li>
+                <li
+                    style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
+                <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
+                <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" class="active" style="padding-left: 1rem;">Human in the Loop (HITL)</a>
+                </li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
+            </ul>
+        </aside>
+        <main class="content">
+            <h1>Human-in-the-loop (HITL)</h1>
+            <p>In many real-world Agent applications, full automation is not always ideal, or even dangerous. You may
+                need human intervention to approve critical actions (like money transfer), provide missing information,
+                or correct Agent's reasoning errors. LangGraphGo treats "humans" as first-class citizens in the graph.
+            </p>
+
+            <h2>1. Static Interrupt (InterruptBefore)</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>This is the most common HITL pattern: always pause before executing a specific node to wait for approval.
+                This is similar to the manual approval step in CI/CD pipelines.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>When compiling or running the graph, we configure the <code>InterruptBefore</code> list. When the runtime
+                is about to execute a node in the list, it checks if a resume signal is received. If not, it saves the
+                current state (Checkpoint), suspends execution, and returns a special error.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// 1. Set interrupt config
+config := &graph.Config{
+    InterruptBefore: []string{"human_approval_node"},
+}
+
+// 2. Run graph
+// When execution reaches "human_approval_node", Invoke returns GraphInterrupt error
+res, err := runnable.InvokeWithConfig(ctx, initialState, config)
+
+// 3. Check interrupt
+var interrupt *graph.GraphInterrupt
+if errors.As(err, &interrupt) {
+    fmt.Println("Graph paused, waiting for human approval...")
+    // You can return ThreadID to frontend for user action
+}</code></pre>
+
+            <h2>2. Dynamic Interrupt</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Sometimes we cannot predict when an interrupt is needed. For example, only when Agent confidence is low,
+                or potential sensitive content is detected, do we need human intervention. Dynamic interrupt allows
+                nodes to decide whether to pause at runtime.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>A node function can return an error of type <code>graph.Interrupt</code>. When the runtime catches this
+                error, it immediately stops subsequent execution and saves the current state.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">func sensitiveActionNode(ctx context.Context, state interface{}) (interface{}, error) {
+    data := state.(MyState)
+    
+    // Dynamic check: if amount > 1000, trigger interrupt
+    if data.Amount > 1000 {
+        return nil, graph.Interrupt("Amount too high, requesting human review")
+    }
+    
+    // Otherwise execute directly
+    return executeTransfer(data), nil
+}</code></pre>
+
+            <h2>3. Resume Execution</h2>
+
+            <h3>Background & Functionality</h3>
+            <p>Pausing is only for better continuation. After human approval or input, we need to resume graph
+                execution. LangGraphGo allows you to resume execution with new input or modified state.</p>
+
+            <h3>Implementation Principle</h3>
+            <p>Use <code>ResumeFrom</code> config or directly call <code>Invoke</code> with the same ThreadID. The
+                framework loads the latest Checkpoint. If there is a pending interrupt on this Checkpoint, the framework
+                clears the interrupt flag and resumes execution of the paused node with optional new input.</p>
+
+            <h3>Code Showcase</h3>
+            <pre><code class="language-go">// User approved the action
+// We update state (e.g., set Approved = true)
+runnable.UpdateState(ctx, config, map[string]interface{}{"approved": true})
+
+// Resume execution
+// Note: No need to specify InterruptBefore again unless you want to interrupt again
+resumeConfig := &graph.Config{
+    ThreadID: "conversation-123",
+}
+
+// Call Invoke again, graph resumes from where it paused
+runnable.Invoke(ctx, nil, resumeConfig)</code></pre>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
+    <script src="../../script.js"></script>
+</body>
+
+</html>

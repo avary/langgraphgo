@@ -1,19 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>示例 - LangGraphGo</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Examples - LangGraphGo</title>
+    <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.cn/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         .category-title {
@@ -61,10 +59,10 @@
         <div class="nav-container">
             <a href="index.html" class="logo">LangGraphGo</a>
             <ul class="nav-links">
-                <li><a href="showcases.html">案例</a></li>
-                <li><a href="docs.html">文档</a></li>
-                <li><a href="examples.html" style="color: var(--primary-color);">示例</a></li>
-                <li><a href="en/examples.html">English</a></li>
+                <li><a href="showcases.html">Showcases</a></li>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="examples.html" style="color: var(--primary-color);">Examples</a></li>
+                <li><a href="../examples.html">中文</a></li>
             </ul>
             <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
                 <i class="fab fa-github"></i> GitHub
@@ -75,287 +73,288 @@
     <main style="padding-top: 100px; min-height: 80vh;">
         <section class="features">
             <div class="section-title">
-                <h2>示例</h2>
-                <p style="color: var(--text-secondary);">探索 40+ 个代码示例，涵盖从基础到高级的各种场景。</p>
+                <h2>Examples</h2>
+                <p style="color: var(--text-secondary);">Explore 40+ code examples covering various scenarios from basic
+                    to advanced.</p>
             </div>
 
-            <!-- 基本概念 -->
-            <h3 class="category-title">基本概念</h3>
+            <!-- Basic Concepts -->
+            <h3 class="category-title">Basic Concepts</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/basic_example" target="_blank"
                     class="card">
-                    <h3>基本示例</h3>
-                    <p>带有硬编码步骤的简单图，展示最基础的图构建流程。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Basic Example</h3>
+                    <p>Simple graph with hardcoded steps, demonstrating the most basic graph construction flow.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/basic_llm" target="_blank"
                     class="card">
-                    <h3>基本 LLM</h3>
-                    <p>展示如何将 LLM 集成到图节点中进行文本生成。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Basic LLM</h3>
+                    <p>Demonstrates how to integrate LLM into graph nodes for text generation.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/conditional_routing"
                     target="_blank" class="card">
-                    <h3>条件路由</h3>
-                    <p>根据状态动态决定下一步执行路径。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Conditional Routing</h3>
+                    <p>Dynamically decide the next execution path based on state.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/conditional_edges_example"
                     target="_blank" class="card">
-                    <h3>条件边</h3>
-                    <p>使用条件边实现更复杂的控制流逻辑。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Conditional Edges</h3>
+                    <p>Use conditional edges to implement more complex control flow logic.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
 
-            <!-- 高级特性 -->
-            <h3 class="category-title">高级特性</h3>
+            <!-- Advanced Features -->
+            <h3 class="category-title">Advanced Features</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/parallel_execution" target="_blank"
                     class="card">
-                    <h3>并行执行</h3>
-                    <p>带有状态合并的扇出/扇入 (Fan-out/Fan-in) 执行模式。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Parallel Execution</h3>
+                    <p>Fan-out/Fan-in execution pattern with state merging.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/configuration" target="_blank"
                     class="card">
-                    <h3>配置</h3>
-                    <p>使用运行时配置在节点间传递元数据和设置。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Configuration</h3>
+                    <p>Use runtime configuration to pass metadata and settings between nodes.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/custom_reducer" target="_blank"
                     class="card">
-                    <h3>自定义归约器</h3>
-                    <p>为复杂的合并逻辑定义自定义状态归约器 (Reducer)。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Custom Reducer</h3>
+                    <p>Define custom state reducers for complex merge logic.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/state_schema" target="_blank"
                     class="card">
                     <h3>State Schema</h3>
-                    <p>使用结构化 Schema 和 Reducer 管理复杂的状态更新。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Manage complex state updates using structured Schema and Reducers.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/subgraphs" target="_blank"
                     class="card">
-                    <h3>子图</h3>
-                    <p>在图中嵌套其他图，实现模块化和复用。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Subgraphs</h3>
+                    <p>Nest other graphs within a graph for modularity and reuse.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/streaming_modes" target="_blank"
                     class="card">
-                    <h3>流式模式</h3>
-                    <p>支持 updates, values, messages 等模式的高级流式处理。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Streaming Modes</h3>
+                    <p>Advanced streaming support for updates, values, messages modes.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/smart_messages" target="_blank"
                     class="card">
-                    <h3>智能消息</h3>
-                    <p>支持基于 ID 更新 (Upsert) 的智能消息合并。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Smart Messages</h3>
+                    <p>Smart message merging supporting ID-based upserts.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/command_api" target="_blank"
                     class="card">
                     <h3>Command API</h3>
-                    <p>节点级的动态流控制和状态更新。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Node-level dynamic flow control and state updates.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/ephemeral_channels" target="_blank"
                     class="card">
-                    <h3>临时通道</h3>
-                    <p>管理每步后自动清除的临时状态。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Ephemeral Channels</h3>
+                    <p>Manage ephemeral state that is automatically cleared after each step.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/listeners" target="_blank"
                     class="card">
-                    <h3>监听器</h3>
-                    <p>向图添加事件监听器以进行监控或日志记录。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Listeners</h3>
+                    <p>Add event listeners to the graph for monitoring or logging.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
 
-            <!-- 持久化 -->
-            <h3 class="category-title">持久化 (Checkpointing)</h3>
+            <!-- Checkpointing -->
+            <h3 class="category-title">Checkpointing</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/checkpointing" target="_blank"
                     class="card">
-                    <h3>内存 Checkpoint</h3>
-                    <p>基础的内存状态保存。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Memory Checkpoint</h3>
+                    <p>Basic in-memory state preservation.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/checkpointing/postgres"
                     target="_blank" class="card">
                     <h3>PostgreSQL</h3>
-                    <p>使用 PostgreSQL 数据库持久化图状态。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Persist graph state using PostgreSQL database.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/checkpointing/sqlite"
                     target="_blank" class="card">
                     <h3>SQLite</h3>
-                    <p>使用 SQLite 数据库持久化图状态。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Persist graph state using SQLite database.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/checkpointing/redis"
                     target="_blank" class="card">
                     <h3>Redis</h3>
-                    <p>使用 Redis 数据库持久化图状态。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Persist graph state using Redis database.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/durable_execution" target="_blank"
                     class="card">
-                    <h3>持久化执行</h3>
-                    <p>演示崩溃恢复和从检查点恢复执行的能力。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Durable Execution</h3>
+                    <p>Demonstrates crash recovery and execution resumption from checkpoints.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
 
-            <!-- 人机交互 -->
-            <h3 class="category-title">人机交互 (HITL)</h3>
+            <!-- Human in the Loop (HITL) -->
+            <h3 class="category-title">Human in the Loop (HITL)</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/human_in_the_loop" target="_blank"
                     class="card">
-                    <h3>人工审批</h3>
-                    <p>包含中断和人工审批步骤的工作流。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Human Approval</h3>
+                    <p>Workflows involving interrupts and human approval steps.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/time_travel" target="_blank"
                     class="card">
-                    <h3>时间旅行</h3>
-                    <p>检查、修改状态历史并分叉执行 (UpdateState)。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Time Travel</h3>
+                    <p>Inspect, modify state history and fork execution (UpdateState).</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/dynamic_interrupt" target="_blank"
                     class="card">
-                    <h3>动态中断</h3>
-                    <p>使用 <code>graph.Interrupt</code> 在节点内部暂停执行。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Dynamic Interrupt</h3>
+                    <p>Pause execution within a node using <code>graph.Interrupt</code>.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
 
-            <!-- 预构建代理 -->
-            <h3 class="category-title">预构建代理</h3>
+            <!-- Prebuilt Agents -->
+            <h3 class="category-title">Prebuilt Agents</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/create_agent" target="_blank"
                     class="card">
                     <h3>Create Agent</h3>
-                    <p>使用选项模式轻松创建和配置代理。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Easily create and configure agents using the options pattern.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/react_agent" target="_blank"
                     class="card">
                     <h3>ReAct Agent</h3>
-                    <p>经典的推理与行动 (Reason and Action) 代理实现。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Classic Reason and Action agent implementation.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/supervisor" target="_blank"
                     class="card">
                     <h3>Supervisor</h3>
-                    <p>使用 Supervisor 模式进行多代理编排。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Multi-agent orchestration using the Supervisor pattern.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/swarm" target="_blank"
                     class="card">
                     <h3>Swarm</h3>
-                    <p>使用切换 (handoffs) 机制的多代理协作模式。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>Multi-agent collaboration pattern using handoffs.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
 
             <!-- Memory -->
-            <h3 class="category-title">记忆 (Memory)</h3>
+            <h3 class="category-title">Memory</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/memory_basic" target="_blank"
                     class="card">
-                    <h3>Memory 基础</h3>
-                    <p>LangChain Memory 组件的基本用法。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Memory Basics</h3>
+                    <p>Basic usage of LangChain Memory components.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/memory_chatbot" target="_blank"
                     class="card">
-                    <h3>记忆聊天机器人</h3>
-                    <p>集成 Memory 的聊天机器人，支持长对话。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Memory Chatbot</h3>
+                    <p>Chatbot integrated with Memory, supporting long conversations.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
 
             <!-- RAG -->
-            <h3 class="category-title">RAG (检索增强生成)</h3>
+            <h3 class="category-title">RAG (Retrieval Augmented Generation)</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_basic" target="_blank"
                     class="card">
-                    <h3>RAG 基础</h3>
-                    <p>最基础的检索增强生成实现。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>RAG Basics</h3>
+                    <p>Most basic implementation of Retrieval Augmented Generation.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_pipeline" target="_blank"
                     class="card">
-                    <h3>RAG 管道</h3>
-                    <p>完整的 RAG 处理管道示例。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>RAG Pipeline</h3>
+                    <p>Complete RAG processing pipeline example.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_advanced" target="_blank"
                     class="card">
-                    <h3>高级 RAG</h3>
-                    <p>包含重写、评分等高级 RAG 技术。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Advanced RAG</h3>
+                    <p>Advanced RAG techniques including rewriting, scoring, etc.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_conditional" target="_blank"
                     class="card">
-                    <h3>条件 RAG</h3>
-                    <p>根据查询意图动态决定是否检索的 RAG 工作流。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Conditional RAG</h3>
+                    <p>RAG workflow that dynamically decides whether to retrieve based on query intent.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_with_embeddings"
                     target="_blank" class="card">
                     <h3>RAG Embeddings</h3>
-                    <p>使用 Embeddings 进行向量检索的 RAG。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>RAG using Embeddings for vector retrieval.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_with_langchain" target="_blank"
                     class="card">
                     <h3>RAG LangChain</h3>
-                    <p>深度集成 LangChain 组件的 RAG 实现。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>RAG implementation deeply integrated with LangChain components.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_langchain_vectorstore_example"
                     target="_blank" class="card">
                     <h3>RAG VectorStores</h3>
-                    <p>使用 LangChain VectorStores 接口的 RAG。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>RAG using LangChain VectorStores interface.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/rag_chroma_example" target="_blank"
                     class="card">
                     <h3>RAG Chroma</h3>
-                    <p>集成 Chroma 向量数据库的 RAG 示例。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <p>RAG example integrating Chroma vector database.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
 
-            <!-- 其他 -->
-            <h3 class="category-title">其他</h3>
+            <!-- Others -->
+            <h3 class="category-title">Others</h3>
             <div class="grid">
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/visualization" target="_blank"
                     class="card">
-                    <h3>可视化</h3>
-                    <p>生成图的 Mermaid、DOT 和 ASCII 图表。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Visualization</h3>
+                    <p>Generate Mermaid, DOT, and ASCII charts for graphs.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/langchain_example" target="_blank"
                     class="card">
-                    <h3>LangChain 集成</h3>
-                    <p>展示如何使用 LangChain 的工具和模型。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>LangChain Integration</h3>
+                    <p>Demonstrates how to use LangChain tools and models.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/tool_tavily" target="_blank"
                     class="card">
-                    <h3>Tavily 搜索</h3>
-                    <p>集成 Tavily 搜索引擎工具。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Tavily Search</h3>
+                    <p>Integrate Tavily search engine tool.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
                 <a href="https://github.com/smallnest/langgraphgo/tree/main/examples/tool_exa" target="_blank"
                     class="card">
-                    <h3>Exa 搜索</h3>
-                    <p>集成 Exa 搜索引擎工具。</p>
-                    <div class="card-link">查看代码 &rarr;</div>
+                    <h3>Exa Search</h3>
+                    <p>Integrate Exa search engine tool.</p>
+                    <div class="card-link">View Code &rarr;</div>
                 </a>
             </div>
         </section>
@@ -369,7 +368,7 @@
             &copy; 2025 LangGraphGo. Open Source.
         </div>
     </footer>
-    <script src="script.js"></script>
+    <script src="../script.js"></script>
 </body>
 
 </html>

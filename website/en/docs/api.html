@@ -1,19 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API 参考 - LangGraphGo 文档</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>API Reference - LangGraphGo Docs</title>
+    <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.cn/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.cn/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         .doc-container {
@@ -110,10 +108,10 @@
         <div class="nav-container">
             <a href="../index.html" class="logo">LangGraphGo</a>
             <ul class="nav-links">
-                <li><a href="../showcases.html">案例</a></li>
-                <li><a href="../docs.html" style="color: var(--primary-color);">文档</a></li>
-                <li><a href="../examples.html">示例</a></li>
-                <li><a href="../en/docs/api.html">English</a></li>
+                <li><a href="../showcases.html">Showcases</a></li>
+                <li><a href="../docs.html" style="color: var(--primary-color);">Docs</a></li>
+                <li><a href="../examples.html">Examples</a></li>
+                <li><a href="../../docs/api.html">中文</a></li>
             </ul>
             <a href="https://github.com/smallnest/langgraphgo" target="_blank" class="btn-github">
                 <i class="fab fa-github"></i> GitHub
@@ -124,47 +122,48 @@
     <div class="doc-container">
         <aside class="sidebar">
             <ul class="sidebar-nav">
-                <li><a href="getting-started.html">快速开始</a></li>
-                <li><a href="core-concepts.html">核心概念</a></li>
-                <li><a href="guides.html">指南</a></li>
-                <li><a href="api.html" class="active">API 参考</a></li>
+                <li><a href="getting-started.html">Getting Started</a></li>
+                <li><a href="core-concepts.html">Core Concepts</a></li>
+                <li><a href="guides.html">Guides</a></li>
+                <li><a href="api.html" class="active">API Reference</a></li>
                 <li
                     style="margin-top: 1.5rem; font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-                    专题指南</li>
-                <li><a href="guide-basics.html" style="padding-left: 1rem;">基础构建块</a></li>
+                    Topic Guides</li>
+                <li><a href="guide-basics.html" style="padding-left: 1rem;">Basic Building Blocks</a></li>
                 <li><a href="guide-stategraph-vs-messagegraph.html" style="padding-left: 1rem;">StateGraph vs MessageGraph</a></li>
                 <li><a href="guide-createagent-vs-createreactagent.html" style="padding-left: 1rem;">CreateAgent vs CreateReactAgent</a></li>
-                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">预构建 Agent</a></li>
-                <li><a href="guide-streaming.html" style="padding-left: 1rem;">流式传输</a></li>
-                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">记忆与时间旅行</a></li>
-                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">高级特性</a></li>
-                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG 管道</a></li>
-                <li><a href="guide-hitl.html" style="padding-left: 1rem;">人工介入 (HITL)</a></li>
-                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">多 Agent 系统</a></li>
-                <li><a href="guide-state-management.html" style="padding-left: 1rem;">状态管理</a></li>
-                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">监控与调试</a></li>
+                <li><a href="guide-prebuilt-agents.html" style="padding-left: 1rem;">Prebuilt Agents</a></li>
+                <li><a href="guide-streaming.html" style="padding-left: 1rem;">Streaming</a></li>
+                <li><a href="guide-memory-timetravel.html" style="padding-left: 1rem;">Memory & Time Travel</a></li>
+                <li><a href="guide-advanced-features.html" style="padding-left: 1rem;">Advanced Features</a></li>
+                <li><a href="guide-rag.html" style="padding-left: 1rem;">RAG Pipeline</a></li>
+                <li><a href="guide-hitl.html" style="padding-left: 1rem;">Human in the Loop (HITL)</a></li>
+                <li><a href="guide-multi-agent.html" style="padding-left: 1rem;">Multi-Agent Systems</a></li>
+                <li><a href="guide-state-management.html" style="padding-left: 1rem;">State Management</a></li>
+                <li><a href="guide-monitoring.html" style="padding-left: 1rem;">Monitoring & Debugging</a></li>
             </ul>
         </aside>
         <main class="content">
-            <h1>API 参考</h1>
-            <p>LangGraphGo 的完整 API 文档托管在 Go Packages 网站上。</p>
+            <h1>API Reference</h1>
+            <p>The complete API documentation for LangGraphGo is hosted on the Go Packages website.</p>
 
             <div style="margin-top: 2rem;">
                 <a href="https://pkg.go.dev/github.com/smallnest/langgraphgo" target="_blank" class="api-link">
-                    <i class="fas fa-book"></i> 查看 GoDocs
+                    <i class="fas fa-book"></i> View GoDocs
                 </a>
             </div>
 
-            <h2>主要包</h2>
+            <h2>Main Packages</h2>
             <ul>
-                <li><strong>graph</strong>: 核心图运行时，包含 <code>StateGraph</code>, <code>MessageGraph</code> 等。</li>
-                <li><strong>prebuilt</strong>: 预构建的 Agent 工厂，如 <code>CreateReactAgent</code>。</li>
-                <li><strong>checkpoint</strong>: 状态持久化接口和实现。</li>
+                <li><strong>graph</strong>: Core graph runtime, including <code>StateGraph</code>,
+                    <code>MessageGraph</code>, etc.</li>
+                <li><strong>prebuilt</strong>: Prebuilt Agent factories, such as <code>CreateReactAgent</code>.</li>
+                <li><strong>checkpoint</strong>: State persistence interfaces and implementations.</li>
             </ul>
         </main>
     </div>
 
-    <script src="../script.js"></script>
+    <script src="../../script.js"></script>
 </body>
 
 </html>
