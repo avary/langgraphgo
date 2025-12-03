@@ -12,6 +12,7 @@ import (
 
 // CreateAgentOptions contains options for creating an agent
 type CreateAgentOptions struct {
+	skillDir      string
 	SystemMessage string
 	StateModifier func(messages []llms.MessageContent) []llms.MessageContent
 	Checkpointer  graph.CheckpointStore
@@ -39,6 +40,13 @@ func WithStateModifier(modifier func(messages []llms.MessageContent) []llms.Mess
 func WithCheckpointer(checkpointer graph.CheckpointStore) CreateAgentOption {
 	return func(o *CreateAgentOptions) {
 		o.Checkpointer = checkpointer
+	}
+}
+
+// WithSkillDir sets the skill directory for the agent
+func WithSkillDir(skillDir string) CreateAgentOption {
+	return func(o *CreateAgentOptions) {
+		o.skillDir = skillDir
 	}
 }
 
