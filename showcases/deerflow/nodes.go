@@ -11,7 +11,6 @@ import (
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
-	"github.com/smallnest/langgraphgo/tool"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 )
@@ -102,80 +101,11 @@ func PlannerNode(ctx context.Context, state interface{}) (interface{}, error) {
 	return s, nil
 }
 
-// ResearcherNode executes the research plan.
+// ResearcherNode executes the research plan using LLM.
 func ResearcherNode(ctx context.Context, state interface{}) (interface{}, error) {
 	s := state.(*State)
-	logf(ctx, "--- 研究节点：正在执行计划（串行） ---\n")
+	logf(ctx, "--- 研究节点：正在执行计划（使用 LLM） ---\n")
 
-	// Create Tavily search tool
-	tavilyTool, err := tool.NewTavilySearch("", tool.WithTavilySearchDepth("advanced"))
-	if err != nil {
-		logf(ctx, "警告：无法初始化 Tavily 搜索工具 (%v)，将使用 LLM 模拟研究\n", err)
-		// Fallback to LLM-based research
-		return researchWithLLM(ctx, s)
-	}
-
-	var results []string
-	var allImages []string
-
-	for _, step := range s.Plan {
-		logf(ctx, "正在研究步骤：%s\n", step)
-
-		// Use Tavily to search for information with images
-		searchResult, err := tavilyTool.CallWithImages(ctx, step)
-		if err != nil {
-			logf(ctx, "搜索失败 (%v)，跳过此步骤\n", err)
-			continue
-		}
-
-		// Collect images (limit to first 1 per step to avoid too many images)
-		var stepImages []string
-		imageCount := 0
-		for _, imgURL := range searchResult.Images {
-			if imageCount >= 1 {
-				break
-			}
-			stepImages = append(stepImages, imgURL)
-			imageCount++
-		}
-
-		// Use LLM to summarize the search results
-		llm, err := getLLM()
-		if err != nil {
-			return nil, err
-		}
-
-		prompt := fmt.Sprintf("你是一名研究员。请根据以下搜索结果为研究步骤 '%s' 提供详细摘要。必须使用中文回复。\n\n搜索结果：\n%s", step, searchResult.Text)
-		summary, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
-		if err != nil {
-			logf(ctx, "摘要生成失败 (%v)，使用原始搜索结果\n", err)
-			summary = searchResult.Text
-		}
-
-		// Calculate image indices for this step to help LLM reference them
-		var imgIndices []string
-		startIdx := len(allImages) + 1
-		for j, img := range stepImages {
-			allImages = append(allImages, img)
-			imgIndices = append(imgIndices, fmt.Sprintf("IMAGE_%d", startIdx+j))
-		}
-
-		imgNote := ""
-		if len(imgIndices) > 0 {
-			imgNote = fmt.Sprintf("\n(可用图片: %s)", strings.Join(imgIndices, ", "))
-		}
-
-		results = append(results, fmt.Sprintf("Step: %s\nFindings: %s%s", step, summary, imgNote))
-	}
-
-	s.ResearchResults = results
-	s.Images = allImages
-	logf(ctx, "收集到 %d 张图片\n", len(allImages))
-	return s, nil
-}
-
-// researchWithLLM is a fallback function that uses LLM to simulate research
-func researchWithLLM(ctx context.Context, s *State) (interface{}, error) {
 	llm, err := getLLM()
 	if err != nil {
 		return nil, err
@@ -183,7 +113,7 @@ func researchWithLLM(ctx context.Context, s *State) (interface{}, error) {
 
 	var results []string
 	for _, step := range s.Plan {
-		logf(ctx, "正在研究步骤（使用 LLM）：%s\n", step)
+		logf(ctx, "正在研究步骤：%s\n", step)
 		prompt := fmt.Sprintf("你是一名研究员。请为这个研究步骤查找详细信息：%s。提供发现摘要。必须使用中文回复。", step)
 		completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 		if err != nil {
@@ -193,6 +123,7 @@ func researchWithLLM(ctx context.Context, s *State) (interface{}, error) {
 	}
 
 	s.ResearchResults = results
+	s.Images = nil // No images collected
 	return s, nil
 }
 
