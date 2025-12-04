@@ -10,6 +10,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/pashagolub/pgxmock/v3 v3.4.0
 	github.com/redis/go-redis/v9 v9.17.1
+	github.com/sashabaranov/go-openai v1.41.2
 	github.com/smallnest/goskills v0.3.5
 	github.com/stretchr/testify v1.11.1
 	github.com/tmc/langchaingo v0.1.14
@@ -56,7 +57,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.6 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/sashabaranov/go-openai v1.41.2 // indirect
 	github.com/weaviate/weaviate v1.29.0 // indirect
 	github.com/weaviate/weaviate-go-client/v5 v5.0.2 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
