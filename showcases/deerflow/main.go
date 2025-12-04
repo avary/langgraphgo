@@ -81,7 +81,11 @@ func runServer() {
 	http.HandleFunc("/api/history", handleHistory)
 
 	fmt.Println("🚀 DeerFlow Web Server running at http://localhost:8085")
-	log.Fatal(http.ListenAndServe(":8085", nil))
+	server := &http.Server{
+		Addr:              ":8085",
+		ReadHeaderTimeout: 3 * time.Second,
+	}
+	log.Fatal(server.ListenAndServe())
 }
 
 // Refactored handleRun to support concurrent logging and result retrieval
@@ -241,7 +245,10 @@ func replayRun(w http.ResponseWriter, flusher http.Flusher, dir string) {
 		return
 	}
 	var logs []string
-	json.Unmarshal(logsData, &logs)
+	if err := json.Unmarshal(logsData, &logs); err != nil {
+		sendSSE(w, flusher, "error", map[string]string{"message": "Failed to parse saved logs"})
+		return
+	}
 
 	// Read report
 	reportData, err := ioutil.ReadFile(filepath.Join(dir, "report.html"))
@@ -305,7 +312,9 @@ func handleHistory(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(history)
+	if err := json.NewEncoder(w).Encode(history); err != nil {
+		log.Printf("Failed to encode history: %v", err)
+	}
 }
 
 func sendSSE(w http.ResponseWriter, flusher http.Flusher, eventType string, data interface{}) {

@@ -1,5 +1,27 @@
 # 更新日志
 
+## [0.4.0] - 2025-12-04
+
+### 核心与代理 (Core & Agents)
+- **MCP 支持**: 添加了对模型上下文协议 (Model Context Protocol, MCP) 的支持 (#21)。
+- **技能集成 (Skills Integration)**:
+  - 添加了对 **Claude Skills** 的支持 (#20)。
+  - 更新了 `CreateAgent` 以支持动态技能加载 (#20)。
+- **LLM 提供商**: 在 BettaFish 示例中添加了对其他 OpenAI 兼容 LLM 提供商的支持。
+
+### 工具 (Tools)
+- **搜索工具**:
+  - 添加了 **Brave Search** API 支持。
+  - 添加了 **Bocha Search** 工具 (#22)。
+
+### 示例展示 (Showcases)
+- **DeerFlow**: 更新了 DeerFlow 示例。
+- **BettaFish**: 添加了复刻 BettaFish (https://github.com/666ghj/BettaFish) 的新示例 (#19)。
+
+### 文档与网站 (Documentation & Website)
+- **网站**: 将网站内容迁移至 https://github.com/smallnest/lango-website。
+- **DIFF.md**: 为示例展示添加了 DIFF.md (#19)。
+
 ## [0.3.0] - 2025-12-01
 
 ### 核心运行时 (Core Runtime)

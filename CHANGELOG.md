@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.4.0] - 2025-12-04
+
+### Core & Agents
+- **MCP Support**: Added support for Model Context Protocol (MCP) (#21).
+- **Skills Integration**:
+  - Added support for **Claude Skills** (#20).
+  - Updated `CreateAgent` to support dynamic skill loading (#20).
+- **LLM Providers**: Added support for alternative OpenAI-compatible LLM providers in BettaFish showcase.
+
+### Tools
+- **Search Tools**:
+  - Added **Brave Search** API support.
+  - Added **Bocha Search** tool (#22).
+
+### Showcases
+- **DeerFlow**: Updated DeerFlow showcase.
+- **BettaFish**: Added new showcase replicating BettaFish (https://github.com/666ghj/BettaFish) (#19).
+
+### Documentation & Website
+- **Website**: Moved website content to https://github.com/smallnest/lango-website.
+- **DIFF.md**: Added DIFF.md for showcases (#19).
+
 ## [0.3.0] - 2025-12-01
 
 ### Core Runtime

@@ -1,6 +1,8 @@
 # LangGraphGo
 ![](website/images/logo/lango5.png)
 
+> 简称 `lango`, 中文: `懒狗`。 logo是一个可爱的中华田园犬形象
+
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/smallnest/langgraphgo)
 
 [English](./README.md) | [简体中文](./README_CN.md)
