@@ -37,6 +37,7 @@ go get github.com/smallnest/langgraphgo
     - **Subgraphs**: Compose complex agents by nesting graphs within graphs.
     - **Enhanced Streaming**: Real-time event streaming with multiple modes (`updates`, `values`, `messages`).
     - **Pre-built Agents**: Ready-to-use `ReAct`, `CreateAgent`, and `Supervisor` agent factories.
+    - **Programmatic Tool Calling (PTC)**: LLM generates code that calls tools programmatically, reducing latency and token usage by 10x.
 
 - **Developer Experience**:
     - **Visualization**: Export graphs to Mermaid, DOT, and ASCII with conditional edge support.
@@ -117,6 +118,9 @@ func main() {
 - **[Dynamic Interrupt](./examples/dynamic_interrupt/)** - Pause execution from within a node
 - **[Durable Execution](./examples/durable_execution/)** - Crash recovery and resuming execution
 - **[GoSkills Integration](./examples/goskills_example/)** - Integration with GoSkills (New!)
+- **[PTC Basic](./examples/ptc_basic/)** - Programmatic Tool Calling for reduced latency (New!)
+- **[PTC Simple](./examples/ptc_simple/)** - Simple PTC example with calculator tools (New!)
+- **[PTC Expense Analysis](./examples/ptc_expense_analysis/)** - Complex PTC scenario with data processing (New!)
 
 ## 🔧 Key Concepts
 
@@ -160,6 +164,25 @@ agent, err := prebuilt.CreateAgent(model, tools, prebuilt.WithSystemMessage("Sys
 // Create a Supervisor agent
 supervisor, err := prebuilt.CreateSupervisor(model, agents)
 ```
+
+### Programmatic Tool Calling (PTC)
+Generate code that calls tools directly, reducing API round-trips and token usage.
+
+```go
+// Create a PTC agent
+agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
+    Model:         model,
+    Tools:         toolList,
+    Language:      ptc.LanguagePython, // or ptc.LanguageGo
+    ExecutionMode: ptc.ModeServer,     // HTTP server (default) or ModeDirect
+    MaxIterations: 10,
+})
+
+// LLM generates code that calls tools programmatically
+result, err := agent.Invoke(ctx, initialState)
+```
+
+See the [PTC README](./ptc/README.md) for detailed documentation.
 
 ## 🎨 Graph Visualization
 

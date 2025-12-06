@@ -40,6 +40,9 @@ This directory contains various examples demonstrating the features of LangGraph
 - **[Supervisor](supervisor/README.md)**: Multi-agent orchestration using a supervisor.
 - **[Swarm](swarm/README.md)**: Multi-agent collaboration using handoffs.
 
+## Programmatic Tool Calling (PTC)
+- **[PTC Basic](ptc_basic/README.md)**: Introduction to Programmatic Tool Calling for reduced latency and token efficiency.
+
 ## Memory
 - **[Memory Basic](memory_basic/README.md)**: Basic usage of LangChain memory.
 - **[Memory Chatbot](memory_chatbot/README.md)**: Chatbot with memory integration.

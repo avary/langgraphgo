@@ -40,6 +40,9 @@
 - **[Supervisor](supervisor/README_CN.md)**: 使用 Supervisor 进行多代理编排。
 - **[Swarm](swarm/README_CN.md)**: 使用切换 (handoffs) 的多代理协作.
 
+## 程序化工具调用 (PTC)
+- **[PTC Basic](ptc_basic/README_CN.md)**: 程序化工具调用入门，降低延迟和提高 Token 效率。
+
 ## Memory (记忆)
 - **[Memory Basic](memory_basic/README_CN.md)**: LangChain Memory 的基本用法。
 - **[Memory Chatbot](memory_chatbot/README_CN.md)**: 集成 Memory 的聊天机器人。

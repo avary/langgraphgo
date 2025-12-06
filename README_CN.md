@@ -36,6 +36,7 @@ go get github.com/smallnest/langgraphgo
     - **子图**: 通过嵌套图来构建复杂的 Agent。
     - **增强流式传输**: 支持多种模式 (`updates`, `values`, `messages`) 的实时事件流。
     - **预构建 Agent**: 开箱即用的 `ReAct`, `CreateAgent` 和 `Supervisor` Agent 工厂。
+    - **程序化工具调用 (PTC)**: LLM 生成代码直接调用工具，降低延迟和 Token 使用量 10 倍。
 
 - **开发者体验**:
     - **可视化**: 支持导出为 Mermaid、DOT 和 ASCII 图表，并支持条件边。
@@ -116,6 +117,9 @@ func main() {
 - **[Dynamic Interrupt](./examples/dynamic_interrupt/)** - 在节点内部暂停执行
 - **[Durable Execution](./examples/durable_execution/)** - 崩溃恢复和从检查点恢复执行
 - **[GoSkills 集成](./examples/goskills_example/)** - GoSkills 集成 (新增!)
+- **[PTC Basic](./examples/ptc_basic/)** - 程序化工具调用，降低延迟 (新增!)
+- **[PTC Simple](./examples/ptc_simple/)** - PTC 简单示例，包含计算器工具 (新增!)
+- **[PTC Expense Analysis](./examples/ptc_expense_analysis/)** - PTC 复杂场景，数据处理 (新增!)
 
 ## 🔧 核心概念
 
@@ -159,6 +163,25 @@ agent, err := prebuilt.CreateAgent(model, tools, prebuilt.WithSystemMessage("Sys
 // 创建 Supervisor Agent
 supervisor, err := prebuilt.CreateSupervisor(model, agents)
 ```
+
+### 程序化工具调用 (PTC)
+生成直接调用工具的代码，减少 API 往返和 Token 使用。
+
+```go
+// 创建 PTC Agent
+agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
+    Model:         model,
+    Tools:         toolList,
+    Language:      ptc.LanguagePython, // 或 ptc.LanguageGo
+    ExecutionMode: ptc.ModeServer,     // HTTP 服务器（默认）或 ModeDirect
+    MaxIterations: 10,
+})
+
+// LLM 生成代码程序化调用工具
+result, err := agent.Invoke(ctx, initialState)
+```
+
+详细文档请参见 [PTC README](./ptc/README_CN.md)。
 
 ## 🎨 图可视化
 

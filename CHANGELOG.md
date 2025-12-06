@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.5.0] - 2025-12-06
+
+### Programmatic Tool Calling (PTC)
+- **PTC Package**: Added new `ptc` package for programmatic tool calling (#27).
+  - LLM generates code that calls tools directly instead of requiring API round-trips
+  - Supports both Python and Go code execution
+  - Two execution modes: `ModeServer` (HTTP server, default) and `ModeDirect` (subprocess, experimental)
+  - Reduces latency and token usage by up to 10x for complex tool chains
+  - Multi-LLM support (OpenAI, Gemini, Claude, any langchaingo-compatible model)
+
+### PTC Features
+- **Code Executor**: Executes LLM-generated Python/Go code with tool access in sandboxed environment
+- **Tool Server**: HTTP server exposing tools via REST API for secure code execution
+- **Smart Code Generation**: Automatic tool wrapper generation for both Python and Go
+- **Error Handling**: Robust error reporting with execution output and debugging information
+- **Documentation**: Complete bilingual documentation (English & Chinese) with Mermaid flow diagrams
+
+### Examples
+- **[PTC Basic](./examples/ptc_basic/)**: Introduction to PTC with calculator, weather, and data processing tools
+- **[PTC Simple](./examples/ptc_simple/)**: Simple calculator example demonstrating basic PTC usage
+- **[PTC Expense Analysis](./examples/ptc_expense_analysis/)**: Complex scenario based on Anthropic PTC Cookbook, showing data filtering and aggregation
+
+### Documentation
+- Added comprehensive PTC documentation in `ptc/README.md` and `ptc/README_CN.md`
+- Included execution flow diagrams and detailed API reference
+- Updated root README files to include PTC feature and examples
+
 ## [0.4.0] - 2025-12-04
 
 ### Core & Agents
