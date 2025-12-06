@@ -193,12 +193,20 @@ func (g *GraphBasedMemory) GetStats(ctx context.Context) (*Stats, error) {
 		totalTokens += node.Message.TokenCount
 	}
 
+	activeTokens := 0
+	compressionRate := 0.0
+
+	if len(g.nodes) > 0 {
+		activeTokens = totalTokens / len(g.nodes) * g.topK
+		compressionRate = float64(g.topK) / float64(len(g.nodes))
+	}
+
 	return &Stats{
 		TotalMessages:   len(g.nodes),
 		TotalTokens:     totalTokens,
 		ActiveMessages:  g.topK,
-		ActiveTokens:    totalTokens / len(g.nodes) * g.topK, // Approximate
-		CompressionRate: float64(g.topK) / float64(len(g.nodes)),
+		ActiveTokens:    activeTokens,
+		CompressionRate: compressionRate,
 	}, nil
 }
 
