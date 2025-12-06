@@ -48,6 +48,7 @@ type CodeExecutor struct {
 	WorkDir    string
 	Mode       ExecutionMode
 	toolServer *ToolServer
+	logger     Logger // Optional logger for debugging and monitoring
 }
 
 // ExecutionResult contains the result of code execution
@@ -72,6 +73,7 @@ func NewCodeExecutorWithMode(language ExecutionLanguage, toolList []tools.Tool, 
 		Timeout:  5 * time.Minute,
 		WorkDir:  os.TempDir(),
 		Mode:     mode,
+		logger:   &NoOpLogger{}, // Default to no logging
 	}
 
 	// Create tool server for both modes
@@ -80,6 +82,20 @@ func NewCodeExecutorWithMode(language ExecutionLanguage, toolList []tools.Tool, 
 	executor.toolServer = NewToolServer(toolList)
 
 	return executor
+}
+
+// SetLogger sets a custom logger for the executor
+func (ce *CodeExecutor) SetLogger(logger Logger) {
+	ce.logger = logger
+	if ce.toolServer != nil {
+		ce.toolServer.SetLogger(logger)
+	}
+}
+
+// WithLogger is a fluent method to set a logger
+func (ce *CodeExecutor) WithLogger(logger Logger) *CodeExecutor {
+	ce.SetLogger(logger)
+	return ce
 }
 
 // Start starts the code executor and its tool server
@@ -113,14 +129,30 @@ func (ce *CodeExecutor) GetToolServerURL() string {
 
 // Execute runs the generated code with access to tools
 func (ce *CodeExecutor) Execute(ctx context.Context, code string) (*ExecutionResult, error) {
+	ce.logger.Debug("Executing code in %s mode with language %s", ce.Mode, ce.Language)
+	ce.logger.Debug("Code length: %d bytes", len(code))
+
+	var result *ExecutionResult
+	var err error
+
 	switch ce.Language {
 	case LanguagePython:
-		return ce.executePython(ctx, code)
+		result, err = ce.executePython(ctx, code)
 	case LanguageGo:
-		return ce.executeGo(ctx, code)
+		result, err = ce.executeGo(ctx, code)
 	default:
-		return nil, fmt.Errorf("unsupported language: %s", ce.Language)
+		err = fmt.Errorf("unsupported language: %s", ce.Language)
+		ce.logger.Error("Unsupported language: %s", ce.Language)
+		return nil, err
 	}
+
+	if err != nil {
+		ce.logger.Error("Code execution failed: %v", err)
+	} else {
+		ce.logger.Info("Code execution succeeded, output length: %d bytes", len(result.Output))
+	}
+
+	return result, err
 }
 
 // executePython executes Python code with tool bindings

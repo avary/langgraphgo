@@ -20,6 +20,7 @@ type ToolServer struct {
 	port    int
 	mu      sync.RWMutex
 	started bool
+	logger  Logger // Optional logger for debugging and monitoring
 }
 
 // ToolRequest represents a tool execution request
@@ -48,7 +49,15 @@ func NewToolServer(toolList []tools.Tool) *ToolServer {
 		tools:   toolMap,
 		port:    0, // Will be assigned automatically
 		started: false,
+		logger:  &NoOpLogger{}, // Default to no logging
 	}
+}
+
+// SetLogger sets a custom logger for the tool server
+func (ts *ToolServer) SetLogger(logger Logger) {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+	ts.logger = logger
 }
 
 // Start starts the tool server on an available port
@@ -66,6 +75,7 @@ func (ts *ToolServer) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to find available port: %w", err)
 	}
 	ts.port = listener.Addr().(*net.TCPAddr).Port
+	ts.logger.Info("Tool server starting on port %d", ts.port)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/tools", ts.handleListTools)
@@ -83,12 +93,13 @@ func (ts *ToolServer) Start(ctx context.Context) error {
 	// Start server in goroutine
 	go func() {
 		if err := ts.server.Serve(listener); err != nil && err != http.ErrServerClosed {
-			fmt.Printf("Tool server error: %v\n", err)
+			ts.logger.Error("Tool server error: %v", err)
 		}
 	}()
 
 	// Wait a bit for server to start
 	time.Sleep(100 * time.Millisecond)
+	ts.logger.Info("Tool server started successfully on http://127.0.0.1:%d", ts.port)
 
 	return nil
 }
@@ -163,15 +174,19 @@ func (ts *ToolServer) handleCallTool(w http.ResponseWriter, r *http.Request) {
 
 	var req ToolRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		ts.logger.Warn("Invalid tool call request: %v", err)
 		ts.sendErrorResponse(w, "", nil, fmt.Sprintf("Invalid request: %v", err))
 		return
 	}
+
+	ts.logger.Debug("Tool call request: %s", req.ToolName)
 
 	ts.mu.RLock()
 	tool, exists := ts.tools[req.ToolName]
 	ts.mu.RUnlock()
 
 	if !exists {
+		ts.logger.Warn("Tool not found: %s", req.ToolName)
 		ts.sendErrorResponse(w, req.ToolName, req.Input, fmt.Sprintf("Tool not found: %s", req.ToolName))
 		return
 	}
@@ -189,16 +204,20 @@ func (ts *ToolServer) handleCallTool(w http.ResponseWriter, r *http.Request) {
 		inputStr = string(inputBytes)
 	}
 
+	ts.logger.Debug("Executing tool %s with input length: %d bytes", req.ToolName, len(inputStr))
+
 	// Execute tool
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
 
 	result, err := tool.Call(ctx, inputStr)
 	if err != nil {
+		ts.logger.Error("Tool %s execution failed: %v", req.ToolName, err)
 		ts.sendErrorResponse(w, req.ToolName, req.Input, fmt.Sprintf("Tool execution failed: %v", err))
 		return
 	}
 
+	ts.logger.Info("Tool %s executed successfully, result length: %d bytes", req.ToolName, len(result))
 	ts.sendSuccessResponse(w, req.ToolName, req.Input, result)
 }
 
