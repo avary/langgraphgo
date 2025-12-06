@@ -9,7 +9,9 @@
 
 > 🔀 **Fork 自 [paulnegz/langgraphgo](https://github.com/paulnegz/langgraphgo)** - 增强了流式传输、可视化、可观测性和生产就绪特性。
 >
-> 本分支旨在**实现与 Python LangGraph 库的功能对齐**，增加了对并行执行、持久化、高级状态管理、预构建 Agent 和人在回路（HITL）工作流的支持。
+> 本分支旨在**实现与 Python LangGraph 库的功能对齐**，增加了对并行执行、持久化、高级状态管理、预构建 Agent 和人工介入（HITL）工作流的支持。并再次基础上扩展langgraph没有的功能。
+
+官网: [http://lango.rpcx.io](http://lango.rpcx.io)
 
 ## 📦 安装
 
