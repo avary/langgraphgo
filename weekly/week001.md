@@ -8,13 +8,13 @@
 
 ## 📊 本周概览
 
-本周是 LangGraphGo 项目正式启动的第一周，取得了突破性进展。项目从 v0.3.0 起步，经历了 4 个版本迭代（v0.3.0 → v0.3.1 → v0.3.2 → v0.4.0），并开始开发 v0.5.0。完成了 **6 个大型 Showcase 项目**的复刻和文档整合工作，总计提交 **39+ 次**，新增代码超过 **15,000 行**。
+本周是 LangGraphGo 项目正式启动的第一周，取得了突破性进展。项目从 v0.3.0 起步，经历了 4 个版本迭代（v0.3.0 → v0.3.1 → v0.3.2 → v0.4.0），并开始开发 v0.5.0。目前最新版本为 v0.4.0。完成了 **6 个大型 Showcase 项目**的复刻和文档整合工作，总计提交 **39+ 次**，新增代码超过 **15,000 行**。
 
 ### 关键指标
 
 | 指标 | 数值 |
 |------|------|
-| 版本发布 | 4 个 (v0.3.0, v0.3.1, v0.3.2, v0.4.0) |
+| 版本发布 | 4 个 (v0.4.0, v0.3.2, v0.3.1, v0.3.0) |
 | Git 提交 | 39+ 次 |
 | Showcases 项目 | 6 个完整项目 |
 | 文档页面 | 20+ 个 (中英双语) |
@@ -26,6 +26,33 @@
 ## 🎯 主要成果
 
 ### 1. 版本发布
+
+#### v0.4.0 (2025-12-04)
+**核心与代理**
+- ✅ **MCP 支持**: Model Context Protocol 集成 (#21)
+- ✅ **Claude Skills**: 支持 Claude 技能集成 (#20)
+- ✅ 更新 `CreateAgent` 支持动态技能加载
+- ✅ BettaFish 支持替代 OpenAI 兼容的 LLM 提供商
+
+**工具集成**
+- ✅ **Brave Search** API 支持
+- ✅ **Bocha Search** 工具 (#22)
+
+**Showcases**
+- ✅ 更新 DeerFlow showcase
+- ✅ 新增 BettaFish showcase（复刻 https://github.com/666ghj/BettaFish）
+
+**文档与网站**
+- ✅ 网站迁移至 https://github.com/smallnest/lango-website
+- ✅ 为 showcases 添加 DIFF.md (#19)
+
+#### v0.3.2 (2025-12-03)
+- 🔧 Bug 修复和稳定性改进
+- 📚 文档优化和示例完善
+
+#### v0.3.1 (2025-12-02)
+- 🔧 Bug 修复和稳定性改进
+- 📚 文档优化和示例完善
 
 #### v0.3.0 (2025-12-01)
 **核心运行时增强**
@@ -48,29 +75,6 @@
 - ✅ ReAct 代理工厂
 - ✅ CreateAgent 工厂（函数式选项）
 - ✅ Supervisor 代理模式
-
-#### v0.3.1 & v0.3.2 (2025-12-02 ~ 2025-12-03)
-- 🔧 Bug 修复和稳定性改进
-- 📚 文档优化和示例完善
-
-#### v0.4.0 (2025-12-04)
-**核心与代理**
-- ✅ **MCP 支持**: Model Context Protocol 集成 (#21)
-- ✅ **Claude Skills**: 支持 Claude 技能集成 (#20)
-- ✅ 更新 `CreateAgent` 支持动态技能加载
-- ✅ BettaFish 支持替代 OpenAI 兼容的 LLM 提供商
-
-**工具集成**
-- ✅ **Brave Search** API 支持
-- ✅ **Bocha Search** 工具 (#22)
-
-**Showcases**
-- ✅ 更新 DeerFlow showcase
-- ✅ 新增 BettaFish showcase（复刻 https://github.com/666ghj/BettaFish）
-
-**文档与网站**
-- ✅ 网站迁移至 https://github.com/smallnest/lango-website
-- ✅ 为 showcases 添加 DIFF.md (#19)
 
 ### 2. Programmatic Tool Calling (PTC) - v0.5.0 ���发中
 
@@ -409,11 +413,11 @@
 - **文档**: 见各 Showcase 的 README 文件
 
 ### 版本标签
-- `v0.3.0` - 2025-12-01
-- `v0.3.1` - 2025-12-02
-- `v0.3.2` - 2025-12-03
-- `v0.4.0` - 2025-12-04
 - `v0.5.0` - 开发中
+- `v0.4.0` - 2025-12-04
+- `v0.3.2` - 2025-12-03
+- `v0.3.1` - 2025-12-02
+- `v0.3.0` - 2025-12-01
 
 ### 重要提交
 - `#39` - Trading Agents 文档合并
