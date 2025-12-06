@@ -25,18 +25,18 @@ const (
 type ExecutionMode string
 
 const (
-	// ModeServer: Tools are called via HTTP server (alternative)
-	// - Fully implemented and tested
+	// ModeServer: All tools are called via HTTP server (alternative)
+	// - Server URL exposed to user-generated code
+	// - Tools accessed via HTTP calls in Python/Go code
 	// - Better isolation (sandboxed)
 	// - Reliable tool execution
-	// - Exposed server for user code
 	ModeServer ExecutionMode = "server"
 
-	// ModeDirect: Tools are executed via internal server (default)
-	// - Fully implemented and tested
-	// - Simpler setup (server starts automatically)
-	// - Internal server not exposed to user
-	// - Recommended for most use cases
+	// ModeDirect: Hybrid approach for optimal performance (default, recommended)
+	// - Shell/Python/File tools: Embedded subprocess execution (true local)
+	// - Generic tools: Internal HTTP server (hidden from user code)
+	// - Server starts automatically but not exposed to user
+	// - Best of both worlds: performance + compatibility
 	ModeDirect ExecutionMode = "direct"
 )
 
