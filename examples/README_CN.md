@@ -10,6 +10,7 @@
 
 ## 高级特性
 - **[并行执行 (Parallel Execution)](parallel_execution/README_CN.md)**: 带有状态合并的扇出/扇入 (Fan-out/Fan-in) 执行。
+- **[复杂并行执行 (Complex Parallel Execution)](complex_parallel_execution/README_CN.md)**: 高级并行执行模式，包含不同长度的分支最终汇聚到单个聚合点。
 - **[配置 (Configuration)](configuration/README_CN.md)**: 使用运行时配置传递元数据和设置。
 - **[自定义归约器 (Custom Reducer)](custom_reducer/README_CN.md)**: 为复杂的合并逻辑定义自定义状态归约器。
 - **[State Schema](state_schema/README_CN.md)**: 使用 Schema 和 Reducer 管理复杂的状态更新。

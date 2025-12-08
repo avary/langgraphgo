@@ -10,6 +10,7 @@ This directory contains various examples demonstrating the features of LangGraph
 
 ## Advanced Features
 - **[Parallel Execution](parallel_execution/README.md)**: Fan-out/Fan-in execution with state merging.
+- **[Complex Parallel Execution](complex_parallel_execution/README.md)**: Advanced parallel execution with branches of varying lengths converging to a single aggregation point.
 - **[Configuration](configuration/README.md)**: Using runtime configuration to pass metadata and settings.
 - **[Custom Reducer](custom_reducer/README.md)**: Defining custom state reducers for complex merge logic.
 - **[State Schema](state_schema/README.md)**: Managing complex state updates with Schema and Reducers.
