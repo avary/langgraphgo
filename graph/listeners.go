@@ -266,6 +266,12 @@ func (lr *ListenableRunnable) InvokeWithConfig(ctx context.Context, initialState
 	state := initialState
 	currentNode := lr.graph.entryPoint
 
+	// Check if we should resume from a specific node
+	if config != nil && len(config.ResumeFrom) > 0 {
+		// For now, we only support resuming from a single node (the first one in the list)
+		currentNode = config.ResumeFrom[0]
+	}
+
 	for {
 		if currentNode == END {
 			break

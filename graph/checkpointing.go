@@ -240,10 +240,19 @@ func (cr *CheckpointableRunnable) Invoke(ctx context.Context, initialState inter
 
 // InvokeWithConfig executes the graph with checkpointing and config
 func (cr *CheckpointableRunnable) InvokeWithConfig(ctx context.Context, initialState interface{}, config *Config) (interface{}, error) {
+	// Extract thread_id from config if present
+	var threadID string
+	if config != nil && config.Configurable != nil {
+		if tid, ok := config.Configurable["thread_id"].(string); ok {
+			threadID = tid
+		}
+	}
+
 	// Create checkpointing listener
 	checkpointListener := &CheckpointListener{
 		store:       cr.config.Store,
 		executionID: cr.executionID,
+		threadID:    threadID,
 		autoSave:    cr.config.AutoSave,
 	}
 
@@ -313,6 +322,7 @@ func (cr *CheckpointableRunnable) ClearCheckpoints(ctx context.Context) error {
 type CheckpointListener struct {
 	store       CheckpointStore
 	executionID string
+	threadID    string
 	autoSave    bool
 	// Embed NoOpCallbackHandler to satisfy other CallbackHandler methods
 	NoOpCallbackHandler
@@ -333,16 +343,21 @@ func (cl *CheckpointListener) OnGraphStep(ctx context.Context, stepNode string, 
 		version = latest.Version + 1
 	}
 
+	metadata := map[string]interface{}{
+		"execution_id": cl.executionID,
+		"event":        "step",
+	}
+	if cl.threadID != "" {
+		metadata["thread_id"] = cl.threadID
+	}
+
 	checkpoint := &Checkpoint{
 		ID:        generateCheckpointID(),
 		NodeName:  stepNode,
 		State:     state,
 		Timestamp: time.Now(),
 		Version:   version,
-		Metadata: map[string]interface{}{
-			"execution_id": cl.executionID,
-			"event":        "step",
-		},
+		Metadata:  metadata,
 	}
 
 	// Save checkpoint synchronously to avoid race conditions in tests

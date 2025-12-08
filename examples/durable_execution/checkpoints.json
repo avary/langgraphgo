@@ -1,0 +1,56 @@
+{
+  "checkpoint_1765200156547185000": {
+    "id": "checkpoint_1765200156547185000",
+    "node_name": "step_1",
+    "state": {
+      "steps": [
+        "Start",
+        "Step 1 Completed"
+      ]
+    },
+    "metadata": {
+      "event": "step",
+      "execution_id": "exec_1765200156045872000",
+      "thread_id": "durable-job-1"
+    },
+    "timestamp": "2025-12-08T21:22:36.547197+08:00",
+    "version": 1
+  },
+  "checkpoint_1765200157954304000": {
+    "id": "checkpoint_1765200157954304000",
+    "node_name": "step_2",
+    "state": {
+      "steps": [
+        "Start",
+        "Step 1 Completed",
+        "Step 2 Completed"
+      ]
+    },
+    "metadata": {
+      "event": "step",
+      "execution_id": "exec_1765200157452427000",
+      "thread_id": "durable-job-1"
+    },
+    "timestamp": "2025-12-08T21:22:37.954307+08:00",
+    "version": 1
+  },
+  "checkpoint_1765200158456111000": {
+    "id": "checkpoint_1765200158456111000",
+    "node_name": "step_3",
+    "state": {
+      "steps": [
+        "Start",
+        "Step 1 Completed",
+        "Step 2 Completed",
+        "Step 3 Completed"
+      ]
+    },
+    "metadata": {
+      "event": "step",
+      "execution_id": "exec_1765200157452427000",
+      "thread_id": "durable-job-1"
+    },
+    "timestamp": "2025-12-08T21:22:38.456117+08:00",
+    "version": 1
+  }
+}

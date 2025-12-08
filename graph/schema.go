@@ -169,13 +169,16 @@ func AppendReducer(current, new interface{}) (interface{}, error) {
 
 	if newVal.Kind() == reflect.Slice {
 		// Append slice to slice
-		// Check if types are compatible? reflect.AppendSlice handles it or panics.
-		// We should probably check types to avoid panics.
 		if currVal.Type().Elem() != newVal.Type().Elem() {
-			// Try to append as generic interface slice?
-			// For now, let's assume types match or rely on reflect to panic/convert if possible.
-			// Actually reflect.AppendSlice requires exact match.
-			return reflect.AppendSlice(currVal, newVal).Interface(), nil
+			// Types don't match, convert both to []interface{}
+			result := make([]interface{}, 0, currVal.Len()+newVal.Len())
+			for i := 0; i < currVal.Len(); i++ {
+				result = append(result, currVal.Index(i).Interface())
+			}
+			for i := 0; i < newVal.Len(); i++ {
+				result = append(result, newVal.Index(i).Interface())
+			}
+			return result, nil
 		}
 		return reflect.AppendSlice(currVal, newVal).Interface(), nil
 	}
