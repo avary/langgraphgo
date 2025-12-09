@@ -41,6 +41,7 @@ This directory contains various examples demonstrating the features of LangGraph
 - **[PEV Agent](pev_agent/README.md)**: Plan-Execute-Verify agent with self-correction and error recovery for reliable task execution.
 - **[Reflection Agent](reflection_agent/README.md)**: Iterative improvement agent that refines responses through self-reflection.
 - **[Tree of Thoughts](tree_of_thoughts/README.md)**: Search-based reasoning agent that explores multiple solution paths through a tree structure.
+- **[Mental Loop](mental_loop/README.md)**: Simulator-in-the-Loop agent that tests actions in a sandbox before real-world execution (think before you act).
 - **[Supervisor](supervisor/README.md)**: Multi-agent orchestration using a supervisor.
 - **[Swarm](swarm/README.md)**: Multi-agent collaboration using handoffs.
 - **[Chat Agent](chat_agent/README.md)**: Multi-turn conversation agent with automatic session management.

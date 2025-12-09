@@ -38,9 +38,10 @@
 - **[动态技能代理 (Dynamic Skill Agent)](dynamic_skill_agent/README_CN.md)**: 具有动态技能发现和选择功能的代理。
 - **[ReAct Agent](react_agent/README_CN.md)**: 使用工具的推理与行动 (Reason and Action) 代理。
 - **[Planning Agent](planning_agent/README_CN.md)**: 根据用户请求动态创建工作流计划的智能代理。
-- **[PEV Agent](pev_agent/README_CN.md)**: 计划-执行-验证 (Plan-Execute-Verify) 代理，具备自我纠正和错误恢复能力，实现可靠的任务执行。
+- **[PEV Agent](pev_agent/README_CN.md)**: 计划-执行-验证 (Plan-Execute-Verify) 代理，具备自我纠正和错误恢复能力,实现可靠的任务执行。
 - **[Reflection Agent](reflection_agent/README_CN.md)**: 迭代改进代理，通过自我反思不断优化响应质量。
 - **[Tree of Thoughts](tree_of_thoughts/README_CN.md)**: 基于搜索的推理代理，通过树结构探索多个解决方案路径。
+- **[Mental Loop](mental_loop/README_CN.md)**: 模拟器循环代理 (Simulator-in-the-Loop)，在真实执行前在沙箱中测试行动方案（三思而后行）。
 - **[Supervisor](supervisor/README_CN.md)**: 使用 Supervisor 进行多代理编排。
 - **[Swarm](swarm/README_CN.md)**: 使用切换 (handoffs) 的多代理协作.
 - **[Chat Agent](chat_agent/README_CN.md)**: 支持自动会话管理的多轮对话代理。
