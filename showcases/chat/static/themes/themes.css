@@ -79,6 +79,25 @@
     --shadow-lg: 0 20px 25px -5px rgb(244 63 94 / 0.1);
 }
 
+/* Sapphire Light Theme - Blue & Red */
+[data-theme="sapphire-light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f0f4ff;
+    --bg-tertiary: #e6eeff;
+    --text-primary: #1a237e;
+    --text-secondary: #455a64;
+    --text-muted: #90a4ae;
+    --border-primary: #c5cae9;
+    --border-secondary: #e8eaf6;
+    --accent-primary: #2962ff;
+    --accent-primary-hover: #0039cb;
+    --accent-secondary: #d32f2f;
+    --accent-secondary-hover: #b71c1c;
+    --shadow-sm: 0 1px 2px 0 rgb(41 98 255 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(41 98 255 / 0.1);
+    --shadow-lg: 0 20px 25px -5px rgb(41 98 255 / 0.1);
+}
+
 /* Dark Theme - Modern */
 [data-theme="modern-dark"] {
     --bg-primary: #0f172a;
