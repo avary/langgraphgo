@@ -163,17 +163,13 @@ body {
     background: var(--bg-secondary);
 }
 
-.message.user {
+.message.user .message-content {
     background: var(--accent-primary);
     color: white;
 }
 
-.message.assistant {
+.message.assistant .message-content {
     background: var(--bg-primary);
-    border: 1px solid var(--border-primary);
-}
-
-.message.assistant .content {
     color: var(--text-primary);
 }
 

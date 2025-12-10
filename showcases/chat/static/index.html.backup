@@ -1,0 +1,2540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">LangGraphGo 聊天</title>
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/marked/11.1.1/marked.min.js" as="script">
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js" as="script">
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/mermaid/10.9.0/mermaid.min.js" as="script">
+    <link rel="preload" href="https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" as="script">
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/marked/11.1.1/marked.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+    <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/mermaid/10.9.0/mermaid.min.js" defer></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" id="MathJax-script" defer></script>
+    <link rel="stylesheet" href="/static/themes/themes.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 50%, var(--bg-primary) 100%);
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            width: 80%;
+            max-width: 60%;
+            height: calc(100vh - 40px);
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1600px) {
+            .container {
+                width: 85%;
+                max-width: 70%;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                width: 90%;
+                max-width: 80%;
+            }
+        }
+
+        @media (max-width: 1400px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .artifacts-sidebar {
+                width: 340px;
+            }
+
+            .chat-area {
+                min-width: 350px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .artifacts-sidebar {
+                width: 320px;
+            }
+
+            .chat-area {
+                min-width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                width: 100%;
+                height: calc(100vh - 20px);
+                border-radius: 10px;
+            }
+
+            .sidebar {
+                width: 200px;
+            }
+
+            .artifacts-sidebar {
+                width: 280px;
+            }
+
+            .chat-area {
+                min-width: 250px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                width: 60px;
+                /* Always collapsed on mobile */
+            }
+
+            .sidebar.collapsed .sidebar-header,
+            .sidebar.collapsed .sessions-list {
+                display: none;
+            }
+
+            .artifacts-sidebar {
+                width: 60px;
+                /* Always collapsed on mobile */
+            }
+
+            .chat-area {
+                min-width: 0;
+            }
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .collapse-btn {
+            position: absolute;
+            right: -20px;
+            top: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .collapse-btn:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-secondary);
+            transform: scale(1.1);
+        }
+
+        .sidebar.collapsed .collapse-btn svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            transition: opacity 0.3s;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .new-chat-btn:hover {
+            background: var(--accent-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Hide sidebar content when collapsed */
+        .sidebar.collapsed .sidebar-header,
+        .sidebar.collapsed .sessions-list {
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        /* Artifact placeholder button styles */
+        .artifact-placeholder {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .artifact-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            border-radius: 10px;
+        }
+
+        .artifact-placeholder:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .artifact-placeholder:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .artifact-placeholder-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .artifact-placeholder-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .artifact-placeholder-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .artifact-placeholder-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .artifact-placeholder-arrow {
+            margin-left: auto;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .artifact-placeholder:hover .artifact-placeholder-arrow {
+            transform: translateX(3px);
+        }
+
+
+        .sessions-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .session-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .session-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .session-item.active {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .session-title {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .session-meta {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .session-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .session-action-btn {
+            padding: 2px 6px;
+            font-size: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 400px;
+            /* Minimum width for chat area */
+        }
+
+        /* Artifacts Sidebar Styles */
+        .artifacts-sidebar {
+            width: 380px;
+            background: #f7f9fc;
+            border-left: 1px solid #e1e8ed;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: width 0.3s ease;
+        }
+
+        .artifacts-sidebar.collapsed {
+            width: 60px;
+        }
+
+        .artifacts-collapse-btn {
+            position: absolute;
+            left: -20px;
+            top: 20px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .artifacts-collapse-btn:hover {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            transform: scale(1.1);
+        }
+
+        .artifacts-sidebar.collapsed .artifacts-collapse-btn svg {
+            transform: rotate(180deg);
+        }
+
+        .artifacts-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .artifacts-header h2 {
+            font-size: 18px;
+            color: #2c3e50;
+            margin: 0;
+            transition: opacity 0.3s;
+        }
+
+        .artifacts-header .artifact-title {
+            font-size: 16px;
+            color: #10b981;
+            font-weight: 600;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .artifacts-header .artifact-type {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #f0fdf4;
+            border-radius: 50%;
+            font-size: 20px;
+            color: #10b981;
+            margin-right: 15px;
+        }
+
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8fafc;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            max-height: calc(80vh - 80px);
+        }
+
+
+        .hierarchical-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .category-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .category-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+
+        .category-header:hover {
+            background: #f1f5f9;
+        }
+
+        .category-header.active {
+            background: #e2e8f0;
+        }
+
+        .category-info {
+            flex: 1;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .category-description {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .expand-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            color: #94a3b8;
+        }
+
+        .category-header.active .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .category-tools {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .category-tools.expanded {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .tool-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background-color 0.2s;
+        }
+
+        .tool-item:last-child {
+            border-bottom: none;
+        }
+
+        .tool-item:hover {
+            background: #f8fafc;
+        }
+
+        .tool-name {
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .tool-description {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .tool-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .tool-item.flat {
+            padding: 15px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .tool-item.flat:hover {
+            background: #f0fdf4;
+            border-color: #10b981;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+        }
+
+        .no-tools {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px dashed #e2e8f0;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .artifacts-content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #fafbfc;
+            min-height: 0;
+        }
+
+        .no-artifacts {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        /* Hide artifacts content when collapsed */
+        .artifacts-sidebar.collapsed .artifacts-header,
+        .artifacts-sidebar.collapsed .artifacts-content {
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .status {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .chat-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .chat-header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tools-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skills-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #fefce8;
+            border: 1px solid #fbbf24;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .skills-status:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .skills-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        .skills-indicator.disabled {
+            background: #94a3b8;
+            animation: none;
+        }
+
+        .skills-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        .skills-status:hover .skills-text {
+            color: #f59e0b;
+        }
+
+        .mcp-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f0fdf4;
+            border: 1px solid #10b981;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .mcp-status:hover {
+            background: #dcfce7;
+            border-color: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        .mcp-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .mcp-indicator.disabled {
+            background: #94a3b8;
+            animation: none;
+        }
+
+        .mcp-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .mcp-status:hover .mcp-text {
+            color: #047857;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #fafbfc;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: #10b981;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #2c3e50;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .copy-btn {
+            cursor: pointer;
+            font-size: 12px;
+            color: #7f8c8d;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .copy-btn:hover {
+            background-color: #f0fdf4;
+            color: #059669;
+        }
+
+        .copy-btn span {
+            margin-left: 5px;
+        }
+
+        /* Markdown Content Styling */
+        .message-content h1,
+        .message-content h2,
+        .message-content h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e1e8ed;
+            padding-bottom: 5px;
+        }
+
+        .message-content h1 {
+            font-size: 1.8em;
+        }
+
+        .message-content h2 {
+            font-size: 1.5em;
+        }
+
+        .message-content h3 {
+            font-size: 1.2em;
+        }
+
+        .message-content p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .message-content ul,
+        .message-content ol {
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .message-content li {
+            margin-bottom: 5px;
+        }
+
+        .message-content code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            background: #f7f9fc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .message-content pre {
+            background: #f7f9fc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
+        .message-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .message-content blockquote {
+            border-left: 4px solid #10b981;
+            padding-left: 15px;
+            margin: 15px 0;
+            color: #555;
+            background: #f0fdf4;
+        }
+
+        .message-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .message-content th,
+        .message-content td {
+            border: 1px solid #e1e8ed;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .message-content th {
+            background-color: #f7f9fc;
+            font-weight: 600;
+        }
+
+        /* Mermaid diagram styling */
+        .message-content .mermaid {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #e1e8ed;
+            overflow-x: auto;
+        }
+
+        .message-content .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 8px;
+        }
+
+        .input-area {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #message-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        #send-btn {
+            padding: 15px 30px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        #send-btn:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        #send-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .welcome {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+
+        .welcome h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 15px 20px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #7f8c8d;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            margin: 10px 0;
+            background: #fadbd8;
+            border-radius: 8px;
+        }
+
+        /* Artifacts Styles */
+        .artifact-card {
+            background: #f8f9fa;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .artifact-header {
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .artifact-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .artifact-type {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .artifact-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .artifact-action-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .artifact-action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .artifact-preview {
+            padding: 15px;
+            background: white;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .artifact-preview pre {
+            margin: 0;
+            background: #f7f9fc;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Artifact display styles */
+        .artifact-full {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e1e8ed;
+            margin-bottom: 20px;
+        }
+
+        .artifact-full pre {
+            margin: 0;
+            padding: 15px;
+            background: #f7f9fc;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .artifact-full iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .artifact-full svg,
+        .artifact-full img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <div class="collapse-btn" id="collapse-btn" onclick="toggleSidebar()">
+                <svg id="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <polyline points="15,18 9,12 15,6"></polyline>
+                </svg>
+            </div>
+            <div class="sidebar-header">
+                <h2>聊天会话</h2>
+                <button class="new-chat-btn" onclick="createNewSession(false)">+ 新建聊天</button>
+            </div>
+            <div class="sessions-list" id="sessions-list">
+                <p style="padding: 20px; text-align: center; color: #7f8c8d;">加载中...</p>
+            </div>
+            <div class="sidebar-footer">
+                <div class="theme-selector-sidebar" id="theme-selector" onclick="showThemeModal()" title="主题设置">
+                    <span class="theme-icon">🎨</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="chat-header-left">
+                    <h1 id="chat-title">LangGraphGo 聊天</h1>
+                    <div class="status" id="status">选择或创建一个会话</div>
+                </div>
+                <div class="chat-header-right">
+                    <div class="tools-status">
+                        <div class="skills-status" id="skills-status" title="Skills 状态">
+                            <span class="skills-indicator" id="skills-indicator"></span>
+                            <span class="skills-text" id="skills-text">Skills</span>
+                        </div>
+                        <div class="mcp-status" id="mcp-status" title="MCP 工具状态">
+                            <span class="mcp-indicator" id="mcp-indicator"></span>
+                            <span class="mcp-text" id="mcp-text">MCP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="messages" id="messages">
+                <div class="welcome">
+                    <h2>👋 欢迎!</h2>
+                    <p>创建一个新会话或选择现有会话开始聊天。</p>
+                </div>
+            </div>
+            <div class="input-area">
+                <div class="input-container">
+                    <input type="text" id="message-input" placeholder="输入您的消息..." disabled>
+                    <button id="send-btn" onclick="sendMessage()" disabled>发送</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="artifacts-sidebar" id="artifacts-sidebar">
+            <div class="artifacts-collapse-btn" id="artifacts-collapse-btn" onclick="toggleArtifactsSidebar()">
+                <svg id="artifacts-collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <polyline points="9,18 15,12 9,6"></polyline>
+                </svg>
+            </div>
+            <div class="artifacts-header" id="artifacts-header">
+                <h2 id="artifacts-title">Artifacts</h2>
+            </div>
+            <div class="artifacts-content" id="artifacts-content">
+                <div class="no-artifacts">No artifacts in this session</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Modal -->
+    <div class="modal" id="theme-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎨 主题设置</h2>
+                <button class="modal-close" onclick="closeThemeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="theme-section">
+                    <h3>☀️ 浅色主题</h3>
+                    <div class="theme-grid">
+                        <div class="theme-option" onclick="setTheme('default-light')" data-theme="default-light">
+                            <div class="theme-preview"
+                                style="background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 50%, #ffffff 100%);">
+                            </div>
+                            <span>默认绿</span>
+                        </div>
+                        <div class="theme-option" onclick="setTheme('blue-light')" data-theme="blue-light">
+                            <div class="theme-preview"
+                                style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #ffffff 100%);">
+                            </div>
+                            <span>天空蓝</span>
+                        </div>
+                        <div class="theme-option" onclick="setTheme('purple-light')" data-theme="purple-light">
+                            <div class="theme-preview"
+                                style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #ffffff 100%);">
+                            </div>
+                            <span>优雅紫</span>
+                        </div>
+                        <div class="theme-option" onclick="setTheme('rose-light')" data-theme="rose-light">
+                            <div class="theme-preview"
+                                style="background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #ffffff 100%);">
+                            </div>
+                            <span>玫瑰红</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="theme-section">
+                    <h3>🌙 深色主题</h3>
+                    <div class="theme-grid">
+                        <div class="theme-option" onclick="setTheme('modern-dark')" data-theme="modern-dark">
+                            <div class="theme-preview"
+                                style="background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #0f172a 100%);">
+                            </div>
+                            <span>现代黑</span>
+                        </div>
+                        <div class="theme-option" onclick="setTheme('blue-dark')" data-theme="blue-dark">
+                            <div class="theme-preview"
+                                style="background: linear-gradient(135deg, #192036 0%, #1e3a5f 50%, #0c1222 100%);">
+                            </div>
+                            <span>深空蓝</span>
+                        </div>
+                        <div class="theme-option" onclick="setTheme('cyberpunk-dark')" data-theme="cyberpunk-dark">
+                            <div class="theme-preview"
+                                style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #0a0a0a 100%);">
+                            </div>
+                            <span>赛博朋克</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Modal -->
+    <div class="modal" id="skills-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎯 Skills</h2>
+                <button class="modal-close" onclick="closeSkillsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="skills-list" class="hierarchical-list">
+                    <p>加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MCP Tools Modal -->
+    <div class="modal" id="mcp-tools-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚡ MCP 工具</h2>
+                <button class="modal-close" onclick="closeMCPToolsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="mcp-tools-list" class="hierarchical-list">
+                    <p>加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = null;
+        let mcpTools = [];
+        let skills = [];
+        let hierarchicalData = null;
+        let mcpEnabled = false;
+        let chatConfig = {
+            chatTitle: "LangGraphGo 聊天"
+        };
+
+        // Theme Management
+        let currentTheme = localStorage.getItem('chatTheme') || 'default-light';
+
+        // Apply saved theme on load
+        function applyTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            currentTheme = themeName;
+            localStorage.setItem('chatTheme', themeName);
+
+            // Update active state in theme selector
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.theme === themeName) {
+                    option.classList.add('active');
+                }
+            });
+        }
+
+        function setTheme(themeName) {
+            applyTheme(themeName);
+            closeThemeModal();
+        }
+
+        function showThemeModal() {
+            const modal = document.getElementById('theme-modal');
+
+            // Set active state for current theme
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+                if (option.dataset.theme === currentTheme) {
+                    option.classList.add('active');
+                }
+            });
+
+            modal.classList.add('show');
+        }
+
+        function closeThemeModal() {
+            const modal = document.getElementById('theme-modal');
+            modal.classList.remove('show');
+        }
+
+        // Load chat configuration
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    chatConfig = config;
+
+                    // Update page title
+                    document.getElementById('page-title').textContent = config.chatTitle;
+
+                    // Update chat title in header
+                    const chatTitleElement = document.getElementById('chat-title');
+                    if (chatTitleElement) {
+                        chatTitleElement.textContent = config.chatTitle;
+                    }
+                }
+            } catch (error) {
+                console.log('Failed to load config:', error);
+                // Use default values
+            }
+        }
+
+        // Initialize artifacts sidebar as collapsed by default
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme
+            applyTheme(currentTheme);
+
+            const artifactsSidebar = document.getElementById('artifacts-sidebar');
+            if (artifactsSidebar) {
+                artifactsSidebar.classList.add('collapsed');
+                isArtifactsOpen = false; // Ensure state is consistent
+            }
+
+            // Add click listener to Skills status
+            const skillsStatus = document.getElementById('skills-status');
+            if (skillsStatus) {
+                skillsStatus.addEventListener('click', showSkillsModal);
+            }
+
+            // Add click listener to MCP status
+            const mcpStatus = document.getElementById('mcp-status');
+            if (mcpStatus) {
+                mcpStatus.addEventListener('click', showMCPToolsModal);
+            }
+
+            // Wait for external resources to load
+            window.addEventListener('load', () => {
+                // Initialize mermaid after all resources are loaded
+                if (typeof mermaid !== 'undefined') {
+                    mermaid.initialize({
+                        startOnLoad: false,
+                        theme: 'base',
+                        themeVariables: {
+                            primaryColor: '#10b981',
+                            primaryTextColor: '#2c3e50',
+                            primaryBorderColor: '#e2e8f0',
+                            lineColor: '#64748b',
+                            secondaryColor: '#f0fdf4',
+                            tertiaryColor: '#f8fafc',
+                            background: '#ffffff',
+                            mainBkg: '#ffffff',
+                            secondBkg: '#f8fafc',
+                            tertiaryBkg: '#f0fdf4'
+                        }
+                    });
+                }
+            });
+        });
+        let sidebarCollapsed = false;
+        let artifacts = new Map(); // Store artifacts by ID
+        let currentArtifactId = null; // Track currently displayed artifact
+
+        // Load config and sessions on page load - delay to improve perceived performance
+        setTimeout(loadConfig, 0);
+        setTimeout(loadSessions, 100);
+
+        // Enable Enter key to send message
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        async function loadSessions() {
+            const sessionsList = document.getElementById('sessions-list');
+            // Show loading state immediately
+            if (sessionsList.children.length === 0) {
+                sessionsList.innerHTML = '<p style="padding: 20px; text-align: center; color: #7f8c8d;">加载中...</p>';
+            }
+
+            try {
+                // Use a timeout to prevent long waiting
+                const response = await Promise.race([
+                    fetch('/api/sessions'),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Timeout')), 5000)
+                    )
+                ]);
+
+                const sessions = await response.json();
+                sessionsList.innerHTML = '';
+
+                if (sessions.length === 0) {
+                    // Auto-create first session if none exists
+                    sessionsList.innerHTML = '<p style="padding: 20px; text-align: center; color: #7f8c8d;">创建会话中...</p>';
+                    // Use setTimeout to not block the UI
+                    setTimeout(() => createNewSession(true), 50);
+                    return;
+                }
+
+                sessions.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+
+                // Auto-select the most recent session if no current session is selected
+                if (!currentSessionId && sessions.length > 0) {
+                    selectSession(sessions[0].id);
+                }
+
+                sessions.forEach(session => {
+                    const item = document.createElement('div');
+                    item.className = 'session-item' + (session.id === currentSessionId ? ' active' : '');
+                    item.setAttribute('data-session-id', session.id);
+                    item.innerHTML = `
+                        <div class="session-title">${session.title || '新会话'}</div>
+                        <div class="session-meta-row">
+                            <div class="session-meta">${session.message_count} 条消息 • ${formatDate(session.updated_at)}</div>
+                            <button class="session-action-btn delete-btn" onclick="deleteSession('${session.id}', event)">删除</button>
+                        </div>
+                    `;
+                    item.onclick = () => selectSession(session.id);
+                    sessionsList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Failed to load sessions:', error);
+                if (sessionsList.innerHTML.includes('加载中')) {
+                    sessionsList.innerHTML = '<p style="padding: 20px; text-align: center; color: #e74c3c;">加载失败，请刷新页面</p>';
+                }
+            }
+        }
+
+        async function createNewSession(autoSelect = false) {
+            try {
+                const response = await fetch('/api/sessions/new', { method: 'POST' });
+                const data = await response.json();
+
+                if (autoSelect) {
+                    // For auto-created sessions, directly select without reloading
+                    currentSessionId = data.session_id;
+                    document.getElementById('message-input').disabled = false;
+                    document.getElementById('send-btn').disabled = false;
+                    document.getElementById('status').textContent = '';
+                    // Load history (will be empty for new session)
+                    await loadHistory(data.session_id);
+                } else {
+                    // For manual clicks, reload the full session list
+                    await loadSessions();
+                    selectSession(data.session_id);
+                }
+            } catch (error) {
+                console.error('Failed to create session:', error);
+                alert('Failed to create new session');
+            }
+        }
+
+        async function selectSession(sessionId) {
+            // Clear and save current artifacts before switching
+            clearArtifacts();
+
+            currentSessionId = sessionId;
+            document.getElementById('message-input').disabled = false;
+            document.getElementById('send-btn').disabled = false;
+            document.getElementById('status').textContent = ``;
+
+            // Update UI
+            document.querySelectorAll('.session-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Find and highlight the selected session
+            const selectedItem = document.querySelector(`[data-session-id="${sessionId}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+
+            // Load history
+            await loadHistory(sessionId);
+
+            // Update MCP status for the new session
+            await updateToolsStatus();
+        }
+
+        async function loadHistory(sessionId) {
+            try {
+                const response = await fetch(`/api/sessions/${sessionId}/history`);
+                const messages = await response.json();
+
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+
+                // Clear artifacts before loading history
+                artifacts.clear();
+
+                for (const msg of messages) {
+                    await addMessageToUI(msg.role, msg.content, msg.timestamp);
+                }
+
+                scrollToBottom();
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+
+        async function sendMessage() {
+            if (!currentSessionId) return;
+
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Disable input
+            input.disabled = true;
+            document.getElementById('send-btn').disabled = true;
+
+            // Add user message to UI
+            await addMessageToUI('user', message, new Date());
+            input.value = '';
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant';
+            typingDiv.innerHTML = `
+                <div class="message-content typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            document.getElementById('messages').appendChild(typingDiv);
+            scrollToBottom();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: currentSessionId,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                typingDiv.remove();
+
+                // Add assistant response
+                await addMessageToUI('assistant', data.response, new Date());
+
+                // Reload sessions to update message count
+                loadSessions();
+            } catch (error) {
+                console.error('Failed to send message:', error);
+                typingDiv.remove();
+                addErrorMessage('Failed to get response. Please try again.');
+            } finally {
+                input.disabled = false;
+                document.getElementById('send-btn').disabled = false;
+                input.focus();
+            }
+        }
+
+        async function addMessageToUI(role, content, timestamp) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const time = new Date(timestamp).toLocaleTimeString();
+            let processedContent = '';
+            let extractedArtifacts = [];
+
+            if (role === 'assistant') {
+                // First extract artifacts from content
+                const result = extractArtifacts(content);
+                extractedArtifacts = result.artifacts;
+
+                console.log('Extracted artifacts:', extractedArtifacts); // Debug log
+                console.log('Current session ID:', currentSessionId); // Debug log
+
+                // Store artifacts
+                extractedArtifacts.forEach(artifact => {
+                    artifacts.set(artifact.id, artifact);
+                });
+
+                console.log('All artifacts after adding:', Array.from(artifacts.entries())); // Debug log
+
+                // Parse Markdown (this will convert code blocks to HTML)
+                processedContent = marked.parse(result.content);
+
+                // Find and replace artifact markers in the parsed HTML
+                const markerRegex = /<!-- ARTIFACT:(.*?) -->/g;
+                    processedContent = processedContent.replace(markerRegex, (match, artifactId) => {
+                        const artifact = artifacts.get(artifactId);
+                        if (artifact) {
+                            return `<div class="artifact-placeholder" data-artifact-id="${artifactId}">
+                            <span class="artifact-placeholder-icon">${getTypeIcon(artifact.type)}</span>
+                            <div class="artifact-placeholder-text">
+                                <div class="artifact-placeholder-label">Artifact</div>
+                                <div class="artifact-placeholder-title">${artifact.title}</div>
+                            </div>
+                            <span class="artifact-placeholder-arrow">→</span>
+                        </div>`;
+                        }
+                        return match;
+                    });
+
+                // Update artifacts display
+                if (isArtifactsOpen) {
+                    updateArtifactsDisplay();
+                }
+            } else {
+                // Escape HTML for user messages
+                processedContent = escapeHtml(content);
+            }
+
+            const messageContentDiv = document.createElement('div');
+            messageContentDiv.className = 'message-content';
+
+            if (role === 'assistant') {
+                const copyBtn = document.createElement('div');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerHTML = '&#x1f4cb; <span>Copy</span>';
+                copyBtn.setAttribute('data-raw-content', content);
+                copyBtn.onclick = (e) => copyToClipboard(e);
+
+                const footer = document.createElement('div');
+                footer.className = 'message-footer';
+
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = time;
+
+                footer.appendChild(timeDiv);
+                footer.appendChild(copyBtn);
+
+                messageContentDiv.innerHTML = processedContent;
+                messageContentDiv.appendChild(footer);
+
+            } else {
+                messageContentDiv.innerHTML = `
+                    ${processedContent}
+                    <div class="message-time">${time}</div>
+                `;
+            }
+
+            messageDiv.appendChild(messageContentDiv);
+            messagesDiv.appendChild(messageDiv);
+
+            // Add click handler for artifact placeholders
+            const placeholders = messageDiv.querySelectorAll('.artifact-placeholder');
+            placeholders.forEach(placeholder => {
+                // Add click handler
+                placeholder.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const artifactId = this.getAttribute('data-artifact-id');
+                    console.log('Artifact clicked:', artifactId); // Debug log
+                    openArtifactsModal();
+                    showArtifact(artifactId);
+                });
+            });
+
+            // Process MathJax, Mermaid, and Highlight.js
+            if (role === 'assistant') {
+                await MathJax.typesetPromise([messageDiv]);
+
+                // Process Mermaid code blocks
+                const mermaidCodeBlocks = messageDiv.querySelectorAll('pre code.language-mermaid');
+                for (const codeBlock of mermaidCodeBlocks) {
+                    const code = codeBlock.textContent;
+                    const mermaidDiv = document.createElement('div');
+                    mermaidDiv.className = 'mermaid';
+                    mermaidDiv.textContent = code;
+                    codeBlock.parentNode.replaceWith(mermaidDiv);
+                }
+
+                try {
+                    await mermaid.run({
+                        nodes: messageDiv.querySelectorAll('.mermaid')
+                    });
+                } catch (e) {
+                    console.error("Mermaid rendering error:", e);
+                }
+
+                // Highlight code blocks (excluding mermaid which has been replaced)
+                messageDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+
+            scrollToBottom();
+        }
+
+        function copyToClipboard(event) {
+            const button = event.currentTarget;
+            const rawContent = button.getAttribute('data-raw-content');
+            navigator.clipboard.writeText(rawContent).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✓ Copied!';
+                button.style.color = '#27ae60'; // Green color for success
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.color = ''; // Revert color
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+            event.stopPropagation();
+        }
+
+        function addErrorMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            messagesDiv.appendChild(errorDiv);
+            scrollToBottom();
+        }
+
+        async function deleteSession(sessionId, event) {
+            event.stopPropagation();
+            if (!confirm('确定要永久删除此会话吗？')) return;
+
+            try {
+                await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+
+                if (sessionId === currentSessionId) {
+                    currentSessionId = null;
+                    document.getElementById('messages').innerHTML = '<div class="welcome"><h2>👋 欢迎!</h2><p>创建一个新会话或选择现有会话开始聊天。</p></div>';
+                    document.getElementById('message-input').disabled = true;
+                    document.getElementById('send-btn').disabled = true;
+                    document.getElementById('status').textContent = '选择或创建一个会话';
+
+                    // Clear artifacts if we're deleting the current session
+                    clearArtifacts();
+                }
+                loadSessions();
+            } catch (error) {
+                console.error('Failed to delete session:', error);
+                alert('Failed to delete session');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebarCollapsed = !sidebarCollapsed;
+
+            if (sidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+            } else {
+                sidebar.classList.remove('collapsed');
+            }
+        }
+
+        function scrollToBottom() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+            return date.toLocaleDateString();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+
+        // Artifacts Functions
+        function extractArtifacts(content) {
+            const artifacts = [];
+            let processedContent = content;
+
+            // Types that should be extracted as artifacts
+            const artifactTypes = ['html', 'svg', 'python', 'javascript', 'js', 'shell', 'bash', 'sh',
+                'css', 'json', 'yaml', 'yml', 'sql', 'docker', 'dockerfile',
+                'go', 'java', 'cpp', 'c', 'rust', 'typescript', 'ts',
+                'php', 'ruby', 'swift', 'kotlin', 'markdown', 'md'];
+
+            // Extract code blocks using regex pattern
+            // Format: ```language ... ```
+            const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+
+            let match;
+            let artifactIndex = 0;
+
+            while ((match = codeBlockRegex.exec(content)) !== null) {
+                const language = match[1] || 'text';
+                const codeContent = match[2].trim();
+
+                // Count the number of lines in the code block
+                const lineCount = codeContent.split('\n').length;
+
+                // Check if this type should be extracted as artifact AND has more than 100 lines
+                if (artifactTypes.includes(language.toLowerCase()) && lineCount > 100) {
+                    const artifactId = `artifact_${Date.now()}_${artifactIndex++}`;
+                    const type = language.toLowerCase();
+
+                    // Generate a smart title based on content
+                    let title = generateArtifactTitle(codeContent, type);
+
+                    artifacts.push({
+                        id: artifactId,
+                        type: type,
+                        language: language,
+                        title: title,
+                        content: codeContent
+                    });
+
+                    // Replace code block with placeholder marker
+                    processedContent = processedContent.replace(match[0],
+                        `<!-- ARTIFACT:${artifactId} -->`);
+                }
+            }
+
+            return {
+                content: processedContent,
+                artifacts: artifacts
+            };
+        }
+
+        function generateArtifactTitle(content, type) {
+            // Try to extract a meaningful title from the content
+            const lines = content.split('\n').filter(line => line.trim());
+
+            // For HTML, look for title tag
+            if (type === 'html') {
+                const titleMatch = content.match(/<title>(.*?)<\/title>/i);
+                if (titleMatch) return titleMatch[1];
+            }
+
+            // For Python/JavaScript/Java, look for function/class/variable definitions
+            if (['python', 'javascript', 'js', 'java', 'go', 'rust', 'typescript', 'ts'].includes(type)) {
+                const funcMatch = lines.find(line =>
+                    line.match(/^(def|function|func|fn)\s+\w+/) ||
+                    line.match(/^class\s+\w+/) ||
+                    line.match(/^(const|let|var)\s+\w+/)
+                );
+                if (funcMatch) return funcMatch.trim().split(/\s+/)[1];
+            }
+
+            // For shell/bash, look for shebang or first command
+            if (['shell', 'bash', 'sh'].includes(type)) {
+                if (lines[0] && lines[0].startsWith('#!')) {
+                    return lines[0].substring(2).trim();
+                }
+            }
+
+            // For CSS, look for class or ID selectors
+            if (type === 'css') {
+                const selectorMatch = lines.find(line =>
+                    line.match(/^\.[\w-]+\s*\{/) ||
+                    line.match(/^#[\w-]+\s*\{/)
+                );
+                if (selectorMatch) return selectorMatch.trim().split(/\s+/)[0];
+            }
+
+            // For Dockerfile
+            if (type === 'dockerfile' || type === 'docker') {
+                const fromMatch = lines.find(line => line.startsWith('FROM'));
+                if (fromMatch) return `Dockerfile - ${fromMatch}`;
+            }
+
+            // Default: use first line or type name
+            if (lines.length > 0 && lines[0].length < 50) {
+                return lines[0].substring(0, 30);
+            }
+
+            return `${type.charAt(0).toUpperCase() + type.slice(1)} Code`;
+        }
+
+        let isArtifactsOpen = false;
+
+        function clearArtifacts() {
+            console.log('Clearing artifacts...'); // Debug log
+
+            // Clear current artifacts
+            artifacts.clear();
+            currentArtifactId = null;
+
+            // Update display
+            updateArtifactsDisplay();
+
+            // Close sidebar
+            if (isArtifactsOpen) {
+                const artifactsSidebar = document.getElementById('artifacts-sidebar');
+                artifactsSidebar.classList.add('collapsed');
+                isArtifactsOpen = false;
+            }
+        }
+
+
+        function toggleArtifactsSidebar() {
+            const artifactsSidebar = document.getElementById('artifacts-sidebar');
+
+            console.log('Toggling artifacts sidebar, current artifacts count:', artifacts.size); // Debug log
+
+            isArtifactsOpen = !isArtifactsOpen;
+
+            if (isArtifactsOpen) {
+                artifactsSidebar.classList.remove('collapsed');
+                updateArtifactsDisplay();
+            } else {
+                artifactsSidebar.classList.add('collapsed');
+            }
+        }
+
+        function updateArtifactsDisplay() {
+            const titleElement = document.getElementById('artifacts-title');
+            const headerElement = document.getElementById('artifacts-header');
+            const contentContainer = document.getElementById('artifacts-content');
+
+            if (artifacts.size === 0) {
+                headerElement.innerHTML = '<h2 id="artifacts-title">Artifacts</h2>';
+                contentContainer.innerHTML = '<div class="no-artifacts">No artifacts in this session</div>';
+                currentArtifactId = null;
+                return;
+            }
+
+            // If there's a current artifact, update the header to show its info
+            if (currentArtifactId && artifacts.has(currentArtifactId)) {
+                const artifact = artifacts.get(currentArtifactId);
+                const icon = getTypeIcon(artifact.type);
+                headerElement.innerHTML = `<h2 id="artifacts-title">${icon} ${artifact.title}</h2>`;
+            } else {
+                // Show first artifact if none selected
+                const firstArtifactId = artifacts.keys().next().value;
+                if (firstArtifactId) {
+                    showArtifact(firstArtifactId);
+                }
+            }
+        }
+
+        function openArtifactsModal() {
+            if (!isArtifactsOpen) {
+                toggleArtifactsSidebar();
+            }
+        }
+
+        function closeArtifactsModal() {
+            if (isArtifactsOpen) {
+                toggleArtifactsSidebar();
+            }
+        }
+
+        function showArtifact(artifactId) {
+            const artifact = artifacts.get(artifactId);
+            if (!artifact) {
+                return;
+            }
+
+            // Update current artifact ID
+            currentArtifactId = artifactId;
+
+            // Ensure artifacts sidebar is open
+            if (!isArtifactsOpen) {
+                const artifactsSidebar = document.getElementById('artifacts-sidebar');
+                artifactsSidebar.classList.remove('collapsed');
+                isArtifactsOpen = true;
+            }
+
+            // Update header with current artifact info
+            const headerElement = document.getElementById('artifacts-header');
+            const icon = getTypeIcon(artifact.type);
+            headerElement.innerHTML = `<h2 id="artifacts-title">${icon} ${artifact.title}</h2>`;
+
+            // Show artifact content
+            const content = document.getElementById('artifacts-content');
+            content.innerHTML = '<div class="artifact-full">' + renderArtifactContent(artifact) + '</div>';
+        }
+
+        function getTypeIcon(type) {
+            const icons = {
+                'html': '🌐',
+                'svg': '🎨',
+                'python': '🐍',
+                'javascript': '⚡',
+                'shell': '🖥️',
+                'bash': '🖥️',
+                'markdown': '📝',
+                'json': '📋',
+                'yaml': '📋',
+                'css': '🎨',
+                'sql': '🗄️',
+                'docker': '🐳',
+                'kubernetes': '☸️',
+                'terraform': '🏗️',
+                'go': '🐹',
+                'java': '☕',
+                'cpp': '⚙️',
+                'c': '⚙️',
+                'rust': '🦀',
+                'typescript': '📘',
+                'php': '🐘',
+                'ruby': '💎',
+                'swift': '🍎',
+                'kotlin': '🎯'
+            };
+            return icons[type] || '📄';
+        }
+
+        function renderArtifactContent(artifact) {
+            const { type, content, language } = artifact;
+
+            switch (type) {
+                case 'html':
+                    return `<iframe srcdoc="${escapeHtml(content)}"></iframe>`;
+
+                case 'svg':
+                    return content;
+
+                case 'python':
+                case 'javascript':
+                case 'js':
+                case 'shell':
+                case 'bash':
+                case 'sh':
+                case 'markdown':
+                case 'md':
+                case 'json':
+                case 'yaml':
+                case 'yml':
+                case 'css':
+                case 'sql':
+                case 'docker':
+                case 'dockerfile':
+                case 'go':
+                case 'java':
+                case 'cpp':
+                case 'c':
+                case 'rust':
+                case 'typescript':
+                case 'ts':
+                case 'php':
+                case 'ruby':
+                case 'swift':
+                case 'kotlin':
+                case 'text':
+                default:
+                    // Map types to highlight.js languages
+                    const langMap = {
+                        'js': 'javascript',
+                        'ts': 'typescript',
+                        'sh': 'bash',
+                        'dockerfile': 'dockerfile',
+                        'md': 'markdown',
+                        'yml': 'yaml'
+                    };
+                    const hlLang = langMap[type] || language || type;
+
+                    // Try to highlight, fallback to plaintext if language not supported
+                    let highlighted;
+                    try {
+                        highlighted = hljs.highlight(content, { language: hlLang }).value;
+                    } catch (e) {
+                        highlighted = hljs.highlight(content, { language: 'plaintext' }).value;
+                    }
+                    return `<pre><code>${highlighted}</code></pre>`;
+            }
+        }
+
+
+        // Tools Functions
+        async function loadHierarchicalData() {
+            if (!currentSessionId) return;
+
+            try {
+                const response = await fetch(`/api/tools/hierarchical?session_id=${currentSessionId}`);
+                if (response.ok) {
+                    hierarchicalData = await response.json();
+
+                    // Update status indicators
+                    mcpEnabled = hierarchicalData.enabled;
+                    skills = hierarchicalData.skills || [];
+                    mcpTools = [];
+
+                    // Flatten MCP tools for status count
+                    hierarchicalData.mcp_tools.forEach(category => {
+                        mcpTools = mcpTools.concat(category.tools || []);
+                    });
+
+                    // Update Skills status
+                    const skillsIndicator = document.getElementById('skills-indicator');
+                    const skillsText = document.getElementById('skills-text');
+
+                    if (skills.length > 0) {
+                        skillsIndicator.classList.remove('disabled');
+                        skillsText.textContent = `Skills (${skills.length})`;
+                        document.getElementById('skills-status').title = `已加载 ${skills.length} 个 Skills`;
+                    } else {
+                        skillsIndicator.classList.add('disabled');
+                        skillsText.textContent = 'Skills';
+                        document.getElementById('skills-status').title = '暂无 Skills';
+                    }
+
+                    // Update MCP status
+                    const mcpIndicator = document.getElementById('mcp-indicator');
+                    const mcpText = document.getElementById('mcp-text');
+
+                    if (mcpEnabled && mcpTools.length > 0) {
+                        mcpIndicator.classList.remove('disabled');
+                        mcpText.textContent = `MCP (${mcpTools.length})`;
+                        document.getElementById('mcp-status').title = `已加载 ${mcpTools.length} 个 MCP 工具`;
+                    } else {
+                        mcpIndicator.classList.add('disabled');
+                        mcpText.textContent = 'MCP';
+                        document.getElementById('mcp-status').title = 'MCP 工具未启用';
+                    }
+                } else {
+                    // Server doesn't support hierarchical tools, fall back to old method
+                    await updateToolsStatusLegacy();
+                }
+            } catch (error) {
+                console.log('Hierarchical tools not available, using legacy:', error);
+                await updateToolsStatusLegacy();
+            }
+        }
+
+        async function updateToolsStatusLegacy() {
+            try {
+                const response = await fetch(`/api/mcp/tools?session_id=${currentSessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    mcpEnabled = data.enabled;
+                    const allTools = data.tools || [];
+
+                    // Separate skills and MCP tools
+                    skills = allTools.filter(tool => tool.type === 'skill');
+                    mcpTools = allTools.filter(tool => tool.type === 'mcp');
+
+                    // Update Skills status
+                    const skillsIndicator = document.getElementById('skills-indicator');
+                    const skillsText = document.getElementById('skills-text');
+
+                    if (skills.length > 0) {
+                        skillsIndicator.classList.remove('disabled');
+                        skillsText.textContent = `Skills (${skills.length})`;
+                        document.getElementById('skills-status').title = `已加载 ${skills.length} 个 Skills`;
+                    } else {
+                        skillsIndicator.classList.add('disabled');
+                        skillsText.textContent = 'Skills';
+                        document.getElementById('skills-status').title = '暂无 Skills';
+                    }
+
+                    // Update MCP status
+                    const mcpIndicator = document.getElementById('mcp-indicator');
+                    const mcpText = document.getElementById('mcp-text');
+
+                    if (mcpEnabled && mcpTools.length > 0) {
+                        mcpIndicator.classList.remove('disabled');
+                        mcpText.textContent = `MCP (${mcpTools.length})`;
+                        document.getElementById('mcp-status').title = `已加载 ${mcpTools.length} 个 MCP 工具`;
+                    } else {
+                        mcpIndicator.classList.add('disabled');
+                        mcpText.textContent = 'MCP';
+                        document.getElementById('mcp-status').title = 'MCP 工具未启用';
+                    }
+                } else {
+                    // Server doesn't support MCP
+                    updateToolsDisabled();
+                }
+            } catch (error) {
+                console.log('Tools not available:', error);
+                updateToolsDisabled();
+            }
+        }
+
+        async function updateToolsStatus() {
+            if (hierarchicalData) {
+                // Data already loaded, just update counts
+                const skillsIndicator = document.getElementById('skills-indicator');
+                const skillsText = document.getElementById('skills-text');
+                const mcpIndicator = document.getElementById('mcp-indicator');
+                const mcpText = document.getElementById('mcp-text');
+
+                if (skills.length > 0) {
+                    skillsIndicator.classList.remove('disabled');
+                    skillsText.textContent = `Skills (${skills.length})`;
+                    document.getElementById('skills-status').title = `已加载 ${skills.length} 个 Skills`;
+                } else {
+                    skillsIndicator.classList.add('disabled');
+                    skillsText.textContent = 'Skills';
+                    document.getElementById('skills-status').title = '暂无 Skills';
+                }
+
+                if (mcpEnabled && mcpTools.length > 0) {
+                    mcpIndicator.classList.remove('disabled');
+                    mcpText.textContent = `MCP (${mcpTools.length})`;
+                    document.getElementById('mcp-status').title = `已加载 ${mcpTools.length} 个 MCP 工具`;
+                } else {
+                    mcpIndicator.classList.add('disabled');
+                    mcpText.textContent = 'MCP';
+                    document.getElementById('mcp-status').title = 'MCP 工具未启用';
+                }
+            } else {
+                await loadHierarchicalData();
+            }
+        }
+
+        function toggleCategory(index, type) {
+            const toolsId = type === 'skill' ? `skill-tools-${index}` : `mcp-tools-${index}`;
+            const toolsElement = document.getElementById(toolsId);
+            const headerElement = toolsElement.previousElementSibling;
+
+            if (toolsElement.classList.contains('expanded')) {
+                toolsElement.classList.remove('expanded');
+                headerElement.classList.remove('active');
+            } else {
+                toolsElement.classList.add('expanded');
+                headerElement.classList.add('active');
+            }
+        }
+
+        function updateToolsDisabled() {
+            const skillsIndicator = document.getElementById('skills-indicator');
+            const skillsText = document.getElementById('skills-text');
+            const mcpIndicator = document.getElementById('mcp-indicator');
+            const mcpText = document.getElementById('mcp-text');
+
+            skillsIndicator.classList.add('disabled');
+            skillsText.textContent = 'Skills';
+            document.getElementById('skills-status').title = 'Skills 未启用';
+
+            mcpIndicator.classList.add('disabled');
+            mcpText.textContent = 'MCP';
+            document.getElementById('mcp-status').title = 'MCP 未启用';
+        }
+
+        async function showSkillsModal() {
+            const modal = document.getElementById('skills-modal');
+            const skillsList = document.getElementById('skills-list');
+
+            // Load hierarchical data if not loaded
+            if (!hierarchicalData) {
+                await loadHierarchicalData();
+            }
+
+            if (!hierarchicalData || hierarchicalData.skills.length === 0) {
+                skillsList.innerHTML = '<div class="no-tools">暂无可用 Skills</div>';
+            } else {
+                skillsList.innerHTML = hierarchicalData.skills.map((skill, index) => `
+                    <div class="category-item">
+                        <div class="category-header" onclick="toggleCategory(${index}, 'skill')">
+                            <div class="category-info">
+                                <div class="category-name">${escapeHtml(skill.name)}</div>
+                                <div class="category-description">${escapeHtml(skill.description)}</div>
+                            </div>
+                            <div class="expand-icon">▶</div>
+                        </div>
+                        <div class="category-tools" id="skill-tools-${index}">
+                            ${skill.tools && skill.tools.length > 0 ?
+                        skill.tools.map(tool => `
+                                    <div class="tool-item">
+                                        <div class="tool-name">${escapeHtml(tool.name)}</div>
+                                        <div class="tool-description">${escapeHtml(tool.description)}</div>
+                                    </div>
+                                `).join('') :
+                        '<div class="tool-item"><div class="tool-description">暂无工具</div></div>'
+                    }
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeSkillsModal() {
+            const modal = document.getElementById('skills-modal');
+            modal.classList.remove('show');
+        }
+
+        async function showMCPToolsModal() {
+            const modal = document.getElementById('mcp-tools-modal');
+            const mcpToolsList = document.getElementById('mcp-tools-list');
+
+            // Load hierarchical data if not loaded
+            if (!hierarchicalData) {
+                await loadHierarchicalData();
+            }
+
+            if (!hierarchicalData || !hierarchicalData.enabled || hierarchicalData.mcp_tools.length === 0) {
+                mcpToolsList.innerHTML = '<div class="no-tools">暂无可用 MCP 工具</div>';
+            } else {
+                mcpToolsList.innerHTML = hierarchicalData.mcp_tools.map((category, index) => `
+                    <div class="category-item">
+                        <div class="category-header" onclick="toggleCategory(${index}, 'mcp')">
+                            <div class="category-info">
+                                <div class="category-name">${escapeHtml(category.category)}</div>
+                                <div class="category-description">${escapeHtml(category.description)} (${category.tools.length} tools)</div>
+                            </div>
+                            <div class="expand-icon">▶</div>
+                        </div>
+                        <div class="category-tools" id="mcp-tools-${index}">
+                            ${category.tools.map(tool => `
+                                <div class="tool-item">
+                                    <div class="tool-name">${escapeHtml(tool.name)}</div>
+                                    <div class="tool-description">${escapeHtml(tool.description)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeMCPToolsModal() {
+            const modal = document.getElementById('mcp-tools-modal');
+            modal.classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('skills-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeSkillsModal();
+            }
+        });
+
+        document.getElementById('mcp-tools-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeMCPToolsModal();
+            }
+        });
+
+        // Escape key to close modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Close any open modal
+                const skillsModal = document.getElementById('skills-modal');
+                const mcpModal = document.getElementById('mcp-tools-modal');
+                const themeModal = document.getElementById('theme-modal');
+
+                if (skillsModal.classList.contains('show')) {
+                    closeSkillsModal();
+                }
+                if (mcpModal.classList.contains('show')) {
+                    closeMCPToolsModal();
+                }
+                if (themeModal.classList.contains('show')) {
+                    closeThemeModal();
+                }
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('theme-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeThemeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>
