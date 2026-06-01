@@ -68,7 +68,7 @@ The market simulator provides:
 ## Workflow
 
 ```go
-workflow := graph.NewStateGraph()
+workflow := graph.NewStateGraph[map[string]any]()
 
 // Add nodes in sequence
 workflow.AddNode("analyst", AnalystNode)

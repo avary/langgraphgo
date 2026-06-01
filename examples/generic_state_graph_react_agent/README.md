@@ -24,7 +24,7 @@ Demonstrates basic usage with a workflow that checks user eligibility:
 - Direct access to state fields
 
 ```go
-g := graph.NewStateGraphTyped[WorkflowState]()
+g := graph.NewStateGraph[WorkflowState]()
 
 g.AddNode("check_age", "Check age", func(ctx context.Context, state WorkflowState) (WorkflowState, error) {
     state.IsAdult = state.Request.Age >= 18  // Type-safe!
@@ -124,7 +124,7 @@ Final State:
 ### Non-Generic (Old Way)
 
 ```go
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 
 g.AddNode("process", "desc", func(ctx context.Context, state any) (any, error) {
     s := state.(WorkflowState)  // Type assertion required ❌
@@ -139,7 +139,7 @@ finalState := result.(WorkflowState)  // Another type assertion ❌
 ### Generic (New Way)
 
 ```go
-g := graph.NewStateGraphTyped[WorkflowState]()
+g := graph.NewStateGraph[WorkflowState]()
 
 g.AddNode("process", "desc", func(ctx context.Context, state WorkflowState) (WorkflowState, error) {
     state.Count++  // Direct access ✅
@@ -166,7 +166,7 @@ type WorkflowState struct {
 ### Creating a Generic Graph
 
 ```go
-g := graph.NewStateGraphTyped[YourStateType]()
+g := graph.NewStateGraph[YourStateType]()
 ```
 
 ### Adding Typed Nodes
@@ -227,10 +227,10 @@ Migrating is straightforward:
 1. **Change constructor:**
    ```go
    // Before
-   g := graph.NewStateGraph()
+   g := graph.NewStateGraph[map[string]any]()
 
    // After
-   g := graph.NewStateGraphTyped[MyState]()
+   g := graph.NewStateGraph[MyState]()
    ```
 
 2. **Update node functions:**

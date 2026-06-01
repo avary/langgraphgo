@@ -34,7 +34,7 @@
 //
 // Basic State Graph
 //
-//	g := graph.NewStateGraph()
+//	g := graph.NewStateGraph[map[string]any]()
 //
 //	// Add nodes
 //	g.AddNode("process", "Process node", func(ctx context.Context, state any) (any, error) {

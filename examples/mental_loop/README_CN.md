@@ -69,7 +69,7 @@ Mental Loop 模式实现了一个深思熟虑的决策过程：
 ## 工作流程
 
 ```go
-workflow := graph.NewStateGraph()
+workflow := graph.NewStateGraph[map[string]any]()
 
 // 按顺序添加节点
 workflow.AddNode("analyst", "analyst", AnalystNode)

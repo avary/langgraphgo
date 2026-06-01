@@ -117,7 +117,7 @@
 // ## Basic Checkpointing
 //
 //	// Create a graph
-//	g := graph.NewStateGraph()
+//	g := graph.NewStateGraph[map[string]any]()
 //	// ... configure graph ...
 //
 //	// Choose and configure a store
@@ -251,7 +251,7 @@
 //	)
 //
 //	// With custom graphs
-//	g := graph.NewStateGraph()
+//	g := graph.NewStateGraph[map[string]any]()
 //	g.WithCheckpointing(graph.CheckpointConfig{
 //	    Store: store,
 //	})

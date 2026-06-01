@@ -658,7 +658,7 @@ type MyState struct {
     History []string
 }
 
-g := graph.NewStateGraphTyped[MyState]()
+g := graph.NewStateGraph[MyState]()
 
 g.AddNode("process", "process", func(ctx context.Context, state MyState) (MyState, error) {
     state.Output = strings.ToUpper(state.Input)

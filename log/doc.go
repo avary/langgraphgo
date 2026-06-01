@@ -77,7 +77,7 @@
 //
 //	logger := log.NewDefaultLogger(log.LogLevelInfo)
 //
-//	g := graph.NewStateGraph()
+//	g := graph.NewStateGraph[map[string]any]()
 //	// ... configure graph ...
 //
 //	// Add a logging listener

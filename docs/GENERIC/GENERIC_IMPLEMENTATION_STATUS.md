@@ -6,9 +6,9 @@
 
 ### 核心 Graph 组件
 
-1. **StateGraphTyped** (`graph/state_graph_typed.go`)
+1. **StateGraph** (`graph/state_graph.go`)
    - 泛型版本的状态图，提供编译时类型安全
-   - API：`NewStateGraphTyped[S]()`
+   - API：`NewStateGraph[S]()`
    - 支持所有原有功能：节点、边、条件边、重试策略等
 
 2. **StateRunnableTyped** (`graph/state_graph_typed.go`)
@@ -62,7 +62,7 @@ type MyState struct {
 }
 
 // 创建泛型图
-g := graph.NewStateGraphTyped[MyState]()
+g := graph.NewStateGraph[MyState]()
 
 // 添加类型安全的节点
 g.AddNode("increment", "Increment counter", func(ctx context.Context, state MyState) (MyState, error) {

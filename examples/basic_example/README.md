@@ -55,7 +55,7 @@ The example will demonstrate each feature with clear output showing:
 
 ```go
 // Basic execution
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 g.AddNode("process", processingFunction)
 g.AddEdge("process", graph.END)
 

@@ -88,7 +88,7 @@
 // The core graph construction and execution engine
 //
 //	// Create a state graph
-//	g := graph.NewStateGraph()
+//	g := graph.NewStateGraph[map[string]any]()
 //
 //	// Add nodes
 //	g.AddNode("process", func(ctx context.Context, state map[string]any) (map[string]any, error) {

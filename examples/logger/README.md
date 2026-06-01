@@ -168,7 +168,7 @@ func main() {
     setupLogging()
 
     // Graph execution will now use golog
-    g := graph.NewStateGraph()
+    g := graph.NewStateGraph[map[string]any]()
     // ... build graph
 }
 ```
