@@ -31,25 +31,25 @@ const (
 // Inspired by pi-mono's AgentState interface
 type PiAgentState struct {
 	// Core state
-	SystemPrompt  string                 `json:"system_prompt"`
-	Model         string                 `json:"model"`
-	ThinkingLevel string                 `json:"thinking_level"` // off, minimal, low, medium, high, xhigh
-	Messages      []llms.MessageContent  `json:"messages"`
-	Tools         []tools.Tool           `json:"-"`
+	SystemPrompt  string                `json:"system_prompt"`
+	Model         string                `json:"model"`
+	ThinkingLevel string                `json:"thinking_level"` // off, minimal, low, medium, high, xhigh
+	Messages      []llms.MessageContent `json:"messages"`
+	Tools         []tools.Tool          `json:"-"`
 
 	// Streaming state
-	IsStreaming   bool                   `json:"is_streaming"`
-	StreamMessage *llms.MessageContent   `json:"stream_message,omitempty"`
+	IsStreaming   bool                 `json:"is_streaming"`
+	StreamMessage *llms.MessageContent `json:"stream_message,omitempty"`
 
 	// Tool execution
-	PendingToolCalls map[string]bool     `json:"pending_tool_calls"`
-	Error            error                `json:"error,omitempty"`
+	PendingToolCalls map[string]bool `json:"pending_tool_calls"`
+	Error            error           `json:"error,omitempty"`
 
 	// Message queues for steering and follow-up
-	SteeringQueue     []llms.MessageContent `json:"steering_queue,omitempty"`
-	SteeringMode      MessageQueueMode      `json:"steering_mode"`
-	FollowUpQueue     []llms.MessageContent `json:"follow_up_queue,omitempty"`
-	FollowUpMode      MessageQueueMode      `json:"follow_up_mode"`
+	SteeringQueue []llms.MessageContent `json:"steering_queue,omitempty"`
+	SteeringMode  MessageQueueMode      `json:"steering_mode"`
+	FollowUpQueue []llms.MessageContent `json:"follow_up_queue,omitempty"`
+	FollowUpMode  MessageQueueMode      `json:"follow_up_mode"`
 
 	// Session info
 	SessionKey string `json:"session_key,omitempty"`
@@ -61,14 +61,14 @@ type PiAgentState struct {
 // NewPiAgentState creates a new agent state
 func NewPiAgentState() *PiAgentState {
 	return &PiAgentState{
-		Messages:          make([]llms.MessageContent, 0),
-		Tools:             make([]tools.Tool, 0),
-		PendingToolCalls:  make(map[string]bool),
-		SteeringQueue:     make([]llms.MessageContent, 0),
-		SteeringMode:      QueueModeAll,
-		FollowUpQueue:     make([]llms.MessageContent, 0),
-		FollowUpMode:      QueueModeAll,
-		ThinkingLevel:     "off",
+		Messages:         make([]llms.MessageContent, 0),
+		Tools:            make([]tools.Tool, 0),
+		PendingToolCalls: make(map[string]bool),
+		SteeringQueue:    make([]llms.MessageContent, 0),
+		SteeringMode:     QueueModeAll,
+		FollowUpQueue:    make([]llms.MessageContent, 0),
+		FollowUpMode:     QueueModeAll,
+		ThinkingLevel:    "off",
 	}
 }
 
@@ -207,8 +207,8 @@ type PiAgentEvent struct {
 	Message llms.MessageContent `json:"message,omitempty"`
 
 	// Turn end fields
-	TurnMessage  llms.MessageContent `json:"turn_message,omitempty"`
-	ToolResults []ToolResultMsg      `json:"tool_results,omitempty"`
+	TurnMessage llms.MessageContent `json:"turn_message,omitempty"`
+	ToolResults []ToolResultMsg     `json:"tool_results,omitempty"`
 
 	// Tool execution fields
 	ToolCallID    string         `json:"tool_call_id,omitempty"`
@@ -461,10 +461,11 @@ func (a *PiAgent) Abort() {
 // Reset resets the agent state
 // Inspired by pi-mono's Agent.reset()
 func (a *PiAgent) Reset() {
+	tools := a.state.Tools // preserve registered tools across reset
 	a.state = NewPiAgentState()
 	a.state.SystemPrompt = ""
 	a.state.Model = "model"
-	a.state.Tools = a.state.Tools // Keep the tools
+	a.state.Tools = tools
 }
 
 // Prompt sends a prompt to the agent and executes it
@@ -594,76 +595,86 @@ func buildPiAgentGraph(agent *PiAgent, model llms.Model, inputTools []tools.Tool
 	// Create state graph with schema
 	g := graph.NewStateGraph[*PiAgentState]()
 
-	// Define state schema - for typed state, we can skip schema or use StructSchema
-	// Important: The merge function should only append new.Messages to current.Messages
-	// Nodes should return only NEW messages in their Messages field, not the full history
-	schema := graph.NewStructSchema(NewPiAgentState(), func(current, new *PiAgentState) (*PiAgentState, error) {
-		// Handle nil cases
-		if current == nil {
-			if new == nil {
-				return NewPiAgentState(), nil
-			}
-			return new, nil
-		}
+	// Define state schema. The merge function only appends new.Messages to
+	// current.Messages; nodes must return only NEW messages, not full history.
+	g.SetSchema(graph.NewStructSchema(NewPiAgentState(), mergePiAgentState))
+
+	// Set entry point and wire nodes/edges.
+	g.AddNode("agent", "Agent node that calls LLM and generates response", newPiAgentNode(agent, model, inputTools))
+	g.AddNode("tools", "Tools node that executes tool calls", newPiToolsNode(agent, inputTools))
+	g.SetEntryPoint("agent")
+	g.AddConditionalEdge("agent", routePiAgent)
+	g.AddEdge("tools", "agent")
+
+	return g.Compile()
+}
+
+// mergePiAgentState merges a node's returned state (new) into the accumulated
+// state (current). Messages and queues are appended; scalar fields overwrite
+// current only when non-zero.
+func mergePiAgentState(current, new *PiAgentState) (*PiAgentState, error) {
+	if current == nil {
 		if new == nil {
-			return current, nil
+			return NewPiAgentState(), nil
 		}
-
-		// Merge messages (append) - only append if new has messages
-		if len(new.Messages) > 0 {
-			current.Messages = append(current.Messages, new.Messages...)
-		}
-		// Copy other fields from new if they are non-zero
-		if new.SystemPrompt != "" {
-			current.SystemPrompt = new.SystemPrompt
-		}
-		if new.Model != "" {
-			current.Model = new.Model
-		}
-		if new.ThinkingLevel != "" {
-			current.ThinkingLevel = new.ThinkingLevel
-		}
-		if new.IsStreaming {
-			current.IsStreaming = true
-		}
-		if new.StreamMessage != nil {
-			current.StreamMessage = new.StreamMessage
-		}
-		if len(new.PendingToolCalls) > 0 {
-			if current.PendingToolCalls == nil {
-				current.PendingToolCalls = make(map[string]bool)
-			}
-			for k, v := range new.PendingToolCalls {
-				current.PendingToolCalls[k] = v
-			}
-		}
-		if new.Error != nil {
-			current.Error = new.Error
-		}
-		if len(new.SteeringQueue) > 0 {
-			current.SteeringQueue = append(current.SteeringQueue, new.SteeringQueue...)
-		}
-		if new.SteeringMode != "" {
-			current.SteeringMode = new.SteeringMode
-		}
-		if len(new.FollowUpQueue) > 0 {
-			current.FollowUpQueue = append(current.FollowUpQueue, new.FollowUpQueue...)
-		}
-		if new.FollowUpMode != "" {
-			current.FollowUpMode = new.FollowUpMode
-		}
-		if new.SessionKey != "" {
-			current.SessionKey = new.SessionKey
-		}
+		return new, nil
+	}
+	if new == nil {
 		return current, nil
-	})
-	g.SetSchema(schema)
+	}
 
+	if len(new.Messages) > 0 {
+		current.Messages = append(current.Messages, new.Messages...)
+	}
+	if new.SystemPrompt != "" {
+		current.SystemPrompt = new.SystemPrompt
+	}
+	if new.Model != "" {
+		current.Model = new.Model
+	}
+	if new.ThinkingLevel != "" {
+		current.ThinkingLevel = new.ThinkingLevel
+	}
+	if new.IsStreaming {
+		current.IsStreaming = true
+	}
+	if new.StreamMessage != nil {
+		current.StreamMessage = new.StreamMessage
+	}
+	if len(new.PendingToolCalls) > 0 {
+		if current.PendingToolCalls == nil {
+			current.PendingToolCalls = make(map[string]bool)
+		}
+		for k, v := range new.PendingToolCalls {
+			current.PendingToolCalls[k] = v
+		}
+	}
+	if new.Error != nil {
+		current.Error = new.Error
+	}
+	if len(new.SteeringQueue) > 0 {
+		current.SteeringQueue = append(current.SteeringQueue, new.SteeringQueue...)
+	}
+	if new.SteeringMode != "" {
+		current.SteeringMode = new.SteeringMode
+	}
+	if len(new.FollowUpQueue) > 0 {
+		current.FollowUpQueue = append(current.FollowUpQueue, new.FollowUpQueue...)
+	}
+	if new.FollowUpMode != "" {
+		current.FollowUpMode = new.FollowUpMode
+	}
+	if new.SessionKey != "" {
+		current.SessionKey = new.SessionKey
+	}
+	return current, nil
+}
+
+// newPiAgentNode builds the "agent" node function that calls the LLM and
+// returns a single new AI message.
+func newPiAgentNode(agent *PiAgent, model llms.Model, inputTools []tools.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
 	maxIterations := agent.maxIterations
-
-	// Add agent node - calls LLM and generates assistant response
-	g.AddNode("agent", "Agent node that calls LLM and generates response", func(ctx context.Context, state *PiAgentState) (*PiAgentState, error) {
-		// Check iteration count
+	return func(ctx context.Context, state *PiAgentState) (*PiAgentState, error) {
 		iterationCount := 0
 		if state.Messages != nil {
 			for _, msg := range state.Messages {
@@ -674,56 +685,45 @@ func buildPiAgentGraph(agent *PiAgent, model llms.Model, inputTools []tools.Tool
 		}
 
 		if iterationCount >= maxIterations {
-			// Max iterations reached - return ONLY the new message in a new state
 			finalMsg := llms.TextParts(llms.ChatMessageTypeAI, "Maximum iterations reached. Please try a simpler query.")
 			return &PiAgentState{Messages: []llms.MessageContent{finalMsg}}, nil
 		}
 
-		// Apply context transform if configured
 		messagesToUse := state.Messages
 		if agent.transformCtx != nil {
-			transformed, err := agent.transformCtx(state.Messages)
-			if err == nil {
+			if transformed, err := agent.transformCtx(state.Messages); err == nil {
 				messagesToUse = transformed
 			}
 		}
-
-		// Convert to LLM format if configured
 		if agent.convertToLLM != nil {
-			converted, err := agent.convertToLLM(messagesToUse)
-			if err == nil {
+			if converted, err := agent.convertToLLM(messagesToUse); err == nil {
 				messagesToUse = converted
 			}
 		}
 
-		// Build full messages with system prompt
 		msgsToSend := make([]llms.MessageContent, 0, len(messagesToUse))
 		if agent.state.SystemPrompt != "" {
 			msgsToSend = append(msgsToSend, llms.TextParts(llms.ChatMessageTypeSystem, agent.state.SystemPrompt))
 		}
 		msgsToSend = append(msgsToSend, messagesToUse...)
 
-		// Build tool definitions
 		var toolDefs []llms.Tool
 		for _, t := range inputTools {
-			toolSchema := getToolSchema(t)
 			toolDefs = append(toolDefs, llms.Tool{
 				Type: "function",
 				Function: &llms.FunctionDefinition{
 					Name:        t.Name(),
 					Description: t.Description(),
-					Parameters:  toolSchema,
+					Parameters:  getToolSchema(t),
 				},
 			})
 		}
 
-		// Call LLM
 		resp, err := model.GenerateContent(ctx, msgsToSend, llms.WithTools(toolDefs), llms.WithToolChoice("auto"))
 		if err != nil {
 			return &PiAgentState{}, fmt.Errorf("LLM call failed: %w", err)
 		}
 
-		// Create assistant message from response
 		choice := resp.Choices[0]
 		aiMsg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
 		if choice.Content != "" {
@@ -733,14 +733,14 @@ func buildPiAgentGraph(agent *PiAgent, model llms.Model, inputTools []tools.Tool
 			aiMsg.Parts = append(aiMsg.Parts, tc)
 		}
 
-		// Return ONLY the new AI message in a new state
-		// The merge function will append it to the current state's messages
 		return &PiAgentState{Messages: []llms.MessageContent{aiMsg}}, nil
-	})
+	}
+}
 
-	// Add tools node - executes tool calls
-	g.AddNode("tools", "Tools node that executes tool calls", func(ctx context.Context, state *PiAgentState) (*PiAgentState, error) {
-		// Find last assistant message and extract tool calls
+// newPiToolsNode builds the "tools" node function that executes the tool calls
+// from the last AI message and returns the resulting tool messages.
+func newPiToolsNode(agent *PiAgent, inputTools []tools.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
+	return func(ctx context.Context, state *PiAgentState) (*PiAgentState, error) {
 		if len(state.Messages) == 0 {
 			return &PiAgentState{}, nil
 		}
@@ -754,110 +754,73 @@ func buildPiAgentGraph(agent *PiAgent, model llms.Model, inputTools []tools.Tool
 
 		var toolMessages []llms.MessageContent
 		for _, part := range lastMsg.Parts {
-			if tc, ok := part.(llms.ToolCall); ok {
-				// Emit tool_execution_start event
-				agent.emit(PiAgentEvent{
-					Type:        EventToolExecutionStart,
-					Timestamp:   time.Now().UnixMilli(),
-					ToolCallID:  tc.ID,
-					ToolName:    tc.FunctionCall.Name,
-					ToolArgs:    nil, // Parse from tc.FunctionCall.Arguments if needed
-				})
+			tc, ok := part.(llms.ToolCall)
+			if !ok {
+				continue
+			}
 
-				// Get the tool to check if it has a custom schema
-				var inputVal string
-				if tool, hasTool := toolExecutor.Tools[tc.FunctionCall.Name]; hasTool {
-					if _, hasCustomSchema := tool.(ToolWithSchema); hasCustomSchema {
-						inputVal = tc.FunctionCall.Arguments
-					} else {
-						// Tool uses default schema, try to extract "input" field
-						inputVal = tc.FunctionCall.Arguments
-					}
-				} else {
-					inputVal = tc.FunctionCall.Arguments
-				}
+			agent.emit(PiAgentEvent{
+				Type:       EventToolExecutionStart,
+				Timestamp:  time.Now().UnixMilli(),
+				ToolCallID: tc.ID,
+				ToolName:   tc.FunctionCall.Name,
+			})
 
-				// Execute the tool
-				res, err := toolExecutor.Execute(ctx, ToolInvocation{
-					Tool:      tc.FunctionCall.Name,
-					ToolInput: inputVal,
-				})
+			res, err := toolExecutor.Execute(ctx, ToolInvocation{
+				Tool:      tc.FunctionCall.Name,
+				ToolInput: tc.FunctionCall.Arguments,
+			})
+			if err != nil {
+				res = fmt.Sprintf("Error: %v", err)
+			}
+			agent.emit(PiAgentEvent{
+				Type:       EventToolExecutionEnd,
+				Timestamp:  time.Now().UnixMilli(),
+				ToolCallID: tc.ID,
+				ToolName:   tc.FunctionCall.Name,
+				ToolResult: res,
+				ToolError:  err != nil,
+			})
 
-				if err != nil {
-					res = fmt.Sprintf("Error: %v", err)
-					agent.emit(PiAgentEvent{
-						Type:        EventToolExecutionEnd,
-						Timestamp:   time.Now().UnixMilli(),
-						ToolCallID:  tc.ID,
-						ToolName:    tc.FunctionCall.Name,
-						ToolResult:  res,
-						ToolError:   true,
-					})
-				} else {
-					agent.emit(PiAgentEvent{
-						Type:        EventToolExecutionEnd,
-						Timestamp:   time.Now().UnixMilli(),
-						ToolCallID:  tc.ID,
-						ToolName:    tc.FunctionCall.Name,
-						ToolResult:  res,
-						ToolError:   false,
-					})
-				}
-
-				// Create tool result message with ToolCallResponse
-				toolMessages = append(toolMessages, llms.MessageContent{
-					Role:  llms.ChatMessageTypeTool,
-					Parts: []llms.ContentPart{
-						llms.ToolCallResponse{
-							ToolCallID: tc.ID,
-							Name:       tc.FunctionCall.Name,
-							Content:    res,
-						},
+			toolMessages = append(toolMessages, llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{
+						ToolCallID: tc.ID,
+						Name:       tc.FunctionCall.Name,
+						Content:    res,
 					},
-				})
+				},
+			})
 
-				// Check for steering messages after each tool
-				steering := state.DequeueSteeringMessages()
-				if len(steering) > 0 {
-					// Add steering messages to tool messages (they're new messages too)
-					toolMessages = append(toolMessages, steering...)
-					break
-				}
+			// Steering messages injected mid-execution stop further tool calls.
+			if steering := state.DequeueSteeringMessages(); len(steering) > 0 {
+				toolMessages = append(toolMessages, steering...)
+				break
 			}
 		}
 
-		// Return ONLY the new tool result messages in a new state
-		// The merge function will append them to the current state's messages
 		return &PiAgentState{Messages: toolMessages}, nil
-	})
+	}
+}
 
-	// Set entry point
-	g.SetEntryPoint("agent")
-
-	// Add conditional edge from agent - check if there are tool calls
-	g.AddConditionalEdge("agent", func(ctx context.Context, state *PiAgentState) string {
-		if len(state.Messages) == 0 {
-			return graph.END
-		}
-
-		lastMsg := state.Messages[len(state.Messages)-1]
-		if lastMsg.Role != llms.ChatMessageTypeAI {
-			return graph.END
-		}
-
-		// Check if there are tool calls
-		for _, part := range lastMsg.Parts {
-			if _, ok := part.(llms.ToolCall); ok {
-				return "tools"
-			}
-		}
-
+// routePiAgent decides whether the agent's last message requires tool execution
+// or ends the run.
+func routePiAgent(ctx context.Context, state *PiAgentState) string {
+	if len(state.Messages) == 0 {
 		return graph.END
-	})
+	}
 
-	// Add edge from tools back to agent (for multi-step tool use)
-	g.AddEdge("tools", "agent")
+	lastMsg := state.Messages[len(state.Messages)-1]
+	if lastMsg.Role != llms.ChatMessageTypeAI {
+		return graph.END
+	}
 
-	// Compile the graph
-	return g.Compile()
+	for _, part := range lastMsg.Parts {
+		if _, ok := part.(llms.ToolCall); ok {
+			return "tools"
+		}
+	}
+
+	return graph.END
 }
