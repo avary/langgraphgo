@@ -134,14 +134,14 @@
 ### 何时使用NewStateGraph()
 ```go
 // 1. 使用简单状态（字符串、数字等）
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 
 // 2. 使用自定义结构体
 type MyState struct { ... }
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 
 // 3. 使用LangChain消息但作为状态本身
-g := graph.NewStateGraph() // 状态是 []llms.MessageContent
+g := graph.NewStateGraph[map[string]any]() // 状态是 []llms.MessageContent
 ```
 
 ### 何时使用NewMessageGraph()

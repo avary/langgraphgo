@@ -178,7 +178,7 @@ type ListenableStateGraphMap = ListenableStateGraph[map[string]any]
 
 ```go
 // 非泛型版本
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 
 // 泛型版本
 g := graph.NewStateGraph[MyState]()
@@ -580,7 +580,7 @@ type MyState struct {
 
 ```go
 // 之前
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 
 // 之后
 g := graph.NewStateGraph[MyState]()
@@ -641,7 +641,7 @@ result, _ := app.Invoke(ctx, MyState{Count: 0})
 ```go
 // ====== 迁移前：非泛型版本 ======
 func oldVersion() error {
-    g := graph.NewStateGraph()
+    g := graph.NewStateGraph[map[string]any]()
 
     g.AddNode("increment", "Increment", func(ctx context.Context, state any) (any, error) {
         s := state.(map[string]any)

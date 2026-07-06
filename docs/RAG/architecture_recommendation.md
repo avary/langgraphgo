@@ -103,7 +103,7 @@ agent := create_agent.NewAgent(llm, []Tool{
 ```go
 // 这是一个标准的 RAG 流程图
 func NewRAGGraph(llm LLM, engine rag.Engine) *graph.StateGraph {
-    workflow := graph.NewStateGraph()
+    workflow := graph.NewStateGraph[map[string]any]()
     
     workflow.AddNode("retrieve", rag.NewRetrievalNode(engine, ...))
     workflow.AddNode("generate", NewGenerationNode(llm, ...))

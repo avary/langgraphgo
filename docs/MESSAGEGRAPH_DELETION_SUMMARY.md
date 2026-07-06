@@ -137,7 +137,7 @@ g := graph.NewMessageGraph()
 **不需要消息处理（其他应用）：**
 ```go
 // 使用NewStateGraph，不带schema
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 // 可以自己配置schema或不使用schema
 ```
 
@@ -148,7 +148,7 @@ g := graph.NewStateGraph()
 // 这些代码继续工作，无需任何更改
 g := graph.NewMessageGraph()           // 现在默认带schema
 g := graph.NewMessageGraphWithSchema()  // 仍然可用
-g := graph.NewStateGraph()              // 不带schema版本
+g := graph.NewStateGraph[map[string]any]()              // 不带schema版本
 
 var mg *graph.MessageGraph = ...        // 实际是StateGraph
 var r *graph.Runnable = ...             // 实际是StateRunnable

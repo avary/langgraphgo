@@ -21,7 +21,7 @@
 展示了检查用户资格的基本用法：
 
 ```go
-g := graph.NewStateGraphTyped[WorkflowState]()
+g := graph.NewStateGraph[WorkflowState]()
 
 g.AddNode("check_age", "检查年龄", func(ctx context.Context, state WorkflowState) (WorkflowState, error) {
     state.IsAdult = state.Request.Age >= 18  // 类型安全！
@@ -71,7 +71,7 @@ go run main.go
 ### 非泛型（旧方式）
 
 ```go
-g := graph.NewStateGraph()
+g := graph.NewStateGraph[map[string]any]()
 
 g.AddNode("process", "desc", func(ctx context.Context, state any) (any, error) {
     s := state.(WorkflowState)  // 需要类型断言 ❌
@@ -86,7 +86,7 @@ finalState := result.(WorkflowState)  // 又一次类型断言 ❌
 ### 泛型（新方式）
 
 ```go
-g := graph.NewStateGraphTyped[WorkflowState]()
+g := graph.NewStateGraph[WorkflowState]()
 
 g.AddNode("process", "desc", func(ctx context.Context, state WorkflowState) (WorkflowState, error) {
     state.Count++  // 直接访问 ✅
@@ -117,10 +117,10 @@ finalState, _ := app.Invoke(ctx, initialState)  // 类型安全的结果 ✅
 1. **更改构造函数：**
    ```go
    // 之前
-   g := graph.NewStateGraph()
+   g := graph.NewStateGraph[map[string]any]()
 
    // 之后
-   g := graph.NewStateGraphTyped[MyState]()
+   g := graph.NewStateGraph[MyState]()
    ```
 
 2. **更新节点函数：**

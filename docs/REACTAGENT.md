@@ -561,7 +561,7 @@ While ReAct Agent uses simple message state, you can build on it:
 reactAgent, _ := prebuilt.CreateReactAgent(model, tools)
 
 // Wrap in custom graph with additional state
-customWorkflow := graph.NewStateGraph()
+customWorkflow := graph.NewStateGraph[map[string]any]()
 schema := graph.NewMapSchema()
 schema.RegisterReducer("messages", graph.AppendReducer)
 schema.RegisterReducer("metadata", graph.OverwriteReducer)

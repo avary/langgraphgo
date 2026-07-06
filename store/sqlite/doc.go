@@ -35,7 +35,7 @@
 //	defer store.Close()
 //
 //	// Use with a graph
-//	g := graph.NewStateGraph()
+//	g := graph.NewStateGraph[map[string]any]()
 //	// ... configure graph ...
 //
 //	// Enable checkpointing

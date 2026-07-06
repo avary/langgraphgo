@@ -561,7 +561,7 @@ result, err := agent.Invoke(ctx, initialState)
 reactAgent, _ := prebuilt.CreateReactAgent(model, tools)
 
 // 使用额外状态包装在自定义图中
-customWorkflow := graph.NewStateGraph()
+customWorkflow := graph.NewStateGraph[map[string]any]()
 schema := graph.NewMapSchema()
 schema.RegisterReducer("messages", graph.AppendReducer)
 schema.RegisterReducer("metadata", graph.OverwriteReducer)

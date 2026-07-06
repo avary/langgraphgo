@@ -202,7 +202,7 @@
 //
 // The PTC agent integrates seamlessly with LangGraph:
 //
-//	g := graph.NewStateGraph()
+//	g := graph.NewStateGraph[map[string]any]()
 //
 //	// Add PTC node
 //	ptcNode := ptc.NewPTCToolNode(ptc.LanguagePython, tools)
