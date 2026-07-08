@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // TestCreateManusAgent tests the basic functionality of the Manus agent
@@ -21,10 +21,10 @@ func TestCreateManusAgent(t *testing.T) {
 			Name:        "test_node",
 			Description: "A test node",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llms.MessageContent)
-				msg := llms.MessageContent{
-					Role:  llms.ChatMessageTypeAI,
-					Parts: []llms.ContentPart{llms.TextPart("Test executed")},
+				messages := state["messages"].([]llmtypes.MessageContent)
+				msg := llmtypes.MessageContent{
+					Role:  llmtypes.ChatMessageTypeAI,
+					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Test executed")},
 				}
 				return map[string]any{
 					"messages": append(messages, msg),

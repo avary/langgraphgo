@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
 	"github.com/tmc/langchaingo/llms/openai"
 )
@@ -26,7 +27,7 @@ func ExampleChatAgent() {
 	}
 
 	// Create ChatAgent with no tools
-	agent, err := prebuilt.NewChatAgent(model, nil)
+	agent, err := prebuilt.NewChatAgent(llmtypes.Wrap(model), nil)
 	if err != nil {
 		fmt.Printf("Error creating agent: %v\n", err)
 		return

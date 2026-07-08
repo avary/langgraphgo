@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -22,20 +22,20 @@ func TestCreateAgentMap(t *testing.T) {
 
 	t.Run("Agent with State Modifier", func(t *testing.T) {
 		mockLLM := &MockLLMWithInputCapture{}
-		modifier := func(messages []llms.MessageContent) []llms.MessageContent {
-			return append(messages, llms.TextParts(llms.ChatMessageTypeHuman, "Modified"))
+		modifier := func(messages []llmtypes.MessageContent) []llmtypes.MessageContent {
+			return append(messages, llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Modified"))
 		}
 
 		agent, err := CreateAgentMap(mockLLM, inputTools, 0, WithStateModifier(modifier))
 		assert.NoError(t, err)
 
-		_, err = agent.Invoke(context.Background(), map[string]any{"messages": []llms.MessageContent{}})
+		_, err = agent.Invoke(context.Background(), map[string]any{"messages": []llmtypes.MessageContent{}})
 		assert.NoError(t, err)
 
 		// Verify modifier was called (last message should be "Modified")
 		assert.True(t, len(mockLLM.lastMessages) > 0)
 		lastMsg := mockLLM.lastMessages[len(mockLLM.lastMessages)-1]
-		assert.Equal(t, "Modified", lastMsg.Parts[0].(llms.TextContent).Text)
+		assert.Equal(t, "Modified", lastMsg.Parts[0].(llmtypes.TextContent).Text)
 	})
 
 	t.Run("Agent with System Message", func(t *testing.T) {
@@ -45,14 +45,14 @@ func TestCreateAgentMap(t *testing.T) {
 		agent, err := CreateAgentMap(mockLLM, inputTools, 0, WithSystemMessage(systemMsg))
 		assert.NoError(t, err)
 
-		_, err = agent.Invoke(context.Background(), map[string]any{"messages": []llms.MessageContent{}})
+		_, err = agent.Invoke(context.Background(), map[string]any{"messages": []llmtypes.MessageContent{}})
 		assert.NoError(t, err)
 
 		// Verify system message was prepended
 		assert.True(t, len(mockLLM.lastMessages) > 0)
 		firstMsg := mockLLM.lastMessages[0]
-		assert.Equal(t, llms.ChatMessageTypeSystem, firstMsg.Role)
-		assert.Equal(t, systemMsg, firstMsg.Parts[0].(llms.TextContent).Text)
+		assert.Equal(t, llmtypes.ChatMessageTypeSystem, firstMsg.Role)
+		assert.Equal(t, systemMsg, firstMsg.Parts[0].(llmtypes.TextContent).Text)
 	})
 
 	t.Run("Agent with Verbose option", func(t *testing.T) {
@@ -74,8 +74,8 @@ func TestCreateAgentMap(t *testing.T) {
 		agent, err := CreateAgentMap(mockLLM, inputTools, 0)
 		assert.NoError(t, err)
 
-		messages := []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Hello"),
+		messages := []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Hello"),
 		}
 		result, err := agent.Invoke(context.Background(), map[string]any{"messages": messages})
 		assert.NoError(t, err)
@@ -92,8 +92,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
 			inputTools,
-			func(s AgentState) []llms.MessageContent { return s.Messages },
-			func(s AgentState, msgs []llms.MessageContent) AgentState {
+			func(s AgentState) []llmtypes.MessageContent { return s.Messages },
+			func(s AgentState, msgs []llmtypes.MessageContent) AgentState {
 				s.Messages = msgs
 				return s
 			},
@@ -114,8 +114,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
 			inputTools,
-			func(s AgentState) []llms.MessageContent { return s.Messages },
-			func(s AgentState, msgs []llms.MessageContent) AgentState {
+			func(s AgentState) []llmtypes.MessageContent { return s.Messages },
+			func(s AgentState, msgs []llmtypes.MessageContent) AgentState {
 				s.Messages = msgs
 				return s
 			},
@@ -132,15 +132,15 @@ func TestCreateAgentGeneric(t *testing.T) {
 
 	t.Run("Create generic agent with state modifier", func(t *testing.T) {
 		inputTools := []tools.Tool{}
-		modifier := func(messages []llms.MessageContent) []llms.MessageContent {
-			return append(messages, llms.TextParts(llms.ChatMessageTypeSystem, "Modified"))
+		modifier := func(messages []llmtypes.MessageContent) []llmtypes.MessageContent {
+			return append(messages, llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, "Modified"))
 		}
 
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
 			inputTools,
-			func(s AgentState) []llms.MessageContent { return s.Messages },
-			func(s AgentState, msgs []llms.MessageContent) AgentState {
+			func(s AgentState) []llmtypes.MessageContent { return s.Messages },
+			func(s AgentState, msgs []llmtypes.MessageContent) AgentState {
 				s.Messages = msgs
 				return s
 			},
@@ -161,8 +161,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
 			inputTools,
-			func(s AgentState) []llms.MessageContent { return s.Messages },
-			func(s AgentState, msgs []llms.MessageContent) AgentState {
+			func(s AgentState) []llmtypes.MessageContent { return s.Messages },
+			func(s AgentState, msgs []llmtypes.MessageContent) AgentState {
 				s.Messages = msgs
 				return s
 			},
@@ -175,8 +175,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 		assert.NoError(t, err)
 
 		state := AgentState{
-			Messages: []llms.MessageContent{
-				llms.TextParts(llms.ChatMessageTypeHuman, "Hello"),
+			Messages: []llmtypes.MessageContent{
+				llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Hello"),
 			},
 		}
 		result, err := agent.Invoke(context.Background(), state)
@@ -192,8 +192,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
 			inputTools,
-			func(s AgentState) []llms.MessageContent { return s.Messages },
-			func(s AgentState, msgs []llms.MessageContent) AgentState {
+			func(s AgentState) []llmtypes.MessageContent { return s.Messages },
+			func(s AgentState, msgs []llmtypes.MessageContent) AgentState {
 				s.Messages = msgs
 				return s
 			},
@@ -206,8 +206,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 		assert.NoError(t, err)
 
 		state := AgentState{
-			Messages: []llms.MessageContent{
-				llms.TextParts(llms.ChatMessageTypeHuman, "Hello"),
+			Messages: []llmtypes.MessageContent{
+				llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Hello"),
 			},
 			ExtraTools: []tools.Tool{
 				&MockToolWithResponse{name: "extra_tool", description: "Extra tool", response: "extra response"},
@@ -232,8 +232,8 @@ func TestCreateAgentWithToolCalls(t *testing.T) {
 		agent, err := CreateAgentMap(mockLLM, []tools.Tool{mockTool}, 0)
 		assert.NoError(t, err)
 
-		messages := []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Use the test tool"),
+		messages := []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Use the test tool"),
 		}
 		result, err := agent.Invoke(context.Background(), map[string]any{"messages": messages})
 		assert.NoError(t, err)
@@ -252,8 +252,8 @@ func TestCreateAgentWithToolCalls(t *testing.T) {
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
 			[]tools.Tool{mockTool},
-			func(s AgentState) []llms.MessageContent { return s.Messages },
-			func(s AgentState, msgs []llms.MessageContent) AgentState {
+			func(s AgentState) []llmtypes.MessageContent { return s.Messages },
+			func(s AgentState, msgs []llmtypes.MessageContent) AgentState {
 				s.Messages = msgs
 				return s
 			},
@@ -266,8 +266,8 @@ func TestCreateAgentWithToolCalls(t *testing.T) {
 		assert.NoError(t, err)
 
 		state := AgentState{
-			Messages: []llms.MessageContent{
-				llms.TextParts(llms.ChatMessageTypeHuman, "Use the test tool"),
+			Messages: []llmtypes.MessageContent{
+				llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Use the test tool"),
 			},
 		}
 		result, err := agent.Invoke(context.Background(), state)
@@ -278,12 +278,12 @@ func TestCreateAgentWithToolCalls(t *testing.T) {
 
 // Mock structures for testing
 type MockLLM struct {
-	llms.Model
+	llmtypes.Model
 }
 
-func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+func (m *MockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{
 				Content: "Hello! I'm a mock AI.",
 			},
@@ -292,14 +292,14 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageCo
 }
 
 type MockLLMWithInputCapture struct {
-	llms.Model
-	lastMessages []llms.MessageContent
+	llmtypes.Model
+	lastMessages []llmtypes.MessageContent
 }
 
-func (m *MockLLMWithInputCapture) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *MockLLMWithInputCapture) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	m.lastMessages = messages
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{
 				Content: "Response",
 			},
@@ -308,24 +308,24 @@ func (m *MockLLMWithInputCapture) GenerateContent(ctx context.Context, messages 
 }
 
 type MockLLMWithToolCalls struct {
-	llms.Model
+	llmtypes.Model
 	callCount int
 }
 
-func (m *MockLLMWithToolCalls) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *MockLLMWithToolCalls) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	m.callCount++
 
 	if m.callCount == 1 {
 		// First call returns a tool call
-		return &llms.ContentResponse{
-			Choices: []*llms.ContentChoice{
+		return &llmtypes.ContentResponse{
+			Choices: []*llmtypes.ContentChoice{
 				{
 					Content: "I'll use the tool for you.",
-					ToolCalls: []llms.ToolCall{
+					ToolCalls: []llmtypes.ToolCall{
 						{
 							ID:   "call_123",
 							Type: "function",
-							FunctionCall: &llms.FunctionCall{
+							FunctionCall: &llmtypes.FunctionCall{
 								Name:      "test_tool",
 								Arguments: `{"input":"test input"}`,
 							},
@@ -338,8 +338,8 @@ func (m *MockLLMWithToolCalls) GenerateContent(ctx context.Context, messages []l
 	}
 
 	// Second call returns final response
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{
 				Content:    "Tool execution complete. Result: Tool executed successfully",
 				StopReason: "stop",

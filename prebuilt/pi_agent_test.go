@@ -7,17 +7,17 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
 // MockLLM for testing PiAgent
 type mockPiAgentLLM struct {
-	responses []*llms.ContentResponse
+	responses []*llmtypes.ContentResponse
 	callCount int
 }
 
-func (m *mockPiAgentLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, opts ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *mockPiAgentLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, opts ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	idx := m.callCount
 	if idx >= len(m.responses) {
 		idx = len(m.responses) - 1
@@ -26,7 +26,7 @@ func (m *mockPiAgentLLM) GenerateContent(ctx context.Context, messages []llms.Me
 	return m.responses[idx], nil
 }
 
-func (m *mockPiAgentLLM) Call(ctx context.Context, prompt string, opts ...llms.CallOption) (string, error) {
+func (m *mockPiAgentLLM) Call(ctx context.Context, prompt string, opts ...llmtypes.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -63,15 +63,15 @@ func (t *mockCalculatorTool) Schema() map[string]any {
 func TestPiAgentMessageDuplication(t *testing.T) {
 	// Create mock LLM that will return one response with a tool call
 	mockLLM := &mockPiAgentLLM{
-		responses: []*llms.ContentResponse{
+		responses: []*llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
 						Content: "",
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
 								ID: "call_123",
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "calculator",
 									Arguments: `{"expression": "25+17"}`,
 								},
@@ -81,7 +81,7 @@ func TestPiAgentMessageDuplication(t *testing.T) {
 				},
 			},
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
 						Content: "The answer is 42",
 					},
@@ -108,8 +108,8 @@ func TestPiAgentMessageDuplication(t *testing.T) {
 	agent.runnable = runnable
 
 	// Start with one user message
-	agent.state.Messages = []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "What is 25 + 17?"),
+	agent.state.Messages = []llmtypes.MessageContent{
+		llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "What is 25 + 17?"),
 	}
 
 	t.Logf("Starting state: %d messages", len(agent.state.Messages))
@@ -143,20 +143,20 @@ func TestPiAgentMessageDuplication(t *testing.T) {
 	// Verify message order
 	if len(finalState.Messages) >= 4 {
 		// Message 0 should be user
-		if finalState.Messages[0].Role != llms.ChatMessageTypeHuman {
-			t.Errorf("Message 0 role mismatch: expected %s, got %s", llms.ChatMessageTypeHuman, finalState.Messages[0].Role)
+		if finalState.Messages[0].Role != llmtypes.ChatMessageTypeHuman {
+			t.Errorf("Message 0 role mismatch: expected %s, got %s", llmtypes.ChatMessageTypeHuman, finalState.Messages[0].Role)
 		}
 		// Message 1 should be AI with tool call
-		if finalState.Messages[1].Role != llms.ChatMessageTypeAI {
-			t.Errorf("Message 1 role mismatch: expected %s, got %s", llms.ChatMessageTypeAI, finalState.Messages[1].Role)
+		if finalState.Messages[1].Role != llmtypes.ChatMessageTypeAI {
+			t.Errorf("Message 1 role mismatch: expected %s, got %s", llmtypes.ChatMessageTypeAI, finalState.Messages[1].Role)
 		}
 		// Message 2 should be tool
-		if finalState.Messages[2].Role != llms.ChatMessageTypeTool {
-			t.Errorf("Message 2 role mismatch: expected %s, got %s", llms.ChatMessageTypeTool, finalState.Messages[2].Role)
+		if finalState.Messages[2].Role != llmtypes.ChatMessageTypeTool {
+			t.Errorf("Message 2 role mismatch: expected %s, got %s", llmtypes.ChatMessageTypeTool, finalState.Messages[2].Role)
 		}
 		// Message 3 should be AI with final answer
-		if finalState.Messages[3].Role != llms.ChatMessageTypeAI {
-			t.Errorf("Message 3 role mismatch: expected %s, got %s", llms.ChatMessageTypeAI, finalState.Messages[3].Role)
+		if finalState.Messages[3].Role != llmtypes.ChatMessageTypeAI {
+			t.Errorf("Message 3 role mismatch: expected %s, got %s", llmtypes.ChatMessageTypeAI, finalState.Messages[3].Role)
 		}
 	}
 }

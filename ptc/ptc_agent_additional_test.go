@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -42,9 +42,9 @@ type MockLLM struct {
 	response string
 }
 
-func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+func (m *MockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{
 				Content: m.response,
 			},
@@ -52,48 +52,48 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageCo
 	}, nil
 }
 
-func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return m.response, nil
 }
 
 func TestContainsCode(t *testing.T) {
 	tests := []struct {
 		name     string
-		message  llms.MessageContent
+		message  llmtypes.MessageContent
 		expected bool
 	}{
 		{
 			name: "Python code block",
-			message: llms.MessageContent{
-				Parts: []llms.ContentPart{
-					llms.TextPart("Here is some python code:\n```python\nprint('Hello, world!')\n```"),
+			message: llmtypes.MessageContent{
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("Here is some python code:\n```python\nprint('Hello, world!')\n```"),
 				},
 			},
 			expected: true,
 		},
 		{
 			name: "Go code block",
-			message: llms.MessageContent{
-				Parts: []llms.ContentPart{
-					llms.TextPart("Here is some go code:\n```go\nfmt.Println(\"Hello, world!\")\n```"),
+			message: llmtypes.MessageContent{
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("Here is some go code:\n```go\nfmt.Println(\"Hello, world!\")\n```"),
 				},
 			},
 			expected: true,
 		},
 		{
 			name: "No code block",
-			message: llms.MessageContent{
-				Parts: []llms.ContentPart{
-					llms.TextPart("This is a regular message."),
+			message: llmtypes.MessageContent{
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("This is a regular message."),
 				},
 			},
 			expected: false,
 		},
 		{
 			name: "Partial code block",
-			message: llms.MessageContent{
-				Parts: []llms.ContentPart{
-					llms.TextPart("This is a partial code block: ```py"),
+			message: llmtypes.MessageContent{
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("This is a partial code block: ```py"),
 				},
 			},
 			expected: false,
@@ -149,7 +149,7 @@ func TestAgentNodeMaxIterations(t *testing.T) {
 	maxIterations := 3
 
 	initialState := map[string]any{
-		"messages":        []llms.MessageContent{},
+		"messages":        []llmtypes.MessageContent{},
 		"iteration_count": maxIterations,
 	}
 
@@ -157,9 +157,9 @@ func TestAgentNodeMaxIterations(t *testing.T) {
 	require.NoError(t, err)
 
 	finalState := initialState
-	messages := finalState["messages"].([]llms.MessageContent)
+	messages := finalState["messages"].([]llmtypes.MessageContent)
 	lastMessage := messages[len(messages)-1]
-	lastPart := lastMessage.Parts[0].(llms.TextContent)
+	lastPart := lastMessage.Parts[0].(llmtypes.TextContent)
 	assert.Contains(t, lastPart.Text, "Maximum iterations reached")
 }
 

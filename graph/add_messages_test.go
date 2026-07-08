@@ -3,8 +3,8 @@ package graph
 import (
 	"testing"
 
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/llms"
 )
 
 // Custom message struct with ID
@@ -14,21 +14,21 @@ type TestMessage struct {
 }
 
 func TestAddMessages(t *testing.T) {
-	// Case 1: Standard llms.MessageContent (No ID, simple append)
+	// Case 1: Standard llmtypes.MessageContent (No ID, simple append)
 	t.Run("StandardMessages", func(t *testing.T) {
-		current := []llms.MessageContent{
-			{Role: "user", Parts: []llms.ContentPart{llms.TextPart("Hello")}},
+		current := []llmtypes.MessageContent{
+			{Role: "user", Parts: []llmtypes.ContentPart{llmtypes.TextPart("Hello")}},
 		}
-		newMsg := llms.MessageContent{Role: "ai", Parts: []llms.ContentPart{llms.TextPart("Hi")}}
+		newMsg := llmtypes.MessageContent{Role: "ai", Parts: []llmtypes.ContentPart{llmtypes.TextPart("Hi")}}
 
 		res, err := AddMessages(current, newMsg)
 		assert.NoError(t, err)
 
-		slice, ok := res.([]llms.MessageContent)
+		slice, ok := res.([]llmtypes.MessageContent)
 		assert.True(t, ok)
 		assert.Len(t, slice, 2)
-		assert.Equal(t, llms.ChatMessageType("user"), slice[0].Role)
-		assert.Equal(t, llms.ChatMessageType("ai"), slice[1].Role)
+		assert.Equal(t, llmtypes.ChatMessageType("user"), slice[0].Role)
+		assert.Equal(t, llmtypes.ChatMessageType("ai"), slice[1].Role)
 	})
 
 	// Case 2: Structs with ID (Upsert logic)

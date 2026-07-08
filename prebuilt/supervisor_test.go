@@ -6,25 +6,25 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/llms"
 )
 
 // SupervisorMockLLM for supervisor testing
 type SupervisorMockLLM struct {
-	responses   []llms.ContentResponse
+	responses   []llmtypes.ContentResponse
 	currentIdx  int
 	returnError error
 }
 
-func (m *SupervisorMockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *SupervisorMockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	if m.returnError != nil {
 		return nil, m.returnError
 	}
 	if m.currentIdx >= len(m.responses) {
-		return &llms.ContentResponse{
-			Choices: []*llms.ContentChoice{
+		return &llmtypes.ContentResponse{
+			Choices: []*llmtypes.ContentChoice{
 				{Content: "No more responses"},
 			},
 		}, nil
@@ -34,7 +34,7 @@ func (m *SupervisorMockLLM) GenerateContent(ctx context.Context, messages []llms
 	return &resp, nil
 }
 
-func (m *SupervisorMockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *SupervisorMockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -72,13 +72,13 @@ func (a *MockAgent) Invoke(ctx context.Context, state any) (any, error) {
 		return nil, errors.New("invalid state type")
 	}
 
-	messages, ok := mState["messages"].([]llms.MessageContent)
+	messages, ok := mState["messages"].([]llmtypes.MessageContent)
 	if !ok {
 		return nil, errors.New("messages key not found or invalid type")
 	}
 
 	// Append agent response
-	newMessages := append(messages, llms.TextParts(llms.ChatMessageTypeAI, a.response))
+	newMessages := append(messages, llmtypes.TextParts(llmtypes.ChatMessageTypeAI, a.response))
 
 	return map[string]any{
 		"messages": newMessages,
@@ -112,13 +112,13 @@ func (a *MockAgent) Compile() (*graph.StateRunnable[map[string]any], error) {
 func TestCreateSupervisor_DirectFinish(t *testing.T) {
 	// Test supervisor that directly routes to FINISH
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "FINISH"}`,
 								},
@@ -141,31 +141,31 @@ func TestCreateSupervisor_DirectFinish(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Complete immediately"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Complete immediately"),
 		},
 	}
 
 	res, err := supervisor.Invoke(context.Background(), initialState)
 	assert.NoError(t, err)
 
-	messages := res["messages"].([]llms.MessageContent)
+	messages := res["messages"].([]llmtypes.MessageContent)
 	// Should only have initial message, no agent responses
 	assert.Equal(t, 1, len(messages))
-	assert.Equal(t, "Complete immediately", messages[0].Parts[0].(llms.TextContent).Text)
+	assert.Equal(t, "Complete immediately", messages[0].Parts[0].(llmtypes.TextContent).Text)
 	assert.Equal(t, "FINISH", res["next"])
 }
 
 func TestCreateSupervisor_AgentError(t *testing.T) {
 	// Test handling of agent errors
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "ErrorAgent"}`,
 								},
@@ -188,8 +188,8 @@ func TestCreateSupervisor_AgentError(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Trigger error"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Trigger error"),
 		},
 	}
 
@@ -202,9 +202,9 @@ func TestCreateSupervisor_AgentError(t *testing.T) {
 func TestCreateSupervisor_NoToolCall(t *testing.T) {
 	// Test when LLM doesn't make a tool call
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
 						Content: "I don't know what to do",
 					},
@@ -224,8 +224,8 @@ func TestCreateSupervisor_NoToolCall(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test"),
 		},
 	}
 
@@ -238,13 +238,13 @@ func TestCreateSupervisor_NoToolCall(t *testing.T) {
 func TestCreateSupervisor_InvalidRouteArguments(t *testing.T) {
 	// Test when route tool has invalid JSON
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{invalid json`,
 								},
@@ -267,8 +267,8 @@ func TestCreateSupervisor_InvalidRouteArguments(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test"),
 		},
 	}
 
@@ -279,13 +279,13 @@ func TestCreateSupervisor_InvalidRouteArguments(t *testing.T) {
 
 func TestCreateSupervisor_InvalidStateType(t *testing.T) {
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "Agent1"}`,
 								},
@@ -314,13 +314,13 @@ func TestCreateSupervisor_InvalidStateType(t *testing.T) {
 
 func TestCreateSupervisor_MissingMessages(t *testing.T) {
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "Agent1"}`,
 								},
@@ -354,7 +354,7 @@ func TestCreateSupervisor_MissingMessages(t *testing.T) {
 func TestCreateSupervisor_LLMError(t *testing.T) {
 	// Test when LLM returns an error
 	mockLLM := &SupervisorMockLLM{
-		responses:   []llms.ContentResponse{},
+		responses:   []llmtypes.ContentResponse{},
 		returnError: errors.New("LLM connection failed"),
 	}
 
@@ -369,8 +369,8 @@ func TestCreateSupervisor_LLMError(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test"),
 		},
 	}
 
@@ -382,13 +382,13 @@ func TestCreateSupervisor_LLMError(t *testing.T) {
 func TestCreateSupervisor_EmptyMembers(t *testing.T) {
 	// Test with no members
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "FINISH"}`,
 								},
@@ -406,15 +406,15 @@ func TestCreateSupervisor_EmptyMembers(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test"),
 		},
 	}
 
 	res, err := supervisor.Invoke(context.Background(), initialState)
 	assert.NoError(t, err)
 
-	messages := res["messages"].([]llms.MessageContent)
+	messages := res["messages"].([]llmtypes.MessageContent)
 	assert.Equal(t, 1, len(messages)) // Only initial message
 	assert.Equal(t, "FINISH", res["next"])
 }
@@ -422,13 +422,13 @@ func TestCreateSupervisor_EmptyMembers(t *testing.T) {
 func TestCreateSupervisor_UnknownAgent(t *testing.T) {
 	// Test when LLM routes to an unknown agent
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "UnknownAgent"}`,
 								},
@@ -451,8 +451,8 @@ func TestCreateSupervisor_UnknownAgent(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test unknown agent"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test unknown agent"),
 		},
 	}
 
@@ -465,11 +465,11 @@ func TestCreateSupervisor_UnknownAgent(t *testing.T) {
 func TestCreateSupervisor_RouteWithoutFunctionCall(t *testing.T) {
 	// Test when tool call has no function call
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
 								// No FunctionCall field
 							},
@@ -491,8 +491,8 @@ func TestCreateSupervisor_RouteWithoutFunctionCall(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test"),
 		},
 	}
 
@@ -503,9 +503,9 @@ func TestCreateSupervisor_RouteWithoutFunctionCall(t *testing.T) {
 func TestCreateSupervisor_NoChoices(t *testing.T) {
 	// Test when LLM returns no choices
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{}, // Empty choices
+				Choices: []*llmtypes.ContentChoice{}, // Empty choices
 			},
 		},
 	}
@@ -521,8 +521,8 @@ func TestCreateSupervisor_NoChoices(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test"),
 		},
 	}
 
@@ -533,13 +533,13 @@ func TestCreateSupervisor_NoChoices(t *testing.T) {
 func TestCreateSupervisor_EmptyRouteName(t *testing.T) {
 	// Test when route tool call has empty name
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "",
 									Arguments: `{"next": "Agent"}`,
 								},
@@ -562,8 +562,8 @@ func TestCreateSupervisor_EmptyRouteName(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Test"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test"),
 		},
 	}
 
@@ -575,13 +575,13 @@ func TestCreateSupervisor_EmptyRouteName(t *testing.T) {
 func TestCreateSupervisor_SingleAgent(t *testing.T) {
 	// Test with single agent
 	mockLLM := &SupervisorMockLLM{
-		responses: []llms.ContentResponse{
+		responses: []llmtypes.ContentResponse{
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "Worker"}`,
 								},
@@ -591,11 +591,11 @@ func TestCreateSupervisor_SingleAgent(t *testing.T) {
 				},
 			},
 			{
-				Choices: []*llms.ContentChoice{
+				Choices: []*llmtypes.ContentChoice{
 					{
-						ToolCalls: []llms.ToolCall{
+						ToolCalls: []llmtypes.ToolCall{
 							{
-								FunctionCall: &llms.FunctionCall{
+								FunctionCall: &llmtypes.FunctionCall{
 									Name:      "route",
 									Arguments: `{"next": "FINISH"}`,
 								},
@@ -618,23 +618,23 @@ func TestCreateSupervisor_SingleAgent(t *testing.T) {
 	assert.NoError(t, err)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Single task"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Single task"),
 		},
 	}
 
 	res, err := supervisor.Invoke(context.Background(), initialState)
 	assert.NoError(t, err)
 
-	messages := res["messages"].([]llms.MessageContent)
+	messages := res["messages"].([]llmtypes.MessageContent)
 	// Should have initial + worker message + potential routing messages
 	assert.True(t, len(messages) >= 2)
-	assert.Equal(t, "Single task", messages[0].Parts[0].(llms.TextContent).Text)
+	assert.Equal(t, "Single task", messages[0].Parts[0].(llmtypes.TextContent).Text)
 	// Find the worker response
 	found := false
 	for _, msg := range messages[1:] {
-		if msg.Role == llms.ChatMessageTypeAI {
-			if txt, ok := msg.Parts[0].(llms.TextContent); ok && txt.Text == "Task completed" {
+		if msg.Role == llmtypes.ChatMessageTypeAI {
+			if txt, ok := msg.Parts[0].(llmtypes.TextContent); ok && txt.Text == "Task completed" {
 				found = true
 				break
 			}

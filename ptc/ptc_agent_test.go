@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -16,10 +16,10 @@ type MockLLM struct {
 	callCount int
 }
 
-func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *MockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	m.callCount++
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{
 				Content: m.response,
 			},
@@ -27,7 +27,7 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageCo
 	}, nil
 }
 
-func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	m.callCount++
 	return m.response, nil
 }
@@ -53,11 +53,11 @@ func TestPTCToolNode(t *testing.T) {
 
 	// Create state with AI message containing code
 	state := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role: llms.ChatMessageTypeAI,
-				Parts: []llms.ContentPart{
-					llms.TextPart("```python\nresult = calculator('2+2')\nprint(result)\n```"),
+				Role: llmtypes.ChatMessageTypeAI,
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("```python\nresult = calculator('2+2')\nprint(result)\n```"),
 				},
 			},
 		},
@@ -70,14 +70,14 @@ func TestPTCToolNode(t *testing.T) {
 	}
 
 	// Check that a new message was added
-	messages := newState.(map[string]any)["messages"].([]llms.MessageContent)
+	messages := newState.(map[string]any)["messages"].([]llmtypes.MessageContent)
 	if len(messages) != 2 {
 		t.Errorf("Expected 2 messages, got %d", len(messages))
 	}
 
 	// Check that the last message contains execution result
 	lastMsg := messages[len(messages)-1]
-	if lastMsg.Role != llms.ChatMessageTypeHuman {
+	if lastMsg.Role != llmtypes.ChatMessageTypeHuman {
 		t.Errorf("Expected last message to be Human, got %s", lastMsg.Role)
 	}
 }
@@ -101,11 +101,11 @@ func TestPTCToolNodeWithGoCode(t *testing.T) {
 	defer node.Close(ctx)
 
 	state := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role: llms.ChatMessageTypeAI,
-				Parts: []llms.ContentPart{
-					llms.TextPart("```go\nresult, _ := greet(ctx, \"World\")\nfmt.Println(result)\n```"),
+				Role: llmtypes.ChatMessageTypeAI,
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("```go\nresult, _ := greet(ctx, \"World\")\nfmt.Println(result)\n```"),
 				},
 			},
 		},
@@ -116,7 +116,7 @@ func TestPTCToolNodeWithGoCode(t *testing.T) {
 		t.Fatalf("Failed to invoke node: %v", err)
 	}
 
-	messages := newState.(map[string]any)["messages"].([]llms.MessageContent)
+	messages := newState.(map[string]any)["messages"].([]llmtypes.MessageContent)
 	if len(messages) != 2 {
 		t.Errorf("Expected 2 messages, got %d", len(messages))
 	}
@@ -142,11 +142,11 @@ func TestPTCToolNodeErrorHandling(t *testing.T) {
 
 	// State with code that has syntax error
 	state := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role: llms.ChatMessageTypeAI,
-				Parts: []llms.ContentPart{
-					llms.TextPart("```python\nprint('unclosed string\n```"),
+				Role: llmtypes.ChatMessageTypeAI,
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("```python\nprint('unclosed string\n```"),
 				},
 			},
 		},
@@ -158,9 +158,9 @@ func TestPTCToolNodeErrorHandling(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	messages := newState.(map[string]any)["messages"].([]llms.MessageContent)
+	messages := newState.(map[string]any)["messages"].([]llmtypes.MessageContent)
 	lastMsg := messages[len(messages)-1]
-	lastText := lastMsg.Parts[0].(llms.TextContent).Text
+	lastText := lastMsg.Parts[0].(llmtypes.TextContent).Text
 
 	if !strings.Contains(lastText, "Error") && !strings.Contains(lastText, "error") {
 		t.Error("Expected error message in output")
@@ -187,11 +187,11 @@ func TestPTCToolNodeWithoutCode(t *testing.T) {
 
 	// State with plain text (will be treated as code and may execute or error)
 	state := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role: llms.ChatMessageTypeAI,
-				Parts: []llms.ContentPart{
-					llms.TextPart("Just some text without code blocks"),
+				Role: llmtypes.ChatMessageTypeAI,
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("Just some text without code blocks"),
 				},
 			},
 		},

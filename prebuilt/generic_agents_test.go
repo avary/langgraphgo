@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -14,13 +14,13 @@ type MockReflectionLLM struct {
 	callCount int
 }
 
-func (m *MockReflectionLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *MockReflectionLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	response := m.responses[m.callCount%len(m.responses)]
 	m.callCount++
-	return &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: response}}}, nil
+	return &llmtypes.ContentResponse{Choices: []*llmtypes.ContentChoice{{Content: response}}}, nil
 }
 
-func (m *MockReflectionLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *MockReflectionLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -43,16 +43,16 @@ type PEVMockLLM struct {
 	callCount int
 }
 
-func (m *PEVMockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *PEVMockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	if m.callCount >= len(m.responses) {
-		return &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: "Default response"}}}, nil
+		return &llmtypes.ContentResponse{Choices: []*llmtypes.ContentChoice{{Content: "Default response"}}}, nil
 	}
 	response := m.responses[m.callCount]
 	m.callCount++
-	return &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: response}}}, nil
+	return &llmtypes.ContentResponse{Choices: []*llmtypes.ContentChoice{{Content: response}}}, nil
 }
 
-func (m *PEVMockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *PEVMockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -91,8 +91,11 @@ func TestCreateReflectionAgent(t *testing.T) {
 	config := ReflectionAgentConfig{Model: mockLLM, MaxIterations: 2}
 	agent, err := CreateReflectionAgent(
 		config,
-		func(s ReflectionAgentState) []llms.MessageContent { return s.Messages },
-		func(s ReflectionAgentState, m []llms.MessageContent) ReflectionAgentState { s.Messages = m; return s },
+		func(s ReflectionAgentState) []llmtypes.MessageContent { return s.Messages },
+		func(s ReflectionAgentState, m []llmtypes.MessageContent) ReflectionAgentState {
+			s.Messages = m
+			return s
+		},
 		func(s ReflectionAgentState) string { return s.Draft },
 		func(s ReflectionAgentState, d string) ReflectionAgentState { s.Draft = d; return s },
 		func(s ReflectionAgentState) int { return s.Iteration },
@@ -103,7 +106,7 @@ func TestCreateReflectionAgent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
-	_, err = agent.Invoke(context.Background(), ReflectionAgentState{Messages: []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "Test")}})
+	_, err = agent.Invoke(context.Background(), ReflectionAgentState{Messages: []llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test")}})
 	if err != nil {
 		t.Fatalf("Invoke failed: %v", err)
 	}
@@ -122,8 +125,8 @@ func TestCreatePEVAgent(t *testing.T) {
 	config := PEVAgentConfig{Model: mockLLM, Tools: []tools.Tool{PEVMockTool{name: "calculator"}}}
 	agent, err := CreatePEVAgent(
 		config,
-		func(s PEVAgentState) []llms.MessageContent { return s.Messages },
-		func(s PEVAgentState, m []llms.MessageContent) PEVAgentState { s.Messages = m; return s },
+		func(s PEVAgentState) []llmtypes.MessageContent { return s.Messages },
+		func(s PEVAgentState, m []llmtypes.MessageContent) PEVAgentState { s.Messages = m; return s },
 		func(s PEVAgentState) []string { return s.Plan },
 		func(s PEVAgentState, p []string) PEVAgentState { s.Plan = p; return s },
 		func(s PEVAgentState) int { return s.CurrentStep },
@@ -142,7 +145,7 @@ func TestCreatePEVAgent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed: %v", err)
 	}
-	_, err = agent.Invoke(context.Background(), PEVAgentState{Messages: []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "Test")}})
+	_, err = agent.Invoke(context.Background(), PEVAgentState{Messages: []llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Test")}})
 	if err != nil {
 		t.Fatalf("Invoke failed: %v", err)
 	}

@@ -6,15 +6,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
-// mockLLM is a mock implementation of llms.Model for testing
+// mockLLM is a mock implementation of llmtypes.Model for testing
 type mockLLM struct {
 	generateResponse      string
 	generateError         error
-	generateContentResult *llms.ContentResponse
+	generateContentResult *llmtypes.ContentResponse
 	generateContentError  error
 	calls                 []mockCall
 }
@@ -24,7 +24,7 @@ type mockCall struct {
 	prompt string
 }
 
-func (m *mockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *mockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	// Check for context cancellation
 	select {
 	case <-ctx.Done():
@@ -32,7 +32,7 @@ func (m *mockLLM) GenerateContent(ctx context.Context, messages []llms.MessageCo
 	default:
 	}
 
-	m.calls = append(m.calls, mockCall{method: "GenerateContent", prompt: messages[0].Parts[0].(llms.TextContent).Text})
+	m.calls = append(m.calls, mockCall{method: "GenerateContent", prompt: messages[0].Parts[0].(llmtypes.TextContent).Text})
 
 	if m.generateContentError != nil {
 		return nil, m.generateContentError
@@ -42,8 +42,8 @@ func (m *mockLLM) GenerateContent(ctx context.Context, messages []llms.MessageCo
 		return m.generateContentResult, nil
 	}
 
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{
 				Content: m.generateResponse,
 			},
@@ -51,7 +51,7 @@ func (m *mockLLM) GenerateContent(ctx context.Context, messages []llms.MessageCo
 	}, nil
 }
 
-func (m *mockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *mockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	// Check for context cancellation
 	select {
 	case <-ctx.Done():
@@ -196,7 +196,7 @@ func TestOpenAIAdapter_GenerateWithSystem(t *testing.T) {
 		name           string
 		system         string
 		prompt         string
-		response       *llms.ContentResponse
+		response       *llmtypes.ContentResponse
 		err            error
 		expectedResult string
 		expectedErr    bool
@@ -205,8 +205,8 @@ func TestOpenAIAdapter_GenerateWithSystem(t *testing.T) {
 			name:   "successful generation with system prompt",
 			system: "You are a helpful assistant.",
 			prompt: "Hello!",
-			response: &llms.ContentResponse{
-				Choices: []*llms.ContentChoice{
+			response: &llmtypes.ContentResponse{
+				Choices: []*llmtypes.ContentChoice{
 					{Content: "Hello! How can I assist you today?"},
 				},
 			},
@@ -217,8 +217,8 @@ func TestOpenAIAdapter_GenerateWithSystem(t *testing.T) {
 			name:   "empty system and prompt",
 			system: "",
 			prompt: "",
-			response: &llms.ContentResponse{
-				Choices: []*llms.ContentChoice{
+			response: &llmtypes.ContentResponse{
+				Choices: []*llmtypes.ContentChoice{
 					{Content: "OK"},
 				},
 			},
@@ -237,8 +237,8 @@ func TestOpenAIAdapter_GenerateWithSystem(t *testing.T) {
 			name:   "empty choices returns empty string",
 			system: "You are helpful.",
 			prompt: "Test",
-			response: &llms.ContentResponse{
-				Choices: []*llms.ContentChoice{},
+			response: &llmtypes.ContentResponse{
+				Choices: []*llmtypes.ContentChoice{},
 			},
 			expectedResult: "",
 			expectedErr:    false,
@@ -247,7 +247,7 @@ func TestOpenAIAdapter_GenerateWithSystem(t *testing.T) {
 			name:   "nil choices returns empty string",
 			system: "You are helpful.",
 			prompt: "Test",
-			response: &llms.ContentResponse{
+			response: &llmtypes.ContentResponse{
 				Choices: nil,
 			},
 			expectedResult: "",
@@ -303,10 +303,10 @@ func TestStreamingLLM_WithStreamCallback(t *testing.T) {
 		i++
 	}
 
-	streamingLLM := WrapLLMWithStreaming(llm, streamCallback)
+	streamingLLM := WrapLLMWithStreaming(llmtypes.Wrap(llm), streamCallback)
 
-	messages := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "Say 'hello' in one word"),
+	messages := []llmtypes.MessageContent{
+		llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Say 'hello' in one word"),
 	}
 
 	ctx := context.Background()
@@ -333,10 +333,10 @@ func TestStreamingLLM_WithNilStreamCallback(t *testing.T) {
 		t.Skip("skipping test: LLM creation failed (likely no API key configured)")
 	}
 
-	streamingLLM := WrapLLMWithStreaming(llm, nil)
+	streamingLLM := WrapLLMWithStreaming(llmtypes.Wrap(llm), nil)
 
-	messages := []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "Say 'hello' in one word"),
+	messages := []llmtypes.MessageContent{
+		llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Say 'hello' in one word"),
 	}
 
 	ctx := context.Background()

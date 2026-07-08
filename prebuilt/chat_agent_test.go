@@ -5,17 +5,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
-// MockModel is a simple mock for llms.Model
+// MockModel is a simple mock for llmtypes.Model
 type MockModel struct {
 	responses []string
 	callCount int
 }
 
-func (m *MockModel) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *MockModel) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	resp := ""
 	if m.callCount < len(m.responses) {
 		resp = m.responses[m.callCount]
@@ -25,7 +25,7 @@ func (m *MockModel) GenerateContent(ctx context.Context, messages []llms.Message
 	m.callCount++
 
 	// Parse options to check for streaming
-	opts := llms.CallOptions{}
+	opts := llmtypes.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
@@ -45,14 +45,14 @@ func (m *MockModel) GenerateContent(ctx context.Context, messages []llms.Message
 		}
 	}
 
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{Content: resp},
 		},
 	}, nil
 }
 
-func (m *MockModel) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *MockModel) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return "", nil
 }
 

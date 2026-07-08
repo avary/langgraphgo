@@ -5,27 +5,27 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/tools"
 )
 
 // MockPlanningLLM is a mock LLM that returns a workflow plan
 type MockPlanningLLM struct {
 	planJSON      string
-	responses     []llms.ContentResponse
+	responses     []llmtypes.ContentResponse
 	callCount     int
-	capturedCalls [][]llms.MessageContent
+	capturedCalls [][]llmtypes.MessageContent
 }
 
-func (m *MockPlanningLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *MockPlanningLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	m.capturedCalls = append(m.capturedCalls, messages)
 
 	// First call is the planning call
 	if m.callCount == 0 {
 		m.callCount++
-		return &llms.ContentResponse{
-			Choices: []*llms.ContentChoice{
+		return &llmtypes.ContentResponse{
+			Choices: []*llmtypes.ContentChoice{
 				{
 					Content: m.planJSON,
 				},
@@ -40,14 +40,14 @@ func (m *MockPlanningLLM) GenerateContent(ctx context.Context, messages []llms.M
 		return &resp, nil
 	}
 
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{Content: "No more responses"},
 		},
 	}, nil
 }
 
-func (m *MockPlanningLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *MockPlanningLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -58,10 +58,10 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 			Name:        "research",
 			Description: "Research and gather information",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llms.MessageContent)
-				researchMsg := llms.MessageContent{
-					Role:  llms.ChatMessageTypeAI,
-					Parts: []llms.ContentPart{llms.TextPart("Research completed")},
+				messages := state["messages"].([]llmtypes.MessageContent)
+				researchMsg := llmtypes.MessageContent{
+					Role:  llmtypes.ChatMessageTypeAI,
+					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Research completed")},
 				}
 				return map[string]any{
 					"messages": append(messages, researchMsg),
@@ -72,10 +72,10 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 			Name:        "analyze",
 			Description: "Analyze the gathered information",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llms.MessageContent)
-				analyzeMsg := llms.MessageContent{
-					Role:  llms.ChatMessageTypeAI,
-					Parts: []llms.ContentPart{llms.TextPart("Analysis completed")},
+				messages := state["messages"].([]llmtypes.MessageContent)
+				analyzeMsg := llmtypes.MessageContent{
+					Role:  llmtypes.ChatMessageTypeAI,
+					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Analysis completed")},
 				}
 				return map[string]any{
 					"messages": append(messages, analyzeMsg),
@@ -100,7 +100,7 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 	// Setup Mock LLM
 	mockLLM := &MockPlanningLLM{
 		planJSON:  planJSON,
-		responses: []llms.ContentResponse{},
+		responses: []llmtypes.ContentResponse{},
 	}
 
 	// Create Planning Agent
@@ -110,8 +110,8 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 
 	// Initial State
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "Please research and analyze"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Please research and analyze"),
 		},
 	}
 
