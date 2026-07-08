@@ -159,10 +159,12 @@
 //
 // # Integration with LangChain
 //
-// The package includes adapters for LangChain compatibility:
+// LangChain-compatible memory adapters live in the memory/langchainadapter
+// subpackage, which is the only place that imports github.com/tmc/langchaingo:
 //
-//	// Convert to LangChain ChatMemory
-//	langchainMem := memory.NewLangchainAdapter(mem)
+//	import "github.com/smallnest/langgraphgo/memory/langchainadapter"
+//
+//	mem := langchainadapter.NewConversationBufferMemory()
 //
 // # Compression Strategies
 //

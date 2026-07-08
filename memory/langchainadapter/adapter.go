@@ -1,4 +1,8 @@
-package memory
+// Package langchainadapter bridges langchaingo's memory implementations to the
+// framework's own message types. It is the sole importer of
+// github.com/tmc/langchaingo in the memory tree, keeping that dependency out of
+// the core memory package.
+package langchainadapter
 
 import (
 	"context"
@@ -26,14 +30,6 @@ type LangChainMemory struct {
 	buffer schema.Memory
 }
 
-// NewLangChainMemory creates a new adapter for langchaingo memory
-// Supports ConversationBuffer, ConversationWindowBuffer, ConversationTokenBuffer, etc.
-func NewLangChainMemory(buffer schema.Memory) *LangChainMemory {
-	return &LangChainMemory{
-		buffer: buffer,
-	}
-}
-
 // NewConversationBufferMemory creates a new conversation buffer memory with default settings
 func NewConversationBufferMemory(options ...langchainmemory.ConversationBufferOption) *LangChainMemory {
 	return &LangChainMemory{
@@ -46,14 +42,6 @@ func NewConversationBufferMemory(options ...langchainmemory.ConversationBufferOp
 func NewConversationWindowBufferMemory(windowSize int, options ...langchainmemory.ConversationBufferOption) *LangChainMemory {
 	return &LangChainMemory{
 		buffer: langchainmemory.NewConversationWindowBuffer(windowSize, options...),
-	}
-}
-
-// NewConversationTokenBufferMemory creates a new conversation token buffer memory
-// that keeps conversation history within a token limit
-func NewConversationTokenBufferMemory(llm llmtypes.Model, maxTokenLimit int, options ...langchainmemory.ConversationBufferOption) *LangChainMemory {
-	return &LangChainMemory{
-		buffer: langchainmemory.NewConversationTokenBuffer(llmtypes.ToLangchain(llm), maxTokenLimit, options...),
 	}
 }
 

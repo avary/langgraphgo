@@ -9,7 +9,14 @@ Memory（记忆）对于对话式 AI 应用至关重要。它允许系统：
 - 在多轮对话中维护上下文
 - 基于历史记录提供个性化响应
 
-我们提供了一个 `LangChainMemory` 适配器，它封装了 LangChainGo 的 memory 实现，使其与 LangGraphGo 的架构兼容。
+我们提供了一个 `LangChainMemory` 适配器，它封装了 LangChainGo 的 memory 实现，使其与 LangGraphGo 的架构兼容。该适配器位于独立子包中，因此核心 `memory` 包不再依赖 `langchaingo`：
+
+```go
+import (
+    langchainadapter "github.com/smallnest/langgraphgo/memory/langchainadapter"
+    langchainmemory "github.com/tmc/langchaingo/memory"
+)
+```
 
 ## 可用的 Memory 类型
 
@@ -19,8 +26,8 @@ Memory（记忆）对于对话式 AI 应用至关重要。它允许系统：
 存储完整的对话历史记录。当您希望模型能够访问所有已说内容时，这非常有用。
 
 ```go
-mem := prebuilt.NewConversationBufferMemory(
-    memory.WithReturnMessages(true),
+mem := langchainadapter.NewConversationBufferMemory(
+    langchainmemory.WithReturnMessages(true),
 )
 ```
 
@@ -29,26 +36,16 @@ mem := prebuilt.NewConversationBufferMemory(
 
 ```go
 // 仅保留最后 5 轮
-mem := prebuilt.NewConversationWindowBufferMemory(5,
-    memory.WithReturnMessages(true),
+mem := langchainadapter.NewConversationWindowBufferMemory(5,
+    langchainmemory.WithReturnMessages(true),
 )
 ```
 
-### 3. ConversationTokenBuffer (对话 Token 缓冲)
-在特定的 Token 限制内维护对话历史。这对于管理成本和保持在 LLM 上下文窗口限制内非常理想。
-
-```go
-// 将历史记录保持在 1000 个 token 以内
-mem := prebuilt.NewConversationTokenBufferMemory(llm, 1000,
-    memory.WithReturnMessages(true),
-)
-```
-
-### 4. ChatMessageHistory (聊天消息历史)
+### 3. ChatMessageHistory (聊天消息历史)
 提供对底层消息历史存储的直接访问，允许您手动添加或检索消息。
 
 ```go
-history := prebuilt.NewChatMessageHistory()
+history := langchainadapter.NewChatMessageHistory()
 history.AddUserMessage(ctx, "你好")
 history.AddAIMessage(ctx, "你好！")
 ```
@@ -108,11 +105,11 @@ func chatNode(ctx context.Context, state *State) (*State, error) {
 如果您的应用程序需要特定的命名约定，您可以自定义用于输入、输出和 memory 变量的键。
 
 ```go
-mem := prebuilt.NewConversationBufferMemory(
-    memory.WithInputKey("user_query"),      // 默认: "input"
-    memory.WithOutputKey("bot_response"),   // 默认: "output"
-    memory.WithMemoryKey("chat_log"),       // 默认: "history"
-    memory.WithReturnMessages(true),
+mem := langchainadapter.NewConversationBufferMemory(
+    langchainmemory.WithInputKey("user_query"),      // 默认: "input"
+    langchainmemory.WithOutputKey("bot_response"),   // 默认: "output"
+    langchainmemory.WithMemoryKey("chat_log"),       // 默认: "history"
+    langchainmemory.WithReturnMessages(true),
 )
 ```
 
@@ -120,9 +117,9 @@ mem := prebuilt.NewConversationBufferMemory(
 当消息作为字符串返回时（即 `WithReturnMessages(false)`），您还可以自定义用于消息的前缀。
 
 ```go
-mem := prebuilt.NewConversationBufferMemory(
-    memory.WithHumanPrefix("用户"),
-    memory.WithAIPrefix("助手"),
+mem := langchainadapter.NewConversationBufferMemory(
+    langchainmemory.WithHumanPrefix("用户"),
+    langchainmemory.WithAIPrefix("助手"),
 )
 ```
 
