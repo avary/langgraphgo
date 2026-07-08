@@ -98,6 +98,12 @@ func toInputItems(messages []llmtypes.MessageContent) []inputItem {
 		}
 
 		var parts []contentPart
+		flush := func() {
+			if len(parts) > 0 {
+				items = append(items, inputItem{Type: "message", Role: role, Content: parts})
+				parts = nil
+			}
+		}
 		for _, part := range m.Parts {
 			switch p := part.(type) {
 			case llmtypes.TextContent:
@@ -105,8 +111,10 @@ func toInputItems(messages []llmtypes.MessageContent) []inputItem {
 			case llmtypes.ImageURLContent:
 				parts = append(parts, contentPart{Type: "input_image", ImageURL: p.URL})
 			case llmtypes.ToolCall:
+				flush()
 				items = append(items, toolCallItem(p))
 			case llmtypes.ToolCallResponse:
+				flush()
 				items = append(items, inputItem{
 					Type:   "function_call_output",
 					CallID: p.ToolCallID,
@@ -114,9 +122,7 @@ func toInputItems(messages []llmtypes.MessageContent) []inputItem {
 				})
 			}
 		}
-		if len(parts) > 0 {
-			items = append(items, inputItem{Type: "message", Role: role, Content: parts})
-		}
+		flush()
 	}
 	return items
 }

@@ -79,6 +79,23 @@ func TestToInputItems(t *testing.T) {
 	}
 }
 
+func TestToInputItemsOrdering(t *testing.T) {
+	// An assistant turn carrying both text and a tool call must flatten as
+	// [message, function_call] so the text precedes the call it introduces.
+	items := toInputItems([]llmtypes.MessageContent{
+		{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{
+			llmtypes.TextContent{Text: "let me look that up"},
+			llmtypes.ToolCall{ID: "call_1", Type: "function", FunctionCall: &llmtypes.FunctionCall{Name: "f", Arguments: "{}"}},
+		}},
+	})
+	if len(items) != 2 {
+		t.Fatalf("want 2 items, got %d", len(items))
+	}
+	if items[0].Type != "message" || items[1].Type != "function_call" {
+		t.Errorf("want [message, function_call], got [%s, %s]", items[0].Type, items[1].Type)
+	}
+}
+
 func TestGenerateContent(t *testing.T) {
 	var captured request
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
