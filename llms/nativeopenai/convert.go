@@ -39,17 +39,27 @@ func toOpenAIMessages(messages []llmtypes.MessageContent) []goopenai.ChatComplet
 	out := make([]goopenai.ChatCompletionMessage, 0, len(messages))
 	for _, m := range messages {
 		msg := goopenai.ChatCompletionMessage{Role: toOpenAIRole(m.Role)}
+		hasImage := false
+		for _, part := range m.Parts {
+			if _, ok := part.(llmtypes.ImageURLContent); ok {
+				hasImage = true
+				break
+			}
+		}
 		var multi []goopenai.ChatMessagePart
 		for _, part := range m.Parts {
 			switch p := part.(type) {
 			case llmtypes.TextContent:
-				if len(m.Parts) == 1 {
-					msg.Content = p.Text
-				} else {
+				// Only role "user" accepts array content; for text-only
+				// messages (and any assistant/tool message) keep a string
+				// body so tool-call messages stay API-valid.
+				if hasImage {
 					multi = append(multi, goopenai.ChatMessagePart{
 						Type: goopenai.ChatMessagePartTypeText,
 						Text: p.Text,
 					})
+				} else {
+					msg.Content += p.Text
 				}
 			case llmtypes.ImageURLContent:
 				multi = append(multi, goopenai.ChatMessagePart{

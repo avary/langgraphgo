@@ -69,6 +69,8 @@ func (o *LLM) generateStreaming(ctx context.Context, req goopenai.ChatCompletion
 		reasoning  string
 		stopReason string
 	)
+	toolCalls := map[int]*goopenai.ToolCall{}
+	var toolOrder []int
 	for {
 		chunk, recvErr := stream.Recv()
 		if errors.Is(recvErr, io.EOF) {
@@ -88,9 +90,36 @@ func (o *LLM) generateStreaming(ctx context.Context, req goopenai.ChatCompletion
 				return nil, streamErr
 			}
 		}
+		for _, d := range choice.Delta.ToolCalls {
+			idx := 0
+			if d.Index != nil {
+				idx = *d.Index
+			}
+			tc, ok := toolCalls[idx]
+			if !ok {
+				tc = &goopenai.ToolCall{}
+				toolCalls[idx] = tc
+				toolOrder = append(toolOrder, idx)
+			}
+			if d.ID != "" {
+				tc.ID = d.ID
+			}
+			if d.Type != "" {
+				tc.Type = d.Type
+			}
+			if d.Function.Name != "" {
+				tc.Function.Name = d.Function.Name
+			}
+			tc.Function.Arguments += d.Function.Arguments
+		}
 		if choice.FinishReason != "" {
 			stopReason = string(choice.FinishReason)
 		}
+	}
+
+	var assembled []goopenai.ToolCall
+	for _, idx := range toolOrder {
+		assembled = append(assembled, *toolCalls[idx])
 	}
 
 	return &llmtypes.ContentResponse{
@@ -98,6 +127,7 @@ func (o *LLM) generateStreaming(ctx context.Context, req goopenai.ChatCompletion
 			Content:          content,
 			StopReason:       stopReason,
 			ReasoningContent: reasoning,
+			ToolCalls:        fromOpenAIToolCalls(assembled),
 		}},
 	}, nil
 }

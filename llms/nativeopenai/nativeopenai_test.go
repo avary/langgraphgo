@@ -86,6 +86,29 @@ func TestToOpenAIMessages(t *testing.T) {
 	}
 }
 
+func TestToOpenAIMessagesTextWithToolCall(t *testing.T) {
+	// An assistant turn with both text and a tool call must keep string
+	// Content: the Chat Completions API rejects array content for assistant.
+	got := toOpenAIMessages([]llmtypes.MessageContent{
+		{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{
+			llmtypes.TextContent{Text: "let me search"},
+			llmtypes.ToolCall{ID: "c1", Type: "function", FunctionCall: &llmtypes.FunctionCall{Name: "f", Arguments: "{}"}},
+		}},
+	})
+	if len(got) != 1 {
+		t.Fatalf("want 1 message, got %d", len(got))
+	}
+	if got[0].Content != "let me search" {
+		t.Errorf("want string Content, got %q", got[0].Content)
+	}
+	if len(got[0].MultiContent) != 0 {
+		t.Errorf("want no MultiContent, got %d parts", len(got[0].MultiContent))
+	}
+	if len(got[0].ToolCalls) != 1 {
+		t.Errorf("want tool call preserved, got %+v", got[0].ToolCalls)
+	}
+}
+
 func TestToolConversion(t *testing.T) {
 	tools := []llmtypes.Tool{{
 		Type: "function",
