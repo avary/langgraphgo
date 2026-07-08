@@ -121,12 +121,12 @@ func main() {
 	}
 
 	// Create retriever and reranker
-	retriever := retriever.NewVectorStoreRetriever(vectorStore, embedder, 5)
-	reranker := store.NewSimpleReranker()
+	vecRetriever := retriever.NewVectorStoreRetriever(vectorStore, embedder, 5)
+	reranker := retriever.NewSimpleReranker()
 
 	// Configure advanced RAG pipeline with reranking and citations
 	config := rag.DefaultPipelineConfig()
-	config.Retriever = retriever
+	config.Retriever = vecRetriever
 	config.Reranker = reranker
 	config.LLM = llm
 	config.TopK = 5
