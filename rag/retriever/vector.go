@@ -33,6 +33,13 @@ func NewVectorRetriever(vectorStore rag.VectorStore, embedder rag.Embedder, conf
 	}
 }
 
+// NewVectorRetrieverTopK creates a vector retriever configured only by top-K,
+// using default score threshold and search type. It is the recommended
+// replacement for NewVectorStoreRetriever.
+func NewVectorRetrieverTopK(vectorStore rag.VectorStore, embedder rag.Embedder, topK int) *VectorRetriever {
+	return NewVectorRetriever(vectorStore, embedder, rag.RetrievalConfig{K: topK})
+}
+
 // Retrieve retrieves documents based on a query
 func (r *VectorRetriever) Retrieve(ctx context.Context, query string) ([]rag.Document, error) {
 	return r.RetrieveWithK(ctx, query, r.config.K)
@@ -300,14 +307,20 @@ func isAlphaNumeric(char rune) bool {
 	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9')
 }
 
-// VectorStoreRetriever implements Retriever using a VectorStore with backward compatibility
+// VectorStoreRetriever implements Retriever using a VectorStore with backward compatibility.
+//
+// Deprecated: VectorStoreRetriever is a top-K-only subset of VectorRetriever.
+// Use NewVectorRetrieverTopK instead; this type will be removed in a future release.
 type VectorStoreRetriever struct {
 	vectorStore rag.VectorStore
 	embedder    rag.Embedder
 	topK        int
 }
 
-// NewVectorStoreRetriever creates a new VectorStoreRetriever
+// NewVectorStoreRetriever creates a new VectorStoreRetriever.
+//
+// Deprecated: use NewVectorRetrieverTopK, which returns a fully-configured
+// VectorRetriever with the same top-K behavior.
 func NewVectorStoreRetriever(vectorStore rag.VectorStore, embedder rag.Embedder, topK int) *VectorStoreRetriever {
 	if topK <= 0 {
 		topK = 4
