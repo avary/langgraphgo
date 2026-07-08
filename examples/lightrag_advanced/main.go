@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 	"github.com/smallnest/langgraphgo/rag"
 	"github.com/smallnest/langgraphgo/rag/engine"
 	"github.com/smallnest/langgraphgo/rag/store"
-	"github.com/tmc/langchaingo/llms/openai"
 )
 
 // OpenAILLMAdapter wraps langchaingo's openai.LLM to implement rag.LLMInterface
@@ -482,7 +482,7 @@ on vast amounts of text data using transformer architectures. Key techniques inc
 pre-training on large corpora, fine-tuning for specific tasks, and reinforcement learning
 from human feedback (RLHF). Applications range from chatbots to code generation.`,
 			Metadata: map[string]any{
-				"source": "llms.txt",
+				"source": "llmtypes.txt",
 				"topic":  "LLMs",
 			},
 			CreatedAt: now,

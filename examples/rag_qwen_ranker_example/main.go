@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/graph"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 	"github.com/smallnest/langgraphgo/llms/qwen"
 	"github.com/smallnest/langgraphgo/rag"
 	"github.com/smallnest/langgraphgo/rag/retriever"
 	"github.com/smallnest/langgraphgo/rag/store"
-	"github.com/tmc/langchaingo/llms/openai"
 )
 
 // This example demonstrates how to use Qwen3-Embedding-4B as both an embedder and reranker

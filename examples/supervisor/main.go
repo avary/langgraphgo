@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/graph"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // CalculatorTool (same as in react_agent example)
@@ -69,13 +69,13 @@ func main() {
 	}
 
 	// 1. Create Math Agent
-	mathAgent, err := prebuilt.CreateAgentMap(model, []tools.Tool{CalculatorTool{}}, 20)
+	mathAgent, err := prebuilt.CreateAgentMap(model, []tooltypes.Tool{CalculatorTool{}}, 20)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// 2. Create General Agent
-	generalAgent, err := prebuilt.CreateAgentMap(model, []tools.Tool{}, 20)
+	generalAgent, err := prebuilt.CreateAgentMap(model, []tooltypes.Tool{}, 20)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func main() {
 	g.AddNode("GeneralAssistant", "General Agent", agentNode(generalAgent))
 
 	supervisorNode := func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages := state["messages"].([]llms.MessageContent)
+		messages := state["messages"].([]llmtypes.MessageContent)
 
 		systemPrompt := `You are a supervisor tasked with managing a conversation between the following workers:
 - MathExpert
@@ -105,8 +105,8 @@ If the task is finished, return FINISH.
 Return only the name of the next actor or FINISH.`
 
 		// Combine system prompt with history
-		msgs := []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt),
+		msgs := []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, systemPrompt),
 		}
 		msgs = append(msgs, messages...)
 
@@ -160,8 +160,8 @@ Return only the name of the next actor or FINISH.`
 	fmt.Printf("User: %s\n", query)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, query),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, query),
 		},
 	}
 
@@ -174,18 +174,18 @@ Return only the name of the next actor or FINISH.`
 	}
 
 	// Print Result
-	messages := res["messages"].([]llms.MessageContent)
+	messages := res["messages"].([]llmtypes.MessageContent)
 
 	fmt.Println("\n=== Conversation History ===")
 	for _, msg := range messages {
 		role := msg.Role
 		var content string
 		if len(msg.Parts) > 0 {
-			if textPart, ok := msg.Parts[0].(llms.TextContent); ok {
+			if textPart, ok := msg.Parts[0].(llmtypes.TextContent); ok {
 				content = textPart.Text
-			} else if _, ok := msg.Parts[0].(llms.ToolCall); ok {
+			} else if _, ok := msg.Parts[0].(llmtypes.ToolCall); ok {
 				content = "[Tool Call]"
-			} else if _, ok := msg.Parts[0].(llms.ToolCallResponse); ok {
+			} else if _, ok := msg.Parts[0].(llmtypes.ToolCallResponse); ok {
 				content = "[Tool Response]"
 			}
 		}

@@ -6,11 +6,11 @@ import (
 	"log"
 	"os"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
 	"github.com/smallnest/langgraphgo/tool"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 func main() {
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// 3. Create the ReAct Agent using map state convenience function
-	agent, err := prebuilt.CreateAgentMap(llm, []tools.Tool{braveTool}, 20)
+	agent, err := prebuilt.CreateAgentMap(llm, []tooltypes.Tool{braveTool}, 20)
 	if err != nil {
 		log.Fatalf("Failed to create agent: %v", err)
 	}
@@ -53,8 +53,8 @@ func main() {
 	fmt.Println("Agent is thinking and searching...")
 
 	inputs := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, query),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, query),
 		},
 	}
 
@@ -64,12 +64,12 @@ func main() {
 	}
 
 	// 5. Print the Result
-	messages, ok := response["messages"].([]llms.MessageContent)
+	messages, ok := response["messages"].([]llmtypes.MessageContent)
 	if ok {
 		// The last message should be the AI's final answer
 		lastMsg := messages[len(messages)-1]
 		for _, part := range lastMsg.Parts {
-			if text, ok := part.(llms.TextContent); ok {
+			if text, ok := part.(llmtypes.TextContent); ok {
 				fmt.Printf("\nAgent: %s\n", text.Text)
 			}
 		}

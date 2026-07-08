@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/graph"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 func main() {
@@ -64,7 +64,7 @@ func main() {
 	agent, err := prebuilt.CreateManusAgent(
 		model,
 		nodes,
-		[]tools.Tool{},
+		[]tooltypes.Tool{},
 		config,
 	)
 	if err != nil {
@@ -80,11 +80,11 @@ func main() {
 
 	// Prepare initial state
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role: llms.ChatMessageTypeHuman,
-				Parts: []llms.ContentPart{
-					llms.TextPart("Research TypeScript benefits and write a comprehensive summary"),
+				Role: llmtypes.ChatMessageTypeHuman,
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("Research TypeScript benefits and write a comprehensive summary"),
 				},
 			},
 		},
@@ -115,7 +115,7 @@ func main() {
 
 // researchNode simulates a research phase
 func researchNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llms.MessageContent)
+	messages := state["messages"].([]llmtypes.MessageContent)
 
 	fmt.Println("🔍 Phase: Research")
 	fmt.Println("   - Searching for TypeScript documentation")
@@ -126,9 +126,9 @@ func researchNode(ctx context.Context, state map[string]any) (map[string]any, er
 	// Simulate research delay
 	time.Sleep(500 * time.Millisecond)
 
-	msg := llms.MessageContent{
-		Role:  llms.ChatMessageTypeAI,
-		Parts: []llms.ContentPart{llms.TextPart("Research complete: Found 15 relevant sources\n\nKey findings:\n- Type safety prevents runtime errors\n- Better IDE support with autocomplete\n- Easier refactoring with type checking\n- Improved code documentation\n- Better team collaboration")},
+	msg := llmtypes.MessageContent{
+		Role:  llmtypes.ChatMessageTypeAI,
+		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Research complete: Found 15 relevant sources\n\nKey findings:\n- Type safety prevents runtime errors\n- Better IDE support with autocomplete\n- Easier refactoring with type checking\n- Improved code documentation\n- Better team collaboration")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -137,7 +137,7 @@ func researchNode(ctx context.Context, state map[string]any) (map[string]any, er
 
 // compileNode compiles research findings
 func compileNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llms.MessageContent)
+	messages := state["messages"].([]llmtypes.MessageContent)
 
 	fmt.Println("📝 Phase: Compile Findings")
 	fmt.Println("   - Organizing research data")
@@ -148,9 +148,9 @@ func compileNode(ctx context.Context, state map[string]any) (map[string]any, err
 	// Simulate compilation delay
 	time.Sleep(300 * time.Millisecond)
 
-	msg := llms.MessageContent{
-		Role:  llms.ChatMessageTypeAI,
-		Parts: []llms.ContentPart{llms.TextPart("Findings compiled: Organized into 5 key benefit categories\n\n1. Type Safety\n2. Developer Experience\n3. Code Quality\n4. Team Productivity\n5. Long-term Maintainability")},
+	msg := llmtypes.MessageContent{
+		Role:  llmtypes.ChatMessageTypeAI,
+		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Findings compiled: Organized into 5 key benefit categories\n\n1. Type Safety\n2. Developer Experience\n3. Code Quality\n4. Team Productivity\n5. Long-term Maintainability")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -159,7 +159,7 @@ func compileNode(ctx context.Context, state map[string]any) (map[string]any, err
 
 // writeNode writes the final deliverable
 func writeNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llms.MessageContent)
+	messages := state["messages"].([]llmtypes.MessageContent)
 
 	fmt.Println("✍️  Phase: Write Summary")
 	fmt.Println("   - Drafting introduction")
@@ -170,9 +170,9 @@ func writeNode(ctx context.Context, state map[string]any) (map[string]any, error
 	// Simulate writing delay
 	time.Sleep(700 * time.Millisecond)
 
-	msg := llms.MessageContent{
-		Role:  llms.ChatMessageTypeAI,
-		Parts: []llms.ContentPart{llms.TextPart("Summary written: 2000 word comprehensive TypeScript benefits document\n\nStructure:\n- Introduction to TypeScript\n- Detailed Benefits (5 sections)\n- Real-world Examples\n- Conclusion")},
+	msg := llmtypes.MessageContent{
+		Role:  llmtypes.ChatMessageTypeAI,
+		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Summary written: 2000 word comprehensive TypeScript benefits document\n\nStructure:\n- Introduction to TypeScript\n- Detailed Benefits (5 sections)\n- Real-world Examples\n- Conclusion")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -181,7 +181,7 @@ func writeNode(ctx context.Context, state map[string]any) (map[string]any, error
 
 // reviewNode validates the output
 func reviewNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llms.MessageContent)
+	messages := state["messages"].([]llmtypes.MessageContent)
 
 	fmt.Println("✅ Phase: Review")
 	fmt.Println("   - Checking factual accuracy")
@@ -192,9 +192,9 @@ func reviewNode(ctx context.Context, state map[string]any) (map[string]any, erro
 	// Simulate review delay
 	time.Sleep(200 * time.Millisecond)
 
-	msg := llms.MessageContent{
-		Role:  llms.ChatMessageTypeAI,
-		Parts: []llms.ContentPart{llms.TextPart("Review complete: Output validated successfully\n\nQuality Score: 9.5/10\n- All claims verified\n- Structure is logical\n- Examples are clear")},
+	msg := llmtypes.MessageContent{
+		Role:  llmtypes.ChatMessageTypeAI,
+		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Review complete: Output validated successfully\n\nQuality Score: 9.5/10\n- All claims verified\n- Structure is logical\n- Examples are clear")},
 	}
 
 	state["messages"] = append(messages, msg)

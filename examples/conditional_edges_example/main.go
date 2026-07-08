@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 func main() {
@@ -31,37 +31,37 @@ func SimpleIntentRouter() {
 	fmt.Println("1️⃣ Intent-Based Routing")
 	fmt.Println("------------------------")
 
-	g := graph.NewStateGraph[[]llms.MessageContent]()
+	g := graph.NewStateGraph[[]llmtypes.MessageContent]()
 
 	// Entry point - analyze intent
-	g.AddNode("analyze_intent", "analyze_intent", func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
-		fmt.Printf("   Analyzing: %s\n", state[0].Parts[0].(llms.TextContent).Text)
+	g.AddNode("analyze_intent", "analyze_intent", func(ctx context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
+		fmt.Printf("   Analyzing: %s\n", state[0].Parts[0].(llmtypes.TextContent).Text)
 		return state, nil
 	})
 
 	// Different handlers for different intents
-	g.AddNode("handle_question", "handle_question", func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+	g.AddNode("handle_question", "handle_question", func(ctx context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
 		response := "I'll help answer your question about that."
 		fmt.Printf("   ❓ Question Handler: %s\n", response)
-		return append(state, llms.TextParts("ai", response)), nil
+		return append(state, llmtypes.TextParts("ai", response)), nil
 	})
 
-	g.AddNode("handle_command", "handle_command", func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+	g.AddNode("handle_command", "handle_command", func(ctx context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
 		response := "Executing your command..."
 		fmt.Printf("   ⚡ Command Handler: %s\n", response)
-		return append(state, llms.TextParts("ai", response)), nil
+		return append(state, llmtypes.TextParts("ai", response)), nil
 	})
 
-	g.AddNode("handle_feedback", "handle_feedback", func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+	g.AddNode("handle_feedback", "handle_feedback", func(ctx context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
 		response := "Thank you for your feedback!"
 		fmt.Printf("   💬 Feedback Handler: %s\n", response)
-		return append(state, llms.TextParts("ai", response)), nil
+		return append(state, llmtypes.TextParts("ai", response)), nil
 	})
 
 	// Conditional routing based on intent
-	g.AddConditionalEdge("analyze_intent", func(ctx context.Context, state []llms.MessageContent) string {
+	g.AddConditionalEdge("analyze_intent", func(ctx context.Context, state []llmtypes.MessageContent) string {
 		if len(state) > 0 {
-			text := state[0].Parts[0].(llms.TextContent).Text
+			text := state[0].Parts[0].(llmtypes.TextContent).Text
 			text = strings.ToLower(text)
 
 			// Route based on keywords
@@ -103,9 +103,9 @@ func SimpleIntentRouter() {
 
 	for _, input := range testInputs {
 		fmt.Printf("\n📝 Input: %s\n", input)
-		messages := []llms.MessageContent{llms.TextParts("human", input)}
+		messages := []llmtypes.MessageContent{llmtypes.TextParts("human", input)}
 		result, _ := runnable.Invoke(ctx, messages)
-		fmt.Printf("   Response: %s\n", result[len(result)-1].Parts[0].(llms.TextContent).Text)
+		fmt.Printf("   Response: %s\n", result[len(result)-1].Parts[0].(llmtypes.TextContent).Text)
 	}
 	fmt.Println()
 }

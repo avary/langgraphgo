@@ -7,9 +7,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/tooltypes"
 
 	"github.com/smallnest/langgraphgo/prebuilt"
 )
@@ -48,7 +48,7 @@ func main() {
 		handler:     BatchOperationTool{}.Call,
 	}
 
-	allTools := []tools.Tool{hotelTool, mortgageTool, batchTool}
+	allTools := []tooltypes.Tool{hotelTool, mortgageTool, batchTool}
 
 	// 打印工具schema用于演示
 	fmt.Println("=== 复杂工具示例 ===")
@@ -178,18 +178,18 @@ func main() {
 		fmt.Println("---")
 
 		resp, err := agent.Invoke(ctx, map[string]any{
-			"messages": []llms.MessageContent{
-				llms.TextParts(llms.ChatMessageTypeHuman, query),
+			"messages": []llmtypes.MessageContent{
+				llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, query),
 			},
 		})
 		if err != nil {
 			log.Printf("代理错误: %v\n", err)
 		} else {
-			if msgs, ok := resp["messages"].([]llms.MessageContent); ok && len(msgs) > 0 {
+			if msgs, ok := resp["messages"].([]llmtypes.MessageContent); ok && len(msgs) > 0 {
 				for _, msg := range msgs {
-					if msg.Role == llms.ChatMessageTypeAI {
+					if msg.Role == llmtypes.ChatMessageTypeAI {
 						for _, part := range msg.Parts {
-							if textPart, ok := part.(llms.TextContent); ok {
+							if textPart, ok := part.(llmtypes.TextContent); ok {
 								fmt.Printf("代理回复: %s\n\n", textPart.Text)
 							}
 						}
@@ -203,7 +203,7 @@ func main() {
 	fmt.Println("=== 示例结束 ===")
 }
 
-// SimpleToolWrapper 包装复杂工具以实现tools.Tool接口
+// SimpleToolWrapper 包装复杂工具以实现tooltypes.Tool接口
 type SimpleToolWrapper struct {
 	name        string
 	description string

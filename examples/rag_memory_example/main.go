@@ -6,10 +6,10 @@ import (
 	"log"
 
 	"github.com/smallnest/langgraphgo/graph"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 	"github.com/smallnest/langgraphgo/rag"
 	"github.com/smallnest/langgraphgo/rag/retriever"
 	"github.com/smallnest/langgraphgo/rag/store"
-	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func main() {

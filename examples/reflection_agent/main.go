@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func main() {
@@ -43,7 +43,7 @@ func main() {
 	runCodeReview(model)
 }
 
-func runBasicReflection(model llms.Model) {
+func runBasicReflection(model llmtypes.Model) {
 	config := prebuilt.ReflectionAgentConfig{
 		Model:         model,
 		MaxIterations: 3,
@@ -60,10 +60,10 @@ func runBasicReflection(model llms.Model) {
 	fmt.Printf("Query: %s\n\n", query)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role:  llms.ChatMessageTypeHuman,
-				Parts: []llms.ContentPart{llms.TextPart(query)},
+				Role:  llmtypes.ChatMessageTypeHuman,
+				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
 			},
 		},
 	}
@@ -76,7 +76,7 @@ func runBasicReflection(model llms.Model) {
 	printResults(result)
 }
 
-func runTechnicalWriting(model llms.Model) {
+func runTechnicalWriting(model llmtypes.Model) {
 	config := prebuilt.ReflectionAgentConfig{
 		Model:         model,
 		MaxIterations: 2,
@@ -103,10 +103,10 @@ Provide specific, actionable feedback.`,
 	fmt.Printf("Query: %s\n\n", query)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role:  llms.ChatMessageTypeHuman,
-				Parts: []llms.ContentPart{llms.TextPart(query)},
+				Role:  llmtypes.ChatMessageTypeHuman,
+				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
 			},
 		},
 	}
@@ -119,7 +119,7 @@ Provide specific, actionable feedback.`,
 	printResults(result)
 }
 
-func runCodeReview(model llms.Model) {
+func runCodeReview(model llmtypes.Model) {
 	config := prebuilt.ReflectionAgentConfig{
 		Model:         model,
 		MaxIterations: 2,
@@ -154,10 +154,10 @@ func getUserById(id int) (*User, error) {
 	fmt.Printf("Query: Code review for getUserById function\n\n")
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role:  llms.ChatMessageTypeHuman,
-				Parts: []llms.ContentPart{llms.TextPart(query)},
+				Role:  llmtypes.ChatMessageTypeHuman,
+				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
 			},
 		},
 	}

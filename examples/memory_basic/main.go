@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/memory"
-	"github.com/tmc/langchaingo/llms"
 	langchainmemory "github.com/tmc/langchaingo/memory"
 )
 
@@ -127,7 +127,7 @@ func chatHistoryExample(ctx context.Context) {
 	history := memory.NewChatMessageHistory()
 
 	// Add different types of messages
-	err := history.AddMessage(ctx, llms.SystemChatMessage{
+	err := history.AddMessage(ctx, llmtypes.SystemChatMessage{
 		Content: "You are a helpful assistant.",
 	})
 	if err != nil {
@@ -223,9 +223,9 @@ func memoryIntegrationPattern(ctx context.Context) {
 		// This is what would happen in a graph node:
 		// 1. Load memory
 		memVars, _ := mem.LoadMemoryVariables(ctx, map[string]any{})
-		var historyMessages []llms.ChatMessage
+		var historyMessages []llmtypes.ChatMessage
 		if history, ok := memVars["history"]; ok {
-			if msgs, ok := history.([]llms.ChatMessage); ok {
+			if msgs, ok := history.([]llmtypes.ChatMessage); ok {
 				historyMessages = msgs
 			}
 		}

@@ -10,8 +10,8 @@ import (
 	"os"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // Example 1: Using OpenAI with LangChain
@@ -27,13 +27,13 @@ func OpenAIExample() {
 	}
 
 	// Create a graph that uses the LLM
-	g := graph.NewStateGraph[[]llms.MessageContent]()
+	g := graph.NewStateGraph[[]llmtypes.MessageContent]()
 
-	g.AddNode("chat", "chat", func(ctx context.Context, messages []llms.MessageContent) ([]llms.MessageContent, error) {
+	g.AddNode("chat", "chat", func(ctx context.Context, messages []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
 		// Use LangChain's GenerateContent method
 		response, err := model.GenerateContent(ctx, messages,
-			llms.WithTemperature(0.7),
-			llms.WithMaxTokens(150),
+			llmtypes.WithTemperature(0.7),
+			llmtypes.WithMaxTokens(150),
 		)
 		if err != nil {
 			return nil, fmt.Errorf("LLM generation failed: %w", err)
@@ -41,7 +41,7 @@ func OpenAIExample() {
 
 		// Append the response to messages
 		return append(messages,
-			llms.TextParts("ai", response.Choices[0].Content),
+			llmtypes.TextParts("ai", response.Choices[0].Content),
 		), nil
 	})
 
@@ -55,8 +55,8 @@ func OpenAIExample() {
 
 	// Execute with initial message
 	ctx := context.Background()
-	result, err := runnable.Invoke(ctx, []llms.MessageContent{
-		llms.TextParts("human", "What are the benefits of using LangChain with Go?"),
+	result, err := runnable.Invoke(ctx, []llmtypes.MessageContent{
+		llmtypes.TextParts("human", "What are the benefits of using LangChain with Go?"),
 	})
 	if err != nil {
 		log.Printf("Execution failed: %v", err)
@@ -76,7 +76,7 @@ func MultiStepReasoningExample() {
 	fmt.Println("======================================")
 
 	// Use whichever LLM is available
-	var model llms.Model
+	var model llmtypes.Model
 	var err error
 
 	ctx := context.Background()
@@ -98,13 +98,13 @@ func MultiStepReasoningExample() {
 
 	// Step 1: Analyze the problem
 	g.AddNode("analyze", "analyze", func(ctx context.Context, data map[string]any) (map[string]any, error) {
-		messages := []llms.MessageContent{
-			llms.TextParts("system", "You are a helpful assistant that breaks down problems step by step."),
-			llms.TextParts("human", data["problem"].(string)),
+		messages := []llmtypes.MessageContent{
+			llmtypes.TextParts("system", "You are a helpful assistant that breaks down problems step by step."),
+			llmtypes.TextParts("human", data["problem"].(string)),
 		}
 
 		response, err := model.GenerateContent(ctx, messages,
-			llms.WithTemperature(0.3), // Lower temperature for analysis
+			llmtypes.WithTemperature(0.3), // Lower temperature for analysis
 		)
 		if err != nil {
 			return nil, err
@@ -116,16 +116,16 @@ func MultiStepReasoningExample() {
 
 	// Step 2: Generate solution
 	g.AddNode("solve", "solve", func(ctx context.Context, data map[string]any) (map[string]any, error) {
-		messages := []llms.MessageContent{
-			llms.TextParts("system", "Based on the analysis, provide a clear solution."),
-			llms.TextParts("human", fmt.Sprintf(
+		messages := []llmtypes.MessageContent{
+			llmtypes.TextParts("system", "Based on the analysis, provide a clear solution."),
+			llmtypes.TextParts("human", fmt.Sprintf(
 				"Problem: %s\nAnalysis: %s\n\nProvide a solution:",
 				data["problem"], data["analysis"],
 			)),
 		}
 
 		response, err := model.GenerateContent(ctx, messages,
-			llms.WithTemperature(0.5),
+			llmtypes.WithTemperature(0.5),
 		)
 		if err != nil {
 			return nil, err
@@ -137,16 +137,16 @@ func MultiStepReasoningExample() {
 
 	// Step 3: Verify solution
 	g.AddNode("verify", "verify", func(ctx context.Context, data map[string]any) (map[string]any, error) {
-		messages := []llms.MessageContent{
-			llms.TextParts("system", "Verify if the solution is correct and complete."),
-			llms.TextParts("human", fmt.Sprintf(
+		messages := []llmtypes.MessageContent{
+			llmtypes.TextParts("system", "Verify if the solution is correct and complete."),
+			llmtypes.TextParts("human", fmt.Sprintf(
 				"Problem: %s\nSolution: %s\n\nVerify this solution:",
 				data["problem"], data["solution"],
 			)),
 		}
 
 		response, err := model.GenerateContent(ctx, messages,
-			llms.WithTemperature(0.2), // Very low temperature for verification
+			llmtypes.WithTemperature(0.2), // Very low temperature for verification
 		)
 		if err != nil {
 			return nil, err

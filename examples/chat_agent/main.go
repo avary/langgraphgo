@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func main() {

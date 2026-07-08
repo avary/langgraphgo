@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // CalculatorTool performs arithmetic operations
@@ -194,14 +194,14 @@ func main() {
 	fmt.Println("This example demonstrates how PTC allows LLMs to generate")
 	fmt.Println("code that calls tools programmatically, reducing API round-trips.\n")
 
-	// Create model (supports any LLM that implements llms.Model)
+	// Create model (supports any LLM that implements llmtypes.Model)
 	model, err := openai.New()
 	if err != nil {
 		log.Fatalf("Failed to create model: %v", err)
 	}
 
 	// Define tools
-	toolList := []tools.Tool{
+	toolList := []tooltypes.Tool{
 		CalculatorTool{},
 		WeatherTool{},
 		DataProcessorTool{},
@@ -228,10 +228,10 @@ func main() {
 	fmt.Println(strings.Repeat("-", 60))
 
 	result, err := agent.Invoke(context.Background(), map[string]any{
-		"messages": []llms.MessageContent{
+		"messages": []llmtypes.MessageContent{
 			{
-				Role:  llms.ChatMessageTypeHuman,
-				Parts: []llms.ContentPart{llms.TextPart(query)},
+				Role:  llmtypes.ChatMessageTypeHuman,
+				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
 			},
 		},
 	})
@@ -240,7 +240,7 @@ func main() {
 	}
 
 	// Print result
-	messages := result["messages"].([]llms.MessageContent)
+	messages := result["messages"].([]llmtypes.MessageContent)
 
 	fmt.Println("\n" + strings.Repeat("-", 60))
 	fmt.Println("Execution Complete!")
@@ -251,19 +251,19 @@ func main() {
 	for i, msg := range messages {
 		var role string
 		switch msg.Role {
-		case llms.ChatMessageTypeHuman:
+		case llmtypes.ChatMessageTypeHuman:
 			role = "User"
-		case llms.ChatMessageTypeAI:
+		case llmtypes.ChatMessageTypeAI:
 			role = "AI"
-		case llms.ChatMessageTypeTool:
+		case llmtypes.ChatMessageTypeTool:
 			role = "Tool"
-		case llms.ChatMessageTypeSystem:
+		case llmtypes.ChatMessageTypeSystem:
 			role = "System"
 		}
 
 		fmt.Printf("\n[%d] %s:\n", i+1, role)
 		for _, part := range msg.Parts {
-			if textPart, ok := part.(llms.TextContent); ok {
+			if textPart, ok := part.(llmtypes.TextContent); ok {
 				text := textPart.Text
 				// Truncate long messages for readability
 				if len(text) > 500 {
@@ -280,9 +280,9 @@ func main() {
 	fmt.Println("FINAL ANSWER:")
 	fmt.Println(strings.Repeat("=", 60))
 	for i := len(messages) - 1; i >= 0; i-- {
-		if messages[i].Role == llms.ChatMessageTypeAI {
+		if messages[i].Role == llmtypes.ChatMessageTypeAI {
 			for _, part := range messages[i].Parts {
-				if textPart, ok := part.(llms.TextContent); ok {
+				if textPart, ok := part.(llmtypes.TextContent); ok {
 					fmt.Println(textPart.Text)
 				}
 			}

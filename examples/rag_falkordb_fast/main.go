@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/adapter"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 	"github.com/smallnest/langgraphgo/rag"
 	"github.com/smallnest/langgraphgo/rag/store"
-	"github.com/tmc/langchaingo/llms/openai"
 )
 
 func main() {

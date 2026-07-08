@@ -9,10 +9,10 @@ import (
 
 	"github.com/smallnest/goskills"
 	adapter "github.com/smallnest/langgraphgo/adapter/goskills"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 	}
 
 	// 3. Convert Skills to Tools
-	var allTools []tools.Tool
+	var allTools []tooltypes.Tool
 	var allSystemMessages strings.Builder
 
 	allSystemMessages.WriteString("You are a helpful assistant that can use skills.\n\n")
@@ -94,8 +94,8 @@ func main() {
 	input := "Please use the available skill to say hello to the world."
 
 	resp, err := agent.Invoke(ctx, map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, input),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, input),
 		},
 	})
 	if err != nil {
@@ -120,7 +120,7 @@ license: MIT
 
 ## Overview
 
-The ` + "`hello_world`" + ` skill is the simplest possible skill in the ecosystem. Its primary purpose is to validate the operational status of the skill runner and the agent's ability to invoke tools.
+The ` + "`hello_world`" + ` skill is the simplest possible skill in the ecosystem. Its primary purpose is to validate the operational status of the skill runner and the agent's ability to invoke tooltypes.
 
 ## Functionality
 
@@ -168,7 +168,7 @@ print("Hello, World from Python!")
 	// Let's assume a simple structure.
 
 	// Actually, goskills uses `skill.yaml` and maybe other files.
-	// Let's create a `tools.json` or similar if goskills supports it, OR just rely on the fact that `goskills` might auto-detect scripts?
+	// Let's create a `tooltypes.json` or similar if goskills supports it, OR just rely on the fact that `goskills` might auto-detect scripts?
 	// `GenerateToolDefinitions` in `goskills` scans for scripts.
 
 	return nil

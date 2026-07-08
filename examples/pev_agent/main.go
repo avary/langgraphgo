@@ -7,10 +7,10 @@ import (
 	"os"
 	"strings"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // CalculatorTool for PEV demo
@@ -41,7 +41,7 @@ func main() {
 
 	config := prebuilt.PEVAgentConfig{
 		Model:      model,
-		Tools:      []tools.Tool{CalculatorTool{}},
+		Tools:      []tooltypes.Tool{CalculatorTool{}},
 		MaxRetries: 3,
 		Verbose:    true,
 	}
@@ -57,8 +57,8 @@ func main() {
 	fmt.Printf("User: %s\n\n", query)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, query),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, query),
 		},
 	}
 

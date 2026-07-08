@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"os"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	// Create PiAgent
 	agent, err := prebuilt.NewPiAgent(
 		model,
-		[]tools.Tool{searchTool},
+		[]tooltypes.Tool{searchTool},
 		prebuilt.WithPiSystemPrompt("You are a helpful research assistant. Use the search tool when you need to find current information."),
 		prebuilt.WithPiMaxIterations(5),
 	)
@@ -62,7 +62,7 @@ func main() {
 
 	// Example: Ask a question that might need the search tool
 	fmt.Println("\n=== Example: Research Query ===")
-	msg := llms.TextParts(llms.ChatMessageTypeHuman, "What's the latest news about AI agents?")
+	msg := llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "What's the latest news about AI agents?")
 
 	err = agent.Prompt(ctx, msg)
 	if err != nil {
@@ -76,7 +76,7 @@ func main() {
 	for i, m := range state.Messages {
 		fmt.Printf("[%d] %s: ", i+1, m.Role)
 		for _, part := range m.Parts {
-			if text, ok := part.(llms.TextContent); ok {
+			if text, ok := part.(llmtypes.TextContent); ok {
 				fmt.Println(text.Text)
 			}
 		}

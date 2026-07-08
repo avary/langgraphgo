@@ -6,10 +6,10 @@ import (
 	"log"
 	"os"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // WeatherTool is a simple tool to get weather
@@ -43,12 +43,12 @@ func main() {
 	}
 
 	// Define tools
-	inputTools := []tools.Tool{&WeatherTool{}}
+	inputTools := []tooltypes.Tool{&WeatherTool{}}
 
 	// Create agent with options using CreateAgentMap
 	agent, err := prebuilt.CreateAgentMap(model, inputTools, 0,
 		prebuilt.WithSystemMessage("You are a helpful weather assistant. Always be polite."),
-		prebuilt.WithStateModifier(func(msgs []llms.MessageContent) []llms.MessageContent {
+		prebuilt.WithStateModifier(func(msgs []llmtypes.MessageContent) []llmtypes.MessageContent {
 			// Example modifier: Log the number of messages
 			log.Printf("Current message count: %d", len(msgs))
 			return msgs
@@ -60,8 +60,8 @@ func main() {
 
 	// Initial input
 	inputs := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, "What is the weather in San Francisco?"),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "What is the weather in San Francisco?"),
 		},
 	}
 
@@ -73,14 +73,14 @@ func main() {
 	}
 
 	// Print result
-	messages := result["messages"].([]llms.MessageContent)
+	messages := result["messages"].([]llmtypes.MessageContent)
 	lastMsg := messages[len(messages)-1]
 
 	for _, part := range lastMsg.Parts {
 		switch p := part.(type) {
-		case llms.TextContent:
+		case llmtypes.TextContent:
 			fmt.Printf("Agent Response: %s\n", p.Text)
-		case llms.ToolCall:
+		case llmtypes.ToolCall:
 			fmt.Printf("Tool Call: %s\n", p.FunctionCall.Name)
 		}
 	}

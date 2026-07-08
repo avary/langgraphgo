@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // CalculatorTool is a simple tool for demonstration
@@ -69,7 +69,7 @@ func main() {
 	}
 
 	// Define Tools
-	inputTools := []tools.Tool{
+	inputTools := []tooltypes.Tool{
 		CalculatorTool{},
 	}
 
@@ -84,8 +84,8 @@ func main() {
 	fmt.Printf("User: %s\n", query)
 
 	initialState := map[string]any{
-		"messages": []llms.MessageContent{
-			llms.TextParts(llms.ChatMessageTypeHuman, query),
+		"messages": []llmtypes.MessageContent{
+			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, query),
 		},
 	}
 
@@ -95,11 +95,11 @@ func main() {
 	}
 
 	// Print Result
-	messages := res["messages"].([]llms.MessageContent)
+	messages := res["messages"].([]llmtypes.MessageContent)
 	lastMsg := messages[len(messages)-1]
 
 	if len(lastMsg.Parts) > 0 {
-		if textPart, ok := lastMsg.Parts[0].(llms.TextContent); ok {
+		if textPart, ok := lastMsg.Parts[0].(llmtypes.TextContent); ok {
 			fmt.Printf("Agent: %s\n", textPart.Text)
 		}
 	}

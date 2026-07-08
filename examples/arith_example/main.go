@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms/openai"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 )
 
 func main() {

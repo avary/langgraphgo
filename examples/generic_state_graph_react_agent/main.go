@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	_ "github.com/smallnest/langgraphgo/llmtypes"
 	_ "github.com/smallnest/langgraphgo/prebuilt"
-	_ "github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // SimpleCounterTool is a basic tool that counts
@@ -48,7 +48,7 @@ func main() {
 	fmt.Println("==========================")
 
 	// Create tools
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		&SimpleCounterTool{},
 		&EchoTool{},
 	}
@@ -65,11 +65,11 @@ func main() {
 	fmt.Println("```go")
 	fmt.Println("// Define your state type")
 	fmt.Println("type AgentState struct {")
-	fmt.Println("    Messages []llms.MessageContent")
+	fmt.Println("    Messages []llmtypes.MessageContent")
 	fmt.Println("}")
 	fmt.Println("")
 	fmt.Println("// Create the agent")
-	fmt.Println("agent, err := prebuilt.CreateReactAgentTyped[model, []tools.Tool]()")
+	fmt.Println("agent, err := prebuilt.CreateReactAgentTyped[model, []tooltypes.Tool]()")
 	fmt.Println("```")
 
 	// Example with custom state
@@ -77,7 +77,7 @@ func main() {
 	fmt.Println("```go")
 	fmt.Println("// Define custom state")
 	fmt.Println("type CustomState struct {")
-	fmt.Println("    Messages []llms.MessageContent")
+	fmt.Println("    Messages []llmtypes.MessageContent")
 	fmt.Println("    StepCount int")
 	fmt.Println("    ToolUseCount map[string]int")
 	fmt.Println("}")
@@ -86,13 +86,13 @@ func main() {
 	fmt.Println("agent, err := prebuilt.CreateReactAgentWithCustomStateTyped[CustomState] (")
 	fmt.Println("    model,")
 	fmt.Println("    tools,")
-	fmt.Println("    func(s CustomState) []llms.MessageContent { return s.Messages },")
-	fmt.Println("    func(s CustomState, msgs []llms.MessageContent) CustomState {")
+	fmt.Println("    func(s CustomState) []llmtypes.MessageContent { return s.Messages },")
+	fmt.Println("    func(s CustomState, msgs []llmtypes.MessageContent) CustomState {")
 	fmt.Println("        s.Messages = msgs")
 	fmt.Println("        s.StepCount++")
 	fmt.Println("        return s")
 	fmt.Println("    },")
-	fmt.Println("    func(msgs []llms.MessageContent) bool { /* check for tool calls */ },")
+	fmt.Println("    func(msgs []llmtypes.MessageContent) bool { /* check for tool calls */ },")
 	fmt.Println(")")
 	fmt.Println("```")
 
@@ -109,8 +109,8 @@ func main() {
 	fmt.Println("```go")
 	fmt.Println("// Initial state")
 	fmt.Println("state := ReactAgentState{")
-	fmt.Println("    Messages: []llms.MessageContent{")
-	fmt.Println("        llms.TextParts(llms.ChatMessageTypeHuman, \"What's 2+2?\"),")
+	fmt.Println("    Messages: []llmtypes.MessageContent{")
+	fmt.Println("        llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, \"What's 2+2?\"),")
 	fmt.Println("    },")
 	fmt.Println("}")
 	fmt.Println("")

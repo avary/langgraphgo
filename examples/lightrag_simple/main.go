@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 	"github.com/smallnest/langgraphgo/rag"
 	"github.com/smallnest/langgraphgo/rag/engine"
 	"github.com/smallnest/langgraphgo/rag/store"
-	"github.com/tmc/langchaingo/llms/openai"
 )
 
 // OpenAILLMAdapter wraps langchaingo's openai.LLM to implement rag.LLMInterface
