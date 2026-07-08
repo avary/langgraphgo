@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -391,17 +392,11 @@ func SkillsToTools(skill *goskills.SkillPackage, opts ...SkillsToToolsOptions) (
 			}
 		}
 		// 合并 NameMapping
-		for k, v := range opts[0].ToolConfig.NameMapping {
-			config.NameMapping[k] = v
-		}
+		maps.Copy(config.NameMapping, opts[0].ToolConfig.NameMapping)
 		// 合并 DescriptionOverrides
-		for k, v := range opts[0].ToolConfig.DescriptionOverrides {
-			config.DescriptionOverrides[k] = v
-		}
+		maps.Copy(config.DescriptionOverrides, opts[0].ToolConfig.DescriptionOverrides)
 		// 合并 SchemaOverrides
-		for k, v := range opts[0].ToolConfig.SchemaOverrides {
-			config.SchemaOverrides[k] = v
-		}
+		maps.Copy(config.SchemaOverrides, opts[0].ToolConfig.SchemaOverrides)
 	}
 
 	availableTools, scriptMap := goskills.GenerateToolDefinitions(skill)

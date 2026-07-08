@@ -129,9 +129,9 @@ func TestConcurrentExecution(t *testing.T) {
 
 	g := graph.NewStateGraph[map[string]any]()
 
-	var counter int32
+	var counter atomic.Int32
 	g.AddNode("increment", "increment", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		atomic.AddInt32(&counter, 1)
+		counter.Add(1)
 		return state, nil
 	})
 
@@ -169,7 +169,7 @@ func TestConcurrentExecution(t *testing.T) {
 	}
 
 	// Verify all executions completed
-	finalCount := atomic.LoadInt32(&counter)
+	finalCount := counter.Load()
 	if finalCount != int32(concurrency) {
 		t.Errorf("Expected %d executions, got %d", concurrency, finalCount)
 	}

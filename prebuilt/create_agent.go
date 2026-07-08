@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/smallnest/goskills"
@@ -76,9 +77,9 @@ func CreateAgentMap(model llmtypes.Model, inputTools []tooltypes.Tool, maxIterat
 				return nil, nil
 			}
 			userPrompt := ""
-			for i := len(messages) - 1; i >= 0; i-- {
-				if messages[i].Role == llmtypes.ChatMessageTypeHuman {
-					userPrompt = messages[i].Parts[0].(llmtypes.TextContent).Text
+			for _, message := range slices.Backward(messages) {
+				if message.Role == llmtypes.ChatMessageTypeHuman {
+					userPrompt = message.Parts[0].(llmtypes.TextContent).Text
 					break
 				}
 			}

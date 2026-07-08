@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"slices"
 	"sync"
 )
 
@@ -80,8 +81,8 @@ func (b *BufferMemory) AddMessage(ctx context.Context, msg *Message) error {
 	// Check token limit
 	if b.maxTokens > 0 {
 		totalTokens := 0
-		for i := len(b.messages) - 1; i >= 0; i-- {
-			totalTokens += b.messages[i].TokenCount
+		for i, v := range slices.Backward(b.messages) {
+			totalTokens += v.TokenCount
 			if totalTokens > b.maxTokens {
 				// Remove oldest messages
 				if b.autoSummarize && i > 0 {

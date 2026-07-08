@@ -63,10 +63,10 @@ func estimateTokens(text string) int {
 }
 
 // messageCounter is used to ensure unique IDs even when created in rapid succession
-var messageCounter uint64
+var messageCounter atomic.Uint64
 
 // generateID generates a unique ID for a message
 func generateID() string {
-	counter := atomic.AddUint64(&messageCounter, 1)
+	counter := messageCounter.Add(1)
 	return fmt.Sprintf("%s-%d", time.Now().Format("20060102150405.000000"), counter)
 }

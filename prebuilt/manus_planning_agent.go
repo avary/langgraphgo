@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -473,8 +474,8 @@ func generateFinalOutput(state map[string]any, config ManusConfig) (map[string]a
 
 	// Now collect in forward order (reversing our reverse collection)
 	var collected []string
-	for i := len(messages) - 1; i >= 0; i-- {
-		msg := messages[i]
+	for _, msg := range slices.Backward(messages) {
+
 		if msg.Role != llmtypes.ChatMessageTypeAI {
 			continue
 		}

@@ -5,6 +5,7 @@ package prebuilt
 import (
 	"context"
 	"fmt"
+	"maps"
 	"sync"
 	"time"
 
@@ -204,10 +205,10 @@ type PiAgentEvent struct {
 	Timestamp int64            `json:"timestamp"`
 
 	// Message fields
-	Message llmtypes.MessageContent `json:"message,omitempty"`
+	Message llmtypes.MessageContent `json:"message"`
 
 	// Turn end fields
-	TurnMessage llmtypes.MessageContent `json:"turn_message,omitempty"`
+	TurnMessage llmtypes.MessageContent `json:"turn_message"`
 	ToolResults []ToolResultMsg         `json:"tool_results,omitempty"`
 
 	// Tool execution fields
@@ -422,9 +423,7 @@ func (a *PiAgent) GetState() *PiAgentState {
 	}
 
 	copy(stateCopy.Messages, a.state.Messages)
-	for k, v := range a.state.PendingToolCalls {
-		stateCopy.PendingToolCalls[k] = v
-	}
+	maps.Copy(stateCopy.PendingToolCalls, a.state.PendingToolCalls)
 
 	return stateCopy
 }
@@ -645,9 +644,7 @@ func mergePiAgentState(current, new *PiAgentState) (*PiAgentState, error) {
 		if current.PendingToolCalls == nil {
 			current.PendingToolCalls = make(map[string]bool)
 		}
-		for k, v := range new.PendingToolCalls {
-			current.PendingToolCalls[k] = v
-		}
+		maps.Copy(current.PendingToolCalls, new.PendingToolCalls)
 	}
 	if new.Error != nil {
 		current.Error = new.Error

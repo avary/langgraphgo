@@ -80,7 +80,7 @@ func main() {
 		log.Printf("Failed to query nodes: %v", err)
 	} else {
 		fmt.Printf("Node query response: %v\n", res3)
-		if r, ok := res3.([]interface{}); ok {
+		if r, ok := res3.([]any); ok {
 			fmt.Printf("Query response length: %d\n", len(r))
 			for i, v := range r {
 				fmt.Printf("  [%d] type: %T\n", i, v)
