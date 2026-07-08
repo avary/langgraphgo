@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -31,25 +31,25 @@ const (
 // Inspired by pi-mono's AgentState interface
 type PiAgentState struct {
 	// Core state
-	SystemPrompt  string                `json:"system_prompt"`
-	Model         string                `json:"model"`
-	ThinkingLevel string                `json:"thinking_level"` // off, minimal, low, medium, high, xhigh
-	Messages      []llms.MessageContent `json:"messages"`
-	Tools         []tools.Tool          `json:"-"`
+	SystemPrompt  string                    `json:"system_prompt"`
+	Model         string                    `json:"model"`
+	ThinkingLevel string                    `json:"thinking_level"` // off, minimal, low, medium, high, xhigh
+	Messages      []llmtypes.MessageContent `json:"messages"`
+	Tools         []tools.Tool              `json:"-"`
 
 	// Streaming state
-	IsStreaming   bool                 `json:"is_streaming"`
-	StreamMessage *llms.MessageContent `json:"stream_message,omitempty"`
+	IsStreaming   bool                     `json:"is_streaming"`
+	StreamMessage *llmtypes.MessageContent `json:"stream_message,omitempty"`
 
 	// Tool execution
 	PendingToolCalls map[string]bool `json:"pending_tool_calls"`
 	Error            error           `json:"error,omitempty"`
 
 	// Message queues for steering and follow-up
-	SteeringQueue []llms.MessageContent `json:"steering_queue,omitempty"`
-	SteeringMode  MessageQueueMode      `json:"steering_mode"`
-	FollowUpQueue []llms.MessageContent `json:"follow_up_queue,omitempty"`
-	FollowUpMode  MessageQueueMode      `json:"follow_up_mode"`
+	SteeringQueue []llmtypes.MessageContent `json:"steering_queue,omitempty"`
+	SteeringMode  MessageQueueMode          `json:"steering_mode"`
+	FollowUpQueue []llmtypes.MessageContent `json:"follow_up_queue,omitempty"`
+	FollowUpMode  MessageQueueMode          `json:"follow_up_mode"`
 
 	// Session info
 	SessionKey string `json:"session_key,omitempty"`
@@ -61,52 +61,52 @@ type PiAgentState struct {
 // NewPiAgentState creates a new agent state
 func NewPiAgentState() *PiAgentState {
 	return &PiAgentState{
-		Messages:         make([]llms.MessageContent, 0),
+		Messages:         make([]llmtypes.MessageContent, 0),
 		Tools:            make([]tools.Tool, 0),
 		PendingToolCalls: make(map[string]bool),
-		SteeringQueue:    make([]llms.MessageContent, 0),
+		SteeringQueue:    make([]llmtypes.MessageContent, 0),
 		SteeringMode:     QueueModeAll,
-		FollowUpQueue:    make([]llms.MessageContent, 0),
+		FollowUpQueue:    make([]llmtypes.MessageContent, 0),
 		FollowUpMode:     QueueModeAll,
 		ThinkingLevel:    "off",
 	}
 }
 
 // AddMessage adds a message to the state
-func (s *PiAgentState) AddMessage(msg llms.MessageContent) {
+func (s *PiAgentState) AddMessage(msg llmtypes.MessageContent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.Messages = append(s.Messages, msg)
 }
 
 // AddMessages adds multiple messages to the state
-func (s *PiAgentState) AddMessages(msgs []llms.MessageContent) {
+func (s *PiAgentState) AddMessages(msgs []llmtypes.MessageContent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.Messages = append(s.Messages, msgs...)
 }
 
 // Steer adds a steering message to interrupt the agent mid-run
-func (s *PiAgentState) Steer(msg llms.MessageContent) {
+func (s *PiAgentState) Steer(msg llmtypes.MessageContent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.SteeringQueue = append(s.SteeringQueue, msg)
 }
 
 // FollowUp adds a follow-up message to be processed after agent finishes
-func (s *PiAgentState) FollowUp(msg llms.MessageContent) {
+func (s *PiAgentState) FollowUp(msg llmtypes.MessageContent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.FollowUpQueue = append(s.FollowUpQueue, msg)
 }
 
 // DequeueSteeringMessages gets and clears steering messages based on queue mode
-func (s *PiAgentState) DequeueSteeringMessages() []llms.MessageContent {
+func (s *PiAgentState) DequeueSteeringMessages() []llmtypes.MessageContent {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if len(s.SteeringQueue) == 0 {
-		return []llms.MessageContent{}
+		return []llmtypes.MessageContent{}
 	}
 
 	switch s.SteeringMode {
@@ -114,22 +114,22 @@ func (s *PiAgentState) DequeueSteeringMessages() []llms.MessageContent {
 		// Return only the first message
 		msg := s.SteeringQueue[0]
 		s.SteeringQueue = s.SteeringQueue[1:]
-		return []llms.MessageContent{msg}
+		return []llmtypes.MessageContent{msg}
 	default: // QueueModeAll
 		// Return all messages
 		msgs := s.SteeringQueue
-		s.SteeringQueue = make([]llms.MessageContent, 0)
+		s.SteeringQueue = make([]llmtypes.MessageContent, 0)
 		return msgs
 	}
 }
 
 // DequeueFollowUpMessages gets and clears follow-up messages based on queue mode
-func (s *PiAgentState) DequeueFollowUpMessages() []llms.MessageContent {
+func (s *PiAgentState) DequeueFollowUpMessages() []llmtypes.MessageContent {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if len(s.FollowUpQueue) == 0 {
-		return []llms.MessageContent{}
+		return []llmtypes.MessageContent{}
 	}
 
 	switch s.FollowUpMode {
@@ -137,11 +137,11 @@ func (s *PiAgentState) DequeueFollowUpMessages() []llms.MessageContent {
 		// Return only the first message
 		msg := s.FollowUpQueue[0]
 		s.FollowUpQueue = s.FollowUpQueue[1:]
-		return []llms.MessageContent{msg}
+		return []llmtypes.MessageContent{msg}
 	default: // QueueModeAll
 		// Return all messages
 		msgs := s.FollowUpQueue
-		s.FollowUpQueue = make([]llms.MessageContent, 0)
+		s.FollowUpQueue = make([]llmtypes.MessageContent, 0)
 		return msgs
 	}
 }
@@ -204,11 +204,11 @@ type PiAgentEvent struct {
 	Timestamp int64            `json:"timestamp"`
 
 	// Message fields
-	Message llms.MessageContent `json:"message,omitempty"`
+	Message llmtypes.MessageContent `json:"message,omitempty"`
 
 	// Turn end fields
-	TurnMessage llms.MessageContent `json:"turn_message,omitempty"`
-	ToolResults []ToolResultMsg     `json:"tool_results,omitempty"`
+	TurnMessage llmtypes.MessageContent `json:"turn_message,omitempty"`
+	ToolResults []ToolResultMsg         `json:"tool_results,omitempty"`
 
 	// Tool execution fields
 	ToolCallID    string         `json:"tool_call_id,omitempty"`
@@ -219,7 +219,7 @@ type PiAgentEvent struct {
 	PartialResult any            `json:"partial_result,omitempty"`
 
 	// Agent end fields
-	FinalMessages []llms.MessageContent `json:"final_messages,omitempty"`
+	FinalMessages []llmtypes.MessageContent `json:"final_messages,omitempty"`
 }
 
 // ToolResultMsg represents a tool result message
@@ -239,14 +239,14 @@ type ToolResultMsg struct {
 // It provides state management, message queues, and event subscription
 type PiAgent struct {
 	state         *PiAgentState
-	model         llms.Model
+	model         llmtypes.Model
 	listeners     []func(PiAgentEvent)
 	listenersMu   sync.RWMutex
 	runnable      *graph.StateRunnable[*PiAgentState]
 	cancelFunc    context.CancelFunc
 	streamMode    graph.StreamMode
-	convertToLLM  func([]llms.MessageContent) ([]llms.MessageContent, error)
-	transformCtx  func([]llms.MessageContent) ([]llms.MessageContent, error)
+	convertToLLM  func([]llmtypes.MessageContent) ([]llmtypes.MessageContent, error)
+	transformCtx  func([]llmtypes.MessageContent) ([]llmtypes.MessageContent, error)
 	maxIterations int
 }
 
@@ -289,14 +289,14 @@ func WithPiStreamMode(mode graph.StreamMode) PiAgentOption {
 }
 
 // WithConvertToLLM sets the message conversion function
-func WithPiConvertToLLM(fn func([]llms.MessageContent) ([]llms.MessageContent, error)) PiAgentOption {
+func WithPiConvertToLLM(fn func([]llmtypes.MessageContent) ([]llmtypes.MessageContent, error)) PiAgentOption {
 	return func(a *PiAgent) {
 		a.convertToLLM = fn
 	}
 }
 
 // WithTransformContext sets the context transformation function
-func WithPiTransformContext(fn func([]llms.MessageContent) ([]llms.MessageContent, error)) PiAgentOption {
+func WithPiTransformContext(fn func([]llmtypes.MessageContent) ([]llmtypes.MessageContent, error)) PiAgentOption {
 	return func(a *PiAgent) {
 		a.transformCtx = fn
 	}
@@ -311,7 +311,7 @@ func WithPiMaxIterations(max int) PiAgentOption {
 
 // NewPiAgent creates a new PiAgent
 // Inspired by pi-mono's Agent class constructor
-func NewPiAgent(model llms.Model, inputTools []tools.Tool, opts ...PiAgentOption) (*PiAgent, error) {
+func NewPiAgent(model llmtypes.Model, inputTools []tools.Tool, opts ...PiAgentOption) (*PiAgent, error) {
 	state := NewPiAgentState()
 	state.Model = "model"
 	state.Tools = inputTools
@@ -384,20 +384,20 @@ func (a *PiAgent) SetTools(tools []tools.Tool) {
 
 // Steer adds a steering message to interrupt the agent mid-run
 // Inspired by pi-mono's Agent.steer()
-func (a *PiAgent) Steer(msg llms.MessageContent) {
+func (a *PiAgent) Steer(msg llmtypes.MessageContent) {
 	a.state.Steer(msg)
 }
 
 // FollowUp adds a follow-up message to be processed after agent finishes
 // Inspired by pi-mono's Agent.followUp()
-func (a *PiAgent) FollowUp(msg llms.MessageContent) {
+func (a *PiAgent) FollowUp(msg llmtypes.MessageContent) {
 	a.state.FollowUp(msg)
 }
 
 // ReplaceMessages replaces the message history
 // Inspired by pi-mono's Agent.replaceMessages()
-func (a *PiAgent) ReplaceMessages(msgs []llms.MessageContent) {
-	a.state.Messages = make([]llms.MessageContent, len(msgs))
+func (a *PiAgent) ReplaceMessages(msgs []llmtypes.MessageContent) {
+	a.state.Messages = make([]llmtypes.MessageContent, len(msgs))
 	copy(a.state.Messages, msgs)
 }
 
@@ -411,7 +411,7 @@ func (a *PiAgent) GetState() *PiAgentState {
 		SystemPrompt:     a.state.SystemPrompt,
 		Model:            a.state.Model,
 		ThinkingLevel:    a.state.ThinkingLevel,
-		Messages:         make([]llms.MessageContent, len(a.state.Messages)),
+		Messages:         make([]llmtypes.MessageContent, len(a.state.Messages)),
 		IsStreaming:      a.state.IsStreaming,
 		StreamMessage:    a.state.StreamMessage,
 		PendingToolCalls: make(map[string]bool),
@@ -470,7 +470,7 @@ func (a *PiAgent) Reset() {
 
 // Prompt sends a prompt to the agent and executes it
 // Inspired by pi-mono's Agent.prompt()
-func (a *PiAgent) Prompt(ctx context.Context, msg llms.MessageContent) error {
+func (a *PiAgent) Prompt(ctx context.Context, msg llmtypes.MessageContent) error {
 	// Create child context with cancel
 	ctx, cancel := context.WithCancel(ctx)
 	a.cancelFunc = cancel
@@ -503,7 +503,7 @@ func (a *PiAgent) Prompt(ctx context.Context, msg llms.MessageContent) error {
 	finalState, err := a.runnable.Invoke(ctx, a.state)
 
 	// Emit agent_end event
-	finalMessages := []llms.MessageContent{}
+	finalMessages := []llmtypes.MessageContent{}
 	if finalState != nil {
 		finalMessages = finalState.Messages
 	}
@@ -529,7 +529,7 @@ func (a *PiAgent) Prompt(ctx context.Context, msg llms.MessageContent) error {
 
 // PromptWithStream sends a prompt and returns a stream of events
 // Inspired by pi-mono's streaming agent loop
-func (a *PiAgent) PromptWithStream(ctx context.Context, msg llms.MessageContent) (<-chan PiAgentEvent, <-chan error, func()) {
+func (a *PiAgent) PromptWithStream(ctx context.Context, msg llmtypes.MessageContent) (<-chan PiAgentEvent, <-chan error, func()) {
 	// Create child context with cancel
 	ctx, cancel := context.WithCancel(ctx)
 	a.cancelFunc = cancel
@@ -567,7 +567,7 @@ func (a *PiAgent) PromptWithStream(ctx context.Context, msg llms.MessageContent)
 		finalState, err := a.runnable.Invoke(ctx, a.state)
 
 		// Emit agent_end event
-		finalMessages := []llms.MessageContent{}
+		finalMessages := []llmtypes.MessageContent{}
 		if finalState != nil {
 			finalMessages = finalState.Messages
 		}
@@ -591,7 +591,7 @@ func (a *PiAgent) PromptWithStream(ctx context.Context, msg llms.MessageContent)
 
 // buildPiAgentGraph builds the agent execution graph
 // Inspired by pi-mono's agentLoop function
-func buildPiAgentGraph(agent *PiAgent, model llms.Model, inputTools []tools.Tool) (*graph.StateRunnable[*PiAgentState], error) {
+func buildPiAgentGraph(agent *PiAgent, model llmtypes.Model, inputTools []tools.Tool) (*graph.StateRunnable[*PiAgentState], error) {
 	// Create state graph with schema
 	g := graph.NewStateGraph[*PiAgentState]()
 
@@ -671,22 +671,22 @@ func mergePiAgentState(current, new *PiAgentState) (*PiAgentState, error) {
 }
 
 // newPiAgentNode builds the "agent" node function that calls the LLM and
-// returns a single new AI message.
-func newPiAgentNode(agent *PiAgent, model llms.Model, inputTools []tools.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
+// returns a single new AI llmtypes.
+func newPiAgentNode(agent *PiAgent, model llmtypes.Model, inputTools []tools.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
 	maxIterations := agent.maxIterations
 	return func(ctx context.Context, state *PiAgentState) (*PiAgentState, error) {
 		iterationCount := 0
 		if state.Messages != nil {
 			for _, msg := range state.Messages {
-				if msg.Role == llms.ChatMessageTypeAI {
+				if msg.Role == llmtypes.ChatMessageTypeAI {
 					iterationCount++
 				}
 			}
 		}
 
 		if iterationCount >= maxIterations {
-			finalMsg := llms.TextParts(llms.ChatMessageTypeAI, "Maximum iterations reached. Please try a simpler query.")
-			return &PiAgentState{Messages: []llms.MessageContent{finalMsg}}, nil
+			finalMsg := llmtypes.TextParts(llmtypes.ChatMessageTypeAI, "Maximum iterations reached. Please try a simpler query.")
+			return &PiAgentState{Messages: []llmtypes.MessageContent{finalMsg}}, nil
 		}
 
 		messagesToUse := state.Messages
@@ -701,17 +701,17 @@ func newPiAgentNode(agent *PiAgent, model llms.Model, inputTools []tools.Tool) f
 			}
 		}
 
-		msgsToSend := make([]llms.MessageContent, 0, len(messagesToUse))
+		msgsToSend := make([]llmtypes.MessageContent, 0, len(messagesToUse))
 		if agent.state.SystemPrompt != "" {
-			msgsToSend = append(msgsToSend, llms.TextParts(llms.ChatMessageTypeSystem, agent.state.SystemPrompt))
+			msgsToSend = append(msgsToSend, llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, agent.state.SystemPrompt))
 		}
 		msgsToSend = append(msgsToSend, messagesToUse...)
 
-		var toolDefs []llms.Tool
+		var toolDefs []llmtypes.Tool
 		for _, t := range inputTools {
-			toolDefs = append(toolDefs, llms.Tool{
+			toolDefs = append(toolDefs, llmtypes.Tool{
 				Type: "function",
-				Function: &llms.FunctionDefinition{
+				Function: &llmtypes.FunctionDefinition{
 					Name:        t.Name(),
 					Description: t.Description(),
 					Parameters:  getToolSchema(t),
@@ -719,21 +719,21 @@ func newPiAgentNode(agent *PiAgent, model llms.Model, inputTools []tools.Tool) f
 			})
 		}
 
-		resp, err := model.GenerateContent(ctx, msgsToSend, llms.WithTools(toolDefs), llms.WithToolChoice("auto"))
+		resp, err := model.GenerateContent(ctx, msgsToSend, llmtypes.WithTools(toolDefs), llmtypes.WithToolChoice("auto"))
 		if err != nil {
 			return &PiAgentState{}, fmt.Errorf("LLM call failed: %w", err)
 		}
 
 		choice := resp.Choices[0]
-		aiMsg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
+		aiMsg := llmtypes.MessageContent{Role: llmtypes.ChatMessageTypeAI}
 		if choice.Content != "" {
-			aiMsg.Parts = append(aiMsg.Parts, llms.TextPart(choice.Content))
+			aiMsg.Parts = append(aiMsg.Parts, llmtypes.TextPart(choice.Content))
 		}
 		for _, tc := range choice.ToolCalls {
 			aiMsg.Parts = append(aiMsg.Parts, tc)
 		}
 
-		return &PiAgentState{Messages: []llms.MessageContent{aiMsg}}, nil
+		return &PiAgentState{Messages: []llmtypes.MessageContent{aiMsg}}, nil
 	}
 }
 
@@ -746,15 +746,15 @@ func newPiToolsNode(agent *PiAgent, inputTools []tools.Tool) func(context.Contex
 		}
 
 		lastMsg := state.Messages[len(state.Messages)-1]
-		if lastMsg.Role != llms.ChatMessageTypeAI {
+		if lastMsg.Role != llmtypes.ChatMessageTypeAI {
 			return &PiAgentState{}, nil
 		}
 
 		toolExecutor := NewToolExecutor(inputTools)
 
-		var toolMessages []llms.MessageContent
+		var toolMessages []llmtypes.MessageContent
 		for _, part := range lastMsg.Parts {
-			tc, ok := part.(llms.ToolCall)
+			tc, ok := part.(llmtypes.ToolCall)
 			if !ok {
 				continue
 			}
@@ -782,10 +782,10 @@ func newPiToolsNode(agent *PiAgent, inputTools []tools.Tool) func(context.Contex
 				ToolError:  err != nil,
 			})
 
-			toolMessages = append(toolMessages, llms.MessageContent{
-				Role: llms.ChatMessageTypeTool,
-				Parts: []llms.ContentPart{
-					llms.ToolCallResponse{
+			toolMessages = append(toolMessages, llmtypes.MessageContent{
+				Role: llmtypes.ChatMessageTypeTool,
+				Parts: []llmtypes.ContentPart{
+					llmtypes.ToolCallResponse{
 						ToolCallID: tc.ID,
 						Name:       tc.FunctionCall.Name,
 						Content:    res,
@@ -812,12 +812,12 @@ func routePiAgent(ctx context.Context, state *PiAgentState) string {
 	}
 
 	lastMsg := state.Messages[len(state.Messages)-1]
-	if lastMsg.Role != llms.ChatMessageTypeAI {
+	if lastMsg.Role != llmtypes.ChatMessageTypeAI {
 		return graph.END
 	}
 
 	for _, part := range lastMsg.Parts {
-		if _, ok := part.(llms.ToolCall); ok {
+		if _, ok := part.(llmtypes.ToolCall); ok {
 			return "tools"
 		}
 	}

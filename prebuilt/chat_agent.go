@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -18,18 +18,18 @@ type ChatAgent struct {
 	// The session ID for this conversation
 	threadID string
 	// Conversation history
-	messages []llms.MessageContent
+	messages []llmtypes.MessageContent
 	// Dynamic tools that can be updated at runtime
 	dynamicTools []tools.Tool
 	// Model reference for streaming (optional)
-	model llms.Model
+	model llmtypes.Model
 	// Options used when creating the agent
 	options *CreateAgentOptions
 }
 
 // NewChatAgent creates a new ChatAgent.
 // It wraps the underlying agent graph and manages conversation history automatically.
-func NewChatAgent(model llms.Model, inputTools []tools.Tool, opts ...CreateAgentOption) (*ChatAgent, error) {
+func NewChatAgent(model llmtypes.Model, inputTools []tools.Tool, opts ...CreateAgentOption) (*ChatAgent, error) {
 	// Parse options
 	options := &CreateAgentOptions{}
 	for _, opt := range opts {
@@ -48,7 +48,7 @@ func NewChatAgent(model llms.Model, inputTools []tools.Tool, opts ...CreateAgent
 	return &ChatAgent{
 		Runnable:     agent,
 		threadID:     threadID,
-		messages:     make([]llms.MessageContent, 0),
+		messages:     make([]llmtypes.MessageContent, 0),
 		dynamicTools: make([]tools.Tool, 0),
 		model:        model,
 		options:      options,
@@ -64,7 +64,7 @@ func (c *ChatAgent) ThreadID() string {
 // It maintains the conversation context by accumulating message history.
 func (c *ChatAgent) Chat(ctx context.Context, message string) (string, error) {
 	// 1. Add user message to history
-	userMsg := llms.TextParts(llms.ChatMessageTypeHuman, message)
+	userMsg := llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, message)
 	c.messages = append(c.messages, userMsg)
 
 	// 2. Construct input with full conversation history and dynamic tools
@@ -92,7 +92,7 @@ func (c *ChatAgent) Chat(ctx context.Context, message string) (string, error) {
 
 	// 5. Extract messages from response
 	// resp is already map[string]any from StateRunnable[map[string]any]
-	messages, ok := resp["messages"].([]llms.MessageContent)
+	messages, ok := resp["messages"].([]llmtypes.MessageContent)
 	if !ok || len(messages) == 0 {
 		return "", fmt.Errorf("no messages in response")
 	}
@@ -107,7 +107,7 @@ func (c *ChatAgent) Chat(ctx context.Context, message string) (string, error) {
 	}
 
 	switch part := lastMsg.Parts[0].(type) {
-	case llms.TextContent:
+	case llmtypes.TextContent:
 		return part.Text, nil
 	default:
 		return fmt.Sprintf("%v", part), nil
@@ -183,7 +183,7 @@ func (c *ChatAgent) AsyncChat(ctx context.Context, message string) (<-chan strin
 	outputChan := make(chan string, 100)
 
 	// Add user message to history
-	userMsg := llms.TextParts(llms.ChatMessageTypeHuman, message)
+	userMsg := llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, message)
 	c.messages = append(c.messages, userMsg)
 
 	// Prepare messages to send
@@ -191,8 +191,8 @@ func (c *ChatAgent) AsyncChat(ctx context.Context, message string) (<-chan strin
 
 	// Apply system message if provided
 	if c.options != nil && c.options.SystemMessage != "" {
-		sysMsg := llms.TextParts(llms.ChatMessageTypeSystem, c.options.SystemMessage)
-		msgsToSend = append([]llms.MessageContent{sysMsg}, msgsToSend...)
+		sysMsg := llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, c.options.SystemMessage)
+		msgsToSend = append([]llmtypes.MessageContent{sysMsg}, msgsToSend...)
 	}
 
 	// Apply state modifier if provided
@@ -220,16 +220,16 @@ func (c *ChatAgent) AsyncChat(ctx context.Context, message string) (<-chan strin
 		}
 
 		// Call model with streaming enabled
-		_, err := c.model.GenerateContent(ctx, msgsToSend, llms.WithStreamingFunc(streamingFunc))
+		_, err := c.model.GenerateContent(ctx, msgsToSend, llmtypes.WithStreamingFunc(streamingFunc))
 		if err != nil {
 			// Error during streaming, channel will be closed
 			return
 		}
 
 		// Add AI response to history
-		aiMsg := llms.MessageContent{
-			Role:  llms.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart(fullResponse)},
+		aiMsg := llmtypes.MessageContent{
+			Role:  llmtypes.ChatMessageTypeAI,
+			Parts: []llmtypes.ContentPart{llmtypes.TextPart(fullResponse)},
 		}
 		c.messages = append(c.messages, aiMsg)
 	}()

@@ -31,7 +31,7 @@
 //
 //	import (
 //		"github.com/smallnest/langgraphgo/ptc"
-//		"github.com/tmc/langchaingo/llms"
+//		"github.com/smallnest/langgraphgo/llmtypes"
 //		"github.com/tmc/langchaingo/tools"
 //	)
 //
@@ -94,11 +94,11 @@
 //		// Execute agent
 //		ctx := context.Background()
 //		result, err := agent.Invoke(ctx, map[string]any{
-//			"messages": []llms.MessageContent{
+//			"messages": []llmtypes.MessageContent{
 //				{
-//					Role: llms.ChatMessageTypeHuman,
-//					Parts: []llms.ContentPart{
-//						llms.TextPart("What is 123 * 456?"),
+//					Role: llmtypes.ChatMessageTypeHuman,
+//					Parts: []llmtypes.ContentPart{
+//						llmtypes.TextPart("What is 123 * 456?"),
 //					},
 //				},
 //			},

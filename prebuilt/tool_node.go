@@ -5,26 +5,26 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // ToolNodeMap is a reusable node that executes tool calls from the last AI message
 // for map[string]any state.
 func ToolNodeMap(executor *ToolExecutor) func(context.Context, map[string]any) (map[string]any, error) {
 	return func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages, ok := state["messages"].([]llms.MessageContent)
+		messages, ok := state["messages"].([]llmtypes.MessageContent)
 		if !ok || len(messages) == 0 {
 			return nil, fmt.Errorf("no messages found in state")
 		}
 
 		lastMsg := messages[len(messages)-1]
-		if lastMsg.Role != llms.ChatMessageTypeAI {
+		if lastMsg.Role != llmtypes.ChatMessageTypeAI {
 			return nil, fmt.Errorf("last message is not an AI message")
 		}
 
-		var toolMessages []llms.MessageContent
+		var toolMessages []llmtypes.MessageContent
 		for _, part := range lastMsg.Parts {
-			if tc, ok := part.(llms.ToolCall); ok {
+			if tc, ok := part.(llmtypes.ToolCall); ok {
 				var args map[string]any
 				_ = json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args)
 
@@ -43,10 +43,10 @@ func ToolNodeMap(executor *ToolExecutor) func(context.Context, map[string]any) (
 					res = fmt.Sprintf("Error: %v", err)
 				}
 
-				toolMessages = append(toolMessages, llms.MessageContent{
-					Role: llms.ChatMessageTypeTool,
-					Parts: []llms.ContentPart{
-						llms.ToolCallResponse{
+				toolMessages = append(toolMessages, llmtypes.MessageContent{
+					Role: llmtypes.ChatMessageTypeTool,
+					Parts: []llmtypes.ContentPart{
+						llmtypes.ToolCallResponse{
 							ToolCallID: tc.ID,
 							Name:       tc.FunctionCall.Name,
 							Content:    res,
@@ -65,8 +65,8 @@ func ToolNodeMap(executor *ToolExecutor) func(context.Context, map[string]any) (
 // ToolNode creates a generic tool execution node
 func ToolNode[S any](
 	executor *ToolExecutor,
-	getMessages func(S) []llms.MessageContent,
-	setMessages func(S, []llms.MessageContent) S,
+	getMessages func(S) []llmtypes.MessageContent,
+	setMessages func(S, []llmtypes.MessageContent) S,
 ) func(context.Context, S) (S, error) {
 	return func(ctx context.Context, state S) (S, error) {
 		messages := getMessages(state)
@@ -75,13 +75,13 @@ func ToolNode[S any](
 		}
 
 		lastMsg := messages[len(messages)-1]
-		if lastMsg.Role != llms.ChatMessageTypeAI {
+		if lastMsg.Role != llmtypes.ChatMessageTypeAI {
 			return state, fmt.Errorf("not an AI message")
 		}
 
-		var toolMessages []llms.MessageContent
+		var toolMessages []llmtypes.MessageContent
 		for _, part := range lastMsg.Parts {
-			if tc, ok := part.(llms.ToolCall); ok {
+			if tc, ok := part.(llmtypes.ToolCall); ok {
 				var args map[string]any
 				_ = json.Unmarshal([]byte(tc.FunctionCall.Arguments), &args)
 
@@ -100,10 +100,10 @@ func ToolNode[S any](
 					res = fmt.Sprintf("Error: %v", err)
 				}
 
-				toolMessages = append(toolMessages, llms.MessageContent{
-					Role: llms.ChatMessageTypeTool,
-					Parts: []llms.ContentPart{
-						llms.ToolCallResponse{
+				toolMessages = append(toolMessages, llmtypes.MessageContent{
+					Role: llmtypes.ChatMessageTypeTool,
+					Parts: []llmtypes.ContentPart{
+						llmtypes.ToolCallResponse{
 							ToolCallID: tc.ID,
 							Name:       tc.FunctionCall.Name,
 							Content:    res,

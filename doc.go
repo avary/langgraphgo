@@ -39,11 +39,11 @@
 //		// Execute the agent
 //		ctx := context.Background()
 //		result, _ := agent.Invoke(ctx, map[string]any{
-//			"messages": []llms.MessageContent{
+//			"messages": []llmtypes.MessageContent{
 //				{
-//					Role: llms.ChatMessageTypeHuman,
-//					Parts: []llms.ContentPart{
-//						llms.TextPart("What is 123 * 456?"),
+//					Role: llmtypes.ChatMessageTypeHuman,
+//					Parts: []llmtypes.ContentPart{
+//						llmtypes.TextPart("What is 123 * 456?"),
 //					},
 //				},
 //			},
@@ -276,11 +276,11 @@
 //
 //		// Execute workflow
 //		result, _ := supervisor.Invoke(ctx, map[string]any{
-//			"messages": []llms.MessageContent{
+//			"messages": []llmtypes.MessageContent{
 //				{
-//					Role: llms.ChatMessageTypeHuman,
-//					Parts: []llms.ContentPart{
-//						llms.TextPart("Write a research paper on quantum computing"),
+//					Role: llmtypes.ChatMessageTypeHuman,
+//					Parts: []llmtypes.ContentPart{
+//						llmtypes.TextPart("Write a research paper on quantum computing"),
 //					},
 //				},
 //			},
@@ -300,7 +300,7 @@
 //		"github.com/smallnest/langgraphgo/memory"
 //		"github.com/smallnest/langgraphgo/store/postgres"
 //		"github.com/tmc/langchaingo/embeddings/openai"
-//		"github.com/tmc/langchaingo/llms"
+//		"github.com/smallnest/langgraphgo/llmtypes"
 //		"github.com/tmc/langchaingo/vectorstores/pgvector"
 //	)
 //
@@ -340,11 +340,11 @@
 //
 //		// Query the system
 //		result, _ := rag.Invoke(ctx, map[string]any{
-//			"messages": []llms.MessageContent{
+//			"messages": []llmtypes.MessageContent{
 //				{
-//					Role: llms.ChatMessageTypeHuman,
-//					Parts: []llms.ContentPart{
-//						llms.TextPart("What are the latest developments in AI?"),
+//					Role: llmtypes.ChatMessageTypeHuman,
+//					Parts: []llmtypes.ContentPart{
+//						llmtypes.TextPart("What are the latest developments in AI?"),
 //					},
 //				},
 //			},

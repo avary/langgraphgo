@@ -13,7 +13,7 @@
 //
 //	import (
 //		"github.com/smallnest/langgraphgo/prebuilt"
-//		"github.com/tmc/langchaingo/llms"
+//		"github.com/smallnest/langgraphgo/llmtypes"
 //		"github.com/tmc/langchaingo/tools"
 //	)
 //
@@ -29,11 +29,11 @@
 //
 //	// Execute agent
 //	result, err := agent.Invoke(ctx, map[string]any{
-//		"messages": []llms.MessageContent{
+//		"messages": []llmtypes.MessageContent{
 //			{
-//				Role: llms.ChatMessageTypeHuman,
-//				Parts: []llms.ContentPart{
-//					llms.TextPart("What's the weather in London and calculate 15% of 100?"),
+//				Role: llmtypes.ChatMessageTypeHuman,
+//				Parts: []llmtypes.ContentPart{
+//					llmtypes.TextPart("What's the weather in London and calculate 15% of 100?"),
 //				},
 //			},
 //		},
@@ -43,7 +43,7 @@
 // A type-safe version of the ReAct agent using Go generics:
 //
 //	type AgentState struct {
-//		Messages       []llms.MessageContent `json:"messages"`
+//		Messages       []llmtypes.MessageContent `json:"messages"`
 //		IterationCount int                    `json:"iteration_count"`
 //	}
 //
@@ -77,11 +77,11 @@
 //
 //	// Use supervisor to route tasks
 //	result, err := supervisor.Invoke(ctx, map[string]any{
-//		"messages": []llms.MessageContent{
+//		"messages": []llmtypes.MessageContent{
 //			{
-//				Role: llms.ChatMessageTypeHuman,
-//				Parts: []llms.ContentPart{
-//					llms.TextPart("Calculate the distance between London and Paris"),
+//				Role: llmtypes.ChatMessageTypeHuman,
+//				Parts: []llmtypes.ContentPart{
+//					llmtypes.TextPart("Calculate the distance between London and Paris"),
 //				},
 //			},
 //		},
@@ -98,11 +98,11 @@
 //
 //	// The agent will create a plan, then execute each step
 //	result, err := planner.Invoke(ctx, map[string]any{
-//		"messages": []llms.MessageContent{
+//		"messages": []llmtypes.MessageContent{
 //			{
-//				Role: llms.ChatMessageTypeHuman,
-//				Parts: []llms.ContentPart{
-//					llms.TextPart("Plan and execute a research report on renewable energy"),
+//				Role: llmtypes.ChatMessageTypeHuman,
+//				Parts: []llmtypes.ContentPart{
+//					llmtypes.TextPart("Plan and execute a research report on renewable energy"),
 //				},
 //			},
 //		},
@@ -118,11 +118,11 @@
 //
 //	// The agent will reflect on and potentially revise its answers
 //	result, err := reflectionAgent.Invoke(ctx, map[string]any{
-//		"messages": []llms.MessageContent{
+//		"messages": []llmtypes.MessageContent{
 //			{
-//				Role: llms.ChatMessageTypeHuman,
-//				Parts: []llms.ContentPart{
-//					llms.TextPart("Explain quantum computing"),
+//				Role: llmtypes.ChatMessageTypeHuman,
+//				Parts: []llmtypes.ContentPart{
+//					llmtypes.TextPart("Explain quantum computing"),
 //				},
 //			},
 //		},
@@ -139,11 +139,11 @@
 //
 //	// The agent will generate and evaluate multiple reasoning paths
 //	result, err := totAgent.Invoke(ctx, map[string]any{
-//		"messages": []llms.MessageContent{
+//		"messages": []llmtypes.MessageContent{
 //			{
-//				Role: llms.ChatMessageTypeHuman,
-//				Parts: []llms.ContentPart{
-//					llms.TextPart("Solve this complex math problem step by step"),
+//				Role: llmtypes.ChatMessageTypeHuman,
+//				Parts: []llmtypes.ContentPart{
+//					llmtypes.TextPart("Solve this complex math problem step by step"),
 //				},
 //			},
 //		},
@@ -165,11 +165,11 @@
 //
 //	// The agent will retrieve relevant documents and generate answers
 //	result, err := rag.Invoke(ctx, map[string]any{
-//		"messages": []llms.MessageContent{
+//		"messages": []llmtypes.MessageContent{
 //			{
-//				Role: llms.ChatMessageTypeHuman,
-//				Parts: []llms.ContentPart{
-//					llms.TextPart("What are the benefits of renewable energy?"),
+//				Role: llmtypes.ChatMessageTypeHuman,
+//				Parts: []llmtypes.ContentPart{
+//					llmtypes.TextPart("What are the benefits of renewable energy?"),
 //				},
 //			},
 //		},
@@ -201,11 +201,11 @@
 //
 //	// The agent maintains conversation context
 //	result, err := chatAgent.Invoke(ctx, map[string]any{
-//		"messages": []llms.MessageContent{
+//		"messages": []llmtypes.MessageContent{
 //			{
-//				Role: llms.ChatMessageTypeHuman,
-//				Parts: []llms.ContentPart{
-//					llms.TextPart("Hello! How are you?"),
+//				Role: llmtypes.ChatMessageTypeHuman,
+//				Parts: []llmtypes.ContentPart{
+//					llmtypes.TextPart("Hello! How are you?"),
 //				},
 //			},
 //		},

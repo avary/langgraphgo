@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -30,7 +30,7 @@ type ManusConfig struct {
 // 4. Supports human-in-the-loop intervention
 // 5. Maintains persistent state across sessions
 func CreateManusAgent(
-	model llms.Model,
+	model llmtypes.Model,
 	availableNodes []graph.TypedNode[map[string]any],
 	inputTools []tools.Tool,
 	config ManusConfig,
@@ -72,7 +72,7 @@ func CreateManusAgent(
 
 	// Node 1: Read existing plan (if any)
 	workflow.AddNode("read_plan", "Read existing plan and notes", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages := state["messages"].([]llms.MessageContent)
+		messages := state["messages"].([]llmtypes.MessageContent)
 
 		// Read existing plan
 		planContent, err := os.ReadFile(config.PlanPath)
@@ -81,9 +81,9 @@ func CreateManusAgent(
 			phases := parsePhasesFromPlan(string(planContent))
 			state["phases"] = phases
 
-			msg := llms.MessageContent{
-				Role:  llms.ChatMessageTypeSystem,
-				Parts: []llms.ContentPart{llms.TextPart(fmt.Sprintf("Loaded existing plan with %d phases", len(phases)))},
+			msg := llmtypes.MessageContent{
+				Role:  llmtypes.ChatMessageTypeSystem,
+				Parts: []llmtypes.ContentPart{llmtypes.TextPart(fmt.Sprintf("Loaded existing plan with %d phases", len(phases)))},
 			}
 			messages = append(messages, msg)
 		} else {
@@ -94,9 +94,9 @@ func CreateManusAgent(
 		// Read existing notes
 		notesContent, err := os.ReadFile(config.NotesPath)
 		if err == nil {
-			msg := llms.MessageContent{
-				Role:  llms.ChatMessageTypeSystem,
-				Parts: []llms.ContentPart{llms.TextPart(fmt.Sprintf("Loaded existing notes (%d bytes)", len(notesContent)))},
+			msg := llmtypes.MessageContent{
+				Role:  llmtypes.ChatMessageTypeSystem,
+				Parts: []llmtypes.ContentPart{llmtypes.TextPart(fmt.Sprintf("Loaded existing notes (%d bytes)", len(notesContent)))},
 			}
 			messages = append(messages, msg)
 			state["notes"] = string(notesContent)
@@ -111,14 +111,14 @@ func CreateManusAgent(
 
 	// Node 2: Planner - Create/Update plan in Markdown format
 	workflow.AddNode("planner", "Generate or update workflow plan", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages := state["messages"].([]llms.MessageContent)
+		messages := state["messages"].([]llmtypes.MessageContent)
 
 		// Build planning prompt with file context
 		nodeDescriptions := buildPlanningNodeDescriptions(availableNodes)
 		planningPrompt := buildManusPlanningPrompt(nodeDescriptions, config.PlanPath, config.NotesPath)
 
-		planningMessages := []llms.MessageContent{
-			{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(planningPrompt)}},
+		planningMessages := []llmtypes.MessageContent{
+			{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(planningPrompt)}},
 		}
 		planningMessages = append(planningMessages, messages...)
 
@@ -139,9 +139,9 @@ func CreateManusAgent(
 		// Parse phases from plan
 		phases := parsePhasesFromPlan(planText)
 
-		aiMsg := llms.MessageContent{
-			Role:  llms.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart(fmt.Sprintf("Plan updated with %d phases\n\n%s", len(phases), planText))},
+		aiMsg := llmtypes.MessageContent{
+			Role:  llmtypes.ChatMessageTypeAI,
+			Parts: []llmtypes.ContentPart{llmtypes.TextPart(fmt.Sprintf("Plan updated with %d phases\n\n%s", len(phases), planText))},
 		}
 
 		return map[string]any{
@@ -153,7 +153,7 @@ func CreateManusAgent(
 
 	// Node 3: Executor - Execute current phase
 	workflow.AddNode("executor", "Execute current phase of the plan", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages := state["messages"].([]llms.MessageContent)
+		messages := state["messages"].([]llmtypes.MessageContent)
 		phases := state["phases"].([]Phase)
 		phaseIndex := state["current_phase"].(int)
 
@@ -209,7 +209,7 @@ func CreateManusAgent(
 		}
 
 		return map[string]any{
-			"messages":      result["messages"].([]llms.MessageContent),
+			"messages":      result["messages"].([]llmtypes.MessageContent),
 			"phases":        phases,
 			"current_phase": phaseIndex + 1,
 			"status":        "in_progress",
@@ -218,7 +218,7 @@ func CreateManusAgent(
 
 	// Node 4: Check if done
 	workflow.AddNode("check_done", "Check if all phases are complete", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages := state["messages"].([]llms.MessageContent)
+		messages := state["messages"].([]llmtypes.MessageContent)
 		phases := state["phases"].([]Phase)
 		currentPhase := state["current_phase"].(int)
 
@@ -426,7 +426,7 @@ func saveErrorToNotes(path, errMsg string, state map[string]any) error {
 }
 
 func generateFinalOutput(state map[string]any, config ManusConfig) (map[string]any, error) {
-	messages := state["messages"].([]llms.MessageContent)
+	messages := state["messages"].([]llmtypes.MessageContent)
 
 	// Collect only the last few non-planner messages to avoid duplicates
 	// Keep the most recent outputs from user nodes
@@ -441,12 +441,12 @@ func generateFinalOutput(state map[string]any, config ManusConfig) (map[string]a
 
 	for i := len(messages) - 1; i >= 0 && count < maxMessages; i-- {
 		msg := messages[i]
-		if msg.Role != llms.ChatMessageTypeAI {
+		if msg.Role != llmtypes.ChatMessageTypeAI {
 			continue
 		}
 
 		for _, part := range msg.Parts {
-			if text, ok := part.(llms.TextContent); ok {
+			if text, ok := part.(llmtypes.TextContent); ok {
 				textStr := strings.TrimSpace(text.Text)
 
 				// Skip empty messages
@@ -475,12 +475,12 @@ func generateFinalOutput(state map[string]any, config ManusConfig) (map[string]a
 	var collected []string
 	for i := len(messages) - 1; i >= 0; i-- {
 		msg := messages[i]
-		if msg.Role != llms.ChatMessageTypeAI {
+		if msg.Role != llmtypes.ChatMessageTypeAI {
 			continue
 		}
 
 		for _, part := range msg.Parts {
-			if text, ok := part.(llms.TextContent); ok {
+			if text, ok := part.(llmtypes.TextContent); ok {
 				textStr := strings.TrimSpace(text.Text)
 
 				// Skip empty messages

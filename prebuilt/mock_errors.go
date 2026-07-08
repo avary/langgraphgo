@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -14,20 +14,20 @@ var _ tools.Tool = (*MockToolError)(nil)
 // MockLLMError for testing GenerateContent error
 type MockLLMError struct{}
 
-func (m *MockLLMError) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *MockLLMError) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	return nil, fmt.Errorf("mock LLM GenerateContent error")
 }
 
-func (m *MockLLMError) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *MockLLMError) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return "", fmt.Errorf("mock LLM Call error")
 }
 
 // MockLLMEmptyContent for testing empty content response
 type MockLLMEmptyContent struct{}
 
-func (m *MockLLMEmptyContent) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
+func (m *MockLLMEmptyContent) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+	return &llmtypes.ContentResponse{
+		Choices: []*llmtypes.ContentChoice{
 			{
 				Content: "", // Empty content
 			},
@@ -35,7 +35,7 @@ func (m *MockLLMEmptyContent) GenerateContent(ctx context.Context, messages []ll
 	}, nil
 }
 
-func (m *MockLLMEmptyContent) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+func (m *MockLLMEmptyContent) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
 	return "", nil // Not used for this test scenario
 }
 

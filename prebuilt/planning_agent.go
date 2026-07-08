@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
 // CreatePlanningAgentMap creates a planning agent with map[string]any state
-func CreatePlanningAgentMap(model llms.Model, availableNodes []graph.TypedNode[map[string]any], inputTools []tools.Tool, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
+func CreatePlanningAgentMap(model llmtypes.Model, availableNodes []graph.TypedNode[map[string]any], inputTools []tools.Tool, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
 	options := &CreateAgentOptions{}
 	for _, opt := range opts {
 		opt(options)
@@ -31,14 +31,14 @@ func CreatePlanningAgentMap(model llms.Model, availableNodes []graph.TypedNode[m
 	workflow.SetSchema(agentSchema)
 
 	workflow.AddNode("planner", "Generates workflow plan", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages, ok := state["messages"].([]llms.MessageContent)
+		messages, ok := state["messages"].([]llmtypes.MessageContent)
 		if !ok {
 			return nil, fmt.Errorf("messages not found")
 		}
 		nodeDescriptions := buildPlanningNodeDescriptions(availableNodes)
 		planningPrompt := buildPlanningPrompt(nodeDescriptions)
-		planningMessages := []llms.MessageContent{
-			{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(planningPrompt)}},
+		planningMessages := []llmtypes.MessageContent{
+			{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(planningPrompt)}},
 		}
 		planningMessages = append(planningMessages, messages...)
 
@@ -53,13 +53,13 @@ func CreatePlanningAgentMap(model llms.Model, availableNodes []graph.TypedNode[m
 			return nil, err
 		}
 
-		aiMsg := llms.MessageContent{
-			Role:  llms.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart(fmt.Sprintf("Workflow plan created with %d nodes and %d edges", len(workflowPlan.Nodes), len(workflowPlan.Edges)))},
+		aiMsg := llmtypes.MessageContent{
+			Role:  llmtypes.ChatMessageTypeAI,
+			Parts: []llmtypes.ContentPart{llmtypes.TextPart(fmt.Sprintf("Workflow plan created with %d nodes and %d edges", len(workflowPlan.Nodes), len(workflowPlan.Edges)))},
 		}
 
 		return map[string]any{
-			"messages":      []llms.MessageContent{aiMsg},
+			"messages":      []llmtypes.MessageContent{aiMsg},
 			"workflow_plan": workflowPlan,
 		}, nil
 	})
@@ -132,10 +132,10 @@ func CreatePlanningAgentMap(model llms.Model, availableNodes []graph.TypedNode[m
 
 // CreatePlanningAgent creates a generic planning agent
 func CreatePlanningAgent[S any](
-	model llms.Model,
+	model llmtypes.Model,
 	availableNodes []graph.TypedNode[S],
-	getMessages func(S) []llms.MessageContent,
-	setMessages func(S, []llms.MessageContent) S,
+	getMessages func(S) []llmtypes.MessageContent,
+	setMessages func(S, []llmtypes.MessageContent) S,
 	getPlan func(S) *WorkflowPlan,
 	setPlan func(S, *WorkflowPlan) S,
 	opts ...CreateAgentOption,
@@ -161,8 +161,8 @@ func CreatePlanningAgent[S any](
 		nodeDescriptions := buildPlanningNodeDescriptions(availableNodes)
 		planningPrompt := buildPlanningPrompt(nodeDescriptions)
 
-		planningMessages := []llms.MessageContent{
-			{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(planningPrompt)}},
+		planningMessages := []llmtypes.MessageContent{
+			{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(planningPrompt)}},
 		}
 		planningMessages = append(planningMessages, messages...)
 
@@ -177,9 +177,9 @@ func CreatePlanningAgent[S any](
 			return state, err
 		}
 
-		aiMsg := llms.MessageContent{
-			Role:  llms.ChatMessageTypeAI,
-			Parts: []llms.ContentPart{llms.TextPart(fmt.Sprintf("Workflow plan created with %d nodes and %d edges", len(workflowPlan.Nodes), len(workflowPlan.Edges)))},
+		aiMsg := llmtypes.MessageContent{
+			Role:  llmtypes.ChatMessageTypeAI,
+			Parts: []llmtypes.ContentPart{llmtypes.TextPart(fmt.Sprintf("Workflow plan created with %d nodes and %d edges", len(workflowPlan.Nodes), len(workflowPlan.Edges)))},
 		}
 
 		state = setMessages(state, append(messages, aiMsg))

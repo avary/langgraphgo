@@ -9,7 +9,7 @@ import (
 	"github.com/smallnest/goskills"
 	adapter "github.com/smallnest/langgraphgo/adapter/goskills"
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -18,7 +18,7 @@ type CreateAgentOptions struct {
 	skillDir               string
 	Verbose                bool
 	SystemMessage          string
-	StateModifier          func(messages []llms.MessageContent) []llms.MessageContent
+	StateModifier          func(messages []llmtypes.MessageContent) []llmtypes.MessageContent
 	MaxIterations          int
 	DisableModelInvocation bool
 }
@@ -29,7 +29,7 @@ func WithSystemMessage(message string) CreateAgentOption {
 	return func(o *CreateAgentOptions) { o.SystemMessage = message }
 }
 
-func WithStateModifier(modifier func(messages []llms.MessageContent) []llms.MessageContent) CreateAgentOption {
+func WithStateModifier(modifier func(messages []llmtypes.MessageContent) []llmtypes.MessageContent) CreateAgentOption {
 	return func(o *CreateAgentOptions) { o.StateModifier = modifier }
 }
 
@@ -50,7 +50,7 @@ func WithDisableModelInvocation(disable bool) CreateAgentOption {
 }
 
 // CreateAgentMap creates a new agent graph with map[string]any state
-func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
+func CreateAgentMap(model llmtypes.Model, inputTools []tools.Tool, maxIterations int, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
 	options := &CreateAgentOptions{}
 	for _, opt := range opts {
 		opt(options)
@@ -71,14 +71,14 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 
 	if options.skillDir != "" {
 		workflow.AddNode("skill", "Skill discovery node", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-			messages, _ := state["messages"].([]llms.MessageContent)
+			messages, _ := state["messages"].([]llmtypes.MessageContent)
 			if len(messages) == 0 {
 				return nil, nil
 			}
 			userPrompt := ""
 			for i := len(messages) - 1; i >= 0; i-- {
-				if messages[i].Role == llms.ChatMessageTypeHuman {
-					userPrompt = messages[i].Parts[0].(llms.TextContent).Text
+				if messages[i].Role == llmtypes.ChatMessageTypeHuman {
+					userPrompt = messages[i].Parts[0].(llmtypes.TextContent).Text
 					break
 				}
 			}
@@ -107,7 +107,7 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 	}
 
 	workflow.AddNode("agent", "Agent decision node", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages, _ := state["messages"].([]llms.MessageContent)
+		messages, _ := state["messages"].([]llmtypes.MessageContent)
 		var allTools []tools.Tool
 		allTools = append(allTools, inputTools...)
 		if extra, ok := state["extra_tools"].([]tools.Tool); ok {
@@ -121,23 +121,23 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 		}
 		if iterationCount >= maxIterations {
 			// Max iterations reached, return final message
-			finalMsg := llms.MessageContent{
-				Role: llms.ChatMessageTypeAI,
-				Parts: []llms.ContentPart{
-					llms.TextPart("Maximum iterations reached. Please try a simpler query."),
+			finalMsg := llmtypes.MessageContent{
+				Role: llmtypes.ChatMessageTypeAI,
+				Parts: []llmtypes.ContentPart{
+					llmtypes.TextPart("Maximum iterations reached. Please try a simpler query."),
 				},
 			}
 			return map[string]any{
-				"messages": []llms.MessageContent{finalMsg},
+				"messages": []llmtypes.MessageContent{finalMsg},
 			}, nil
 		}
 
-		var toolDefs []llms.Tool
+		var toolDefs []llmtypes.Tool
 		for _, t := range allTools {
 			toolSchema := getToolSchema(t)
-			toolDefs = append(toolDefs, llms.Tool{
+			toolDefs = append(toolDefs, llmtypes.Tool{
 				Type: "function",
-				Function: &llms.FunctionDefinition{
+				Function: &llmtypes.FunctionDefinition{
 					Name:        t.Name(),
 					Description: t.Description(),
 					Parameters:  toolSchema,
@@ -155,27 +155,27 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 
 		msgsToSend := messages
 		if options.SystemMessage != "" {
-			msgsToSend = append([]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeSystem, options.SystemMessage)}, msgsToSend...)
+			msgsToSend = append([]llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, options.SystemMessage)}, msgsToSend...)
 		}
 		if options.StateModifier != nil {
 			msgsToSend = options.StateModifier(msgsToSend)
 		}
 
-		var resp *llms.ContentResponse
+		var resp *llmtypes.ContentResponse
 		var err error
 
 		if options.DisableModelInvocation {
 			// Skip model invocation, create a dummy response
-			resp = &llms.ContentResponse{
-				Choices: []*llms.ContentChoice{
+			resp = &llmtypes.ContentResponse{
+				Choices: []*llmtypes.ContentChoice{
 					{
 						Content:   "",
-						ToolCalls: []llms.ToolCall{},
+						ToolCalls: []llmtypes.ToolCall{},
 					},
 				},
 			}
 		} else {
-			resp, err = model.GenerateContent(ctx, msgsToSend, llms.WithTools(toolDefs), llms.WithToolChoice("auto"))
+			resp, err = model.GenerateContent(ctx, msgsToSend, llmtypes.WithTools(toolDefs), llmtypes.WithToolChoice("auto"))
 			if err != nil {
 				return nil, err
 			}
@@ -190,22 +190,22 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 		}
 
 		choice := resp.Choices[0]
-		aiMsg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
+		aiMsg := llmtypes.MessageContent{Role: llmtypes.ChatMessageTypeAI}
 		if choice.Content != "" {
-			aiMsg.Parts = append(aiMsg.Parts, llms.TextPart(choice.Content))
+			aiMsg.Parts = append(aiMsg.Parts, llmtypes.TextPart(choice.Content))
 		}
 		for _, tc := range choice.ToolCalls {
 			aiMsg.Parts = append(aiMsg.Parts, tc)
 		}
 
 		return map[string]any{
-			"messages":        []llms.MessageContent{aiMsg},
+			"messages":        []llmtypes.MessageContent{aiMsg},
 			"iteration_count": iterationCount + 1,
 		}, nil
 	})
 
 	workflow.AddNode("tools", "Tool execution node", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages := state["messages"].([]llms.MessageContent)
+		messages := state["messages"].([]llmtypes.MessageContent)
 		lastMsg := messages[len(messages)-1]
 		var allTools []tools.Tool
 		allTools = append(allTools, inputTools...)
@@ -214,9 +214,9 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 		}
 		toolExecutor := NewToolExecutor(allTools)
 
-		var toolMessages []llms.MessageContent
+		var toolMessages []llmtypes.MessageContent
 		for _, part := range lastMsg.Parts {
-			if tc, ok := part.(llms.ToolCall); ok {
+			if tc, ok := part.(llmtypes.ToolCall); ok {
 				// Get the tool to check if it has a custom schema
 				tool, hasTool := toolExecutor.Tools[tc.FunctionCall.Name]
 
@@ -245,9 +245,9 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 				if err != nil {
 					res = fmt.Sprintf("Error: %v", err)
 				}
-				toolMessages = append(toolMessages, llms.MessageContent{
-					Role:  llms.ChatMessageTypeTool,
-					Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: tc.ID, Name: tc.FunctionCall.Name, Content: res}},
+				toolMessages = append(toolMessages, llmtypes.MessageContent{
+					Role:  llmtypes.ChatMessageTypeTool,
+					Parts: []llmtypes.ContentPart{llmtypes.ToolCallResponse{ToolCallID: tc.ID, Name: tc.FunctionCall.Name, Content: res}},
 				})
 			}
 		}
@@ -262,10 +262,10 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 	}
 
 	workflow.AddConditionalEdge("agent", func(ctx context.Context, state map[string]any) string {
-		messages := state["messages"].([]llms.MessageContent)
+		messages := state["messages"].([]llmtypes.MessageContent)
 		lastMsg := messages[len(messages)-1]
 		for _, part := range lastMsg.Parts {
-			if _, ok := part.(llms.ToolCall); ok {
+			if _, ok := part.(llmtypes.ToolCall); ok {
 				return "tools"
 			}
 		}
@@ -278,10 +278,10 @@ func CreateAgentMap(model llms.Model, inputTools []tools.Tool, maxIterations int
 
 // CreateAgent creates a generic agent graph
 func CreateAgent[S any](
-	model llms.Model,
+	model llmtypes.Model,
 	inputTools []tools.Tool,
-	getMessages func(S) []llms.MessageContent,
-	setMessages func(S, []llms.MessageContent) S,
+	getMessages func(S) []llmtypes.MessageContent,
+	setMessages func(S, []llmtypes.MessageContent) S,
 	getExtraTools func(S) []tools.Tool,
 	setExtraTools func(S, []tools.Tool) S,
 	opts ...CreateAgentOption,
@@ -297,11 +297,11 @@ func CreateAgent[S any](
 		messages := getMessages(state)
 		allTools := append(inputTools, getExtraTools(state)...)
 
-		var toolDefs []llms.Tool
+		var toolDefs []llmtypes.Tool
 		for _, t := range allTools {
-			toolDefs = append(toolDefs, llms.Tool{
+			toolDefs = append(toolDefs, llmtypes.Tool{
 				Type: "function",
-				Function: &llms.FunctionDefinition{
+				Function: &llmtypes.FunctionDefinition{
 					Name:        t.Name(),
 					Description: t.Description(),
 					Parameters:  getToolSchema(t),
@@ -311,36 +311,36 @@ func CreateAgent[S any](
 
 		msgsToSend := messages
 		if options.SystemMessage != "" {
-			msgsToSend = append([]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeSystem, options.SystemMessage)}, msgsToSend...)
+			msgsToSend = append([]llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, options.SystemMessage)}, msgsToSend...)
 		}
 		if options.StateModifier != nil {
 			msgsToSend = options.StateModifier(msgsToSend)
 		}
 
-		var resp *llms.ContentResponse
+		var resp *llmtypes.ContentResponse
 		var err error
 
 		if options.DisableModelInvocation {
 			// Skip model invocation, create a dummy response
-			resp = &llms.ContentResponse{
-				Choices: []*llms.ContentChoice{
+			resp = &llmtypes.ContentResponse{
+				Choices: []*llmtypes.ContentChoice{
 					{
 						Content:   "",
-						ToolCalls: []llms.ToolCall{},
+						ToolCalls: []llmtypes.ToolCall{},
 					},
 				},
 			}
 		} else {
-			resp, err = model.GenerateContent(ctx, msgsToSend, llms.WithTools(toolDefs))
+			resp, err = model.GenerateContent(ctx, msgsToSend, llmtypes.WithTools(toolDefs))
 			if err != nil {
 				return state, err
 			}
 		}
 
 		choice := resp.Choices[0]
-		aiMsg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
+		aiMsg := llmtypes.MessageContent{Role: llmtypes.ChatMessageTypeAI}
 		if choice.Content != "" {
-			aiMsg.Parts = append(aiMsg.Parts, llms.TextPart(choice.Content))
+			aiMsg.Parts = append(aiMsg.Parts, llmtypes.TextPart(choice.Content))
 		}
 		for _, tc := range choice.ToolCalls {
 			aiMsg.Parts = append(aiMsg.Parts, tc)
@@ -354,9 +354,9 @@ func CreateAgent[S any](
 		lastMsg := messages[len(messages)-1]
 		toolExecutor := NewToolExecutor(append(inputTools, getExtraTools(state)...))
 
-		var toolMessages []llms.MessageContent
+		var toolMessages []llmtypes.MessageContent
 		for _, part := range lastMsg.Parts {
-			if tc, ok := part.(llms.ToolCall); ok {
+			if tc, ok := part.(llmtypes.ToolCall); ok {
 				// Get the tool to check if it has a custom schema
 				tool, hasTool := toolExecutor.Tools[tc.FunctionCall.Name]
 
@@ -385,9 +385,9 @@ func CreateAgent[S any](
 				if err != nil {
 					res = fmt.Sprintf("Error: %v", err)
 				}
-				toolMessages = append(toolMessages, llms.MessageContent{
-					Role:  llms.ChatMessageTypeTool,
-					Parts: []llms.ContentPart{llms.ToolCallResponse{ToolCallID: tc.ID, Name: tc.FunctionCall.Name, Content: res}},
+				toolMessages = append(toolMessages, llmtypes.MessageContent{
+					Role:  llmtypes.ChatMessageTypeTool,
+					Parts: []llmtypes.ContentPart{llmtypes.ToolCallResponse{ToolCallID: tc.ID, Name: tc.FunctionCall.Name, Content: res}},
 				})
 			}
 		}
@@ -399,7 +399,7 @@ func CreateAgent[S any](
 		messages := getMessages(state)
 		lastMsg := messages[len(messages)-1]
 		for _, part := range lastMsg.Parts {
-			if _, ok := part.(llms.ToolCall); ok {
+			if _, ok := part.(llmtypes.ToolCall); ok {
 				return "tools"
 			}
 		}
@@ -422,13 +422,13 @@ func discoverSkills(skillDir string) (map[string]*goskills.SkillPackage, error) 
 	return skills, nil
 }
 
-func selectSkill(ctx context.Context, model llms.Model, userPrompt string, availableSkills map[string]*goskills.SkillPackage) (string, error) {
+func selectSkill(ctx context.Context, model llmtypes.Model, userPrompt string, availableSkills map[string]*goskills.SkillPackage) (string, error) {
 	var skillDescriptions strings.Builder
 	for name, pkg := range availableSkills {
 		skillDescriptions.WriteString(fmt.Sprintf("- %s: %s\n", name, pkg.Meta.Description))
 	}
 	prompt := fmt.Sprintf("Select the most appropriate skill for: \"%s\"\n\nSkills:\n%s\nReturn only the skill name or 'None'.", userPrompt, skillDescriptions.String())
-	resp, err := model.GenerateContent(ctx, []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, prompt)})
+	resp, err := model.GenerateContent(ctx, []llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, prompt)})
 	if err != nil {
 		return "", err
 	}

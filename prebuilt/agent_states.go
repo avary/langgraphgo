@@ -1,7 +1,7 @@
 package prebuilt
 
 import (
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/tmc/langchaingo/tools"
 )
 
@@ -9,7 +9,7 @@ import (
 // This is the default state type for generic agents.
 type AgentState struct {
 	// Messages contains the conversation history
-	Messages []llms.MessageContent
+	Messages []llmtypes.MessageContent
 
 	// ExtraTools contains additional tools available to the agent
 	ExtraTools []tools.Tool
@@ -18,7 +18,7 @@ type AgentState struct {
 // ReactAgentState represents the default state for a ReAct agent
 type ReactAgentState struct {
 	// Messages contains the conversation history
-	Messages []llms.MessageContent `json:"messages"`
+	Messages []llmtypes.MessageContent `json:"messages"`
 	// IterationCount counts the current iteration number
 	IterationCount int `json:"iteration_count"`
 }
@@ -28,7 +28,7 @@ type ReactAgentState struct {
 // then executes according to the generated plan.
 type PlanningAgentState struct {
 	// Messages contains the conversation history
-	Messages []llms.MessageContent
+	Messages []llmtypes.MessageContent
 
 	// WorkflowPlan contains the parsed workflow plan from LLM
 	WorkflowPlan *WorkflowPlan
@@ -58,7 +58,7 @@ type WorkflowEdge struct {
 // self-reflection and revision.
 type ReflectionAgentState struct {
 	// Messages contains the conversation history
-	Messages []llms.MessageContent
+	Messages []llmtypes.MessageContent
 
 	// Iteration counts the current iteration number
 	Iteration int
@@ -74,7 +74,7 @@ type ReflectionAgentState struct {
 // This agent follows a three-step process: plan, execute, and verify.
 type PEVAgentState struct {
 	// Messages contains the conversation history
-	Messages []llms.MessageContent
+	Messages []llmtypes.MessageContent
 
 	// Plan contains the list of steps to execute
 	Plan []string
@@ -119,7 +119,7 @@ type TreeOfThoughtsState struct {
 // This is a conversational agent that maintains message history.
 type ChatAgentState struct {
 	// Messages contains the conversation history
-	Messages []llms.MessageContent
+	Messages []llmtypes.MessageContent
 
 	// SystemPrompt is the system prompt for the chat agent
 	SystemPrompt string
@@ -131,7 +131,7 @@ type ChatAgentState struct {
 // SupervisorState represents the state for a supervisor workflow
 type SupervisorState struct {
 	// Messages contains the conversation history
-	Messages []llms.MessageContent `json:"messages"`
+	Messages []llmtypes.MessageContent `json:"messages"`
 	// Next is the next worker to act
 	Next string `json:"next,omitempty"`
 }
