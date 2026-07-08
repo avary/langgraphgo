@@ -120,7 +120,7 @@ license: MIT
 
 ## Overview
 
-The ` + "`hello_world`" + ` skill is the simplest possible skill in the ecosystem. Its primary purpose is to validate the operational status of the skill runner and the agent's ability to invoke tooltypes.
+The ` + "`hello_world`" + ` skill is the simplest possible skill in the ecosystem. Its primary purpose is to validate the operational status of the skill runner and the agent's ability to invoke tools.
 
 ## Functionality
 
@@ -168,7 +168,7 @@ print("Hello, World from Python!")
 	// Let's assume a simple structure.
 
 	// Actually, goskills uses `skill.yaml` and maybe other files.
-	// Let's create a `tooltypes.json` or similar if goskills supports it, OR just rely on the fact that `goskills` might auto-detect scripts?
+	// Let's create a `tools.json` or similar if goskills supports it, OR just rely on the fact that `goskills` might auto-detect scripts?
 	// `GenerateToolDefinitions` in `goskills` scans for scripts.
 
 	return nil
