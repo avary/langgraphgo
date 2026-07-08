@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/memory"
+	langchainadapter "github.com/smallnest/langgraphgo/memory/langchainadapter"
 	langchainmemory "github.com/tmc/langchaingo/memory"
 )
 
@@ -37,7 +37,7 @@ func main() {
 // basicMemoryExample demonstrates basic conversation buffer usage
 func basicMemoryExample(ctx context.Context) {
 	// Create a conversation buffer memory with return messages enabled
-	mem := memory.NewConversationBufferMemory(
+	mem := langchainadapter.NewConversationBufferMemory(
 		langchainmemory.WithReturnMessages(true),
 	)
 
@@ -81,7 +81,7 @@ func basicMemoryExample(ctx context.Context) {
 // windowMemoryExample demonstrates conversation window buffer
 func windowMemoryExample(ctx context.Context) {
 	// Create a window buffer that keeps only the last 2 conversation turns
-	mem := memory.NewConversationWindowBufferMemory(2,
+	mem := langchainadapter.NewConversationWindowBufferMemory(2,
 		langchainmemory.WithReturnMessages(true),
 	)
 
@@ -124,7 +124,7 @@ func windowMemoryExample(ctx context.Context) {
 // chatHistoryExample demonstrates direct chat message history usage
 func chatHistoryExample(ctx context.Context) {
 	// Create a chat message history
-	history := memory.NewChatMessageHistory()
+	history := langchainadapter.NewChatMessageHistory()
 
 	// Add different types of messages
 	err := history.AddMessage(ctx, llmtypes.SystemChatMessage{
@@ -159,7 +159,7 @@ func chatHistoryExample(ctx context.Context) {
 // customKeysExample demonstrates using custom input/output/memory keys
 func customKeysExample(ctx context.Context) {
 	// Create memory with custom keys
-	mem := memory.NewConversationBufferMemory(
+	mem := langchainadapter.NewConversationBufferMemory(
 		langchainmemory.WithInputKey("user_input"),
 		langchainmemory.WithOutputKey("ai_response"),
 		langchainmemory.WithMemoryKey("chat_history"),
@@ -204,7 +204,7 @@ func memoryIntegrationPattern(ctx context.Context) {
 	fmt.Println()
 
 	// Create memory
-	mem := memory.NewConversationBufferMemory(
+	mem := langchainadapter.NewConversationBufferMemory(
 		langchainmemory.WithReturnMessages(true),
 	)
 

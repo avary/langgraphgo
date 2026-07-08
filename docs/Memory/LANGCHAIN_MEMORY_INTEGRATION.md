@@ -9,7 +9,14 @@ Memory is crucial for conversational AI applications. It allows the system to:
 - Maintain context across multiple turns
 - Personalize responses based on history
 
-We provide a `LangChainMemory` adapter that wraps LangChainGo's memory implementations, making them compatible with LangGraphGo's architecture.
+We provide a `LangChainMemory` adapter that wraps LangChainGo's memory implementations, making them compatible with LangGraphGo's architecture. The adapter lives in its own subpackage so the core `memory` package stays free of the `langchaingo` dependency:
+
+```go
+import (
+    langchainadapter "github.com/smallnest/langgraphgo/memory/langchainadapter"
+    langchainmemory "github.com/tmc/langchaingo/memory"
+)
+```
 
 ## Available Memory Types
 
@@ -19,8 +26,8 @@ The integration supports all standard LangChainGo memory types:
 Stores the entire conversation history. This is useful when you want the model to have access to everything that has been said.
 
 ```go
-mem := prebuilt.NewConversationBufferMemory(
-    memory.WithReturnMessages(true),
+mem := langchainadapter.NewConversationBufferMemory(
+    langchainmemory.WithReturnMessages(true),
 )
 ```
 
@@ -29,26 +36,16 @@ Keeps a sliding window of the most recent N conversation turns. This is useful f
 
 ```go
 // Keep only the last 5 turns
-mem := prebuilt.NewConversationWindowBufferMemory(5,
-    memory.WithReturnMessages(true),
+mem := langchainadapter.NewConversationWindowBufferMemory(5,
+    langchainmemory.WithReturnMessages(true),
 )
 ```
 
-### 3. ConversationTokenBuffer
-Maintains conversation history within a specific token limit. This is ideal for managing costs and staying within LLM context window limits.
-
-```go
-// Keep history within 1000 tokens
-mem := prebuilt.NewConversationTokenBufferMemory(llm, 1000,
-    memory.WithReturnMessages(true),
-)
-```
-
-### 4. ChatMessageHistory
+### 3. ChatMessageHistory
 Provides direct access to the underlying message history storage, allowing you to manually add or retrieve messages.
 
 ```go
-history := prebuilt.NewChatMessageHistory()
+history := langchainadapter.NewChatMessageHistory()
 history.AddUserMessage(ctx, "Hello")
 history.AddAIMessage(ctx, "Hi there")
 ```
@@ -108,11 +105,11 @@ func chatNode(ctx context.Context, state *State) (*State, error) {
 You can customize the keys used for input, output, and memory variables if your application requires specific naming conventions.
 
 ```go
-mem := prebuilt.NewConversationBufferMemory(
-    memory.WithInputKey("user_query"),      // Default: "input"
-    memory.WithOutputKey("bot_response"),   // Default: "output"
-    memory.WithMemoryKey("chat_log"),       // Default: "history"
-    memory.WithReturnMessages(true),
+mem := langchainadapter.NewConversationBufferMemory(
+    langchainmemory.WithInputKey("user_query"),      // Default: "input"
+    langchainmemory.WithOutputKey("bot_response"),   // Default: "output"
+    langchainmemory.WithMemoryKey("chat_log"),       // Default: "history"
+    langchainmemory.WithReturnMessages(true),
 )
 ```
 
@@ -120,9 +117,9 @@ mem := prebuilt.NewConversationBufferMemory(
 You can also customize the prefixes used for messages when they are returned as a string (i.e., `WithReturnMessages(false)`).
 
 ```go
-mem := prebuilt.NewConversationBufferMemory(
-    memory.WithHumanPrefix("User"),
-    memory.WithAIPrefix("Assistant"),
+mem := langchainadapter.NewConversationBufferMemory(
+    langchainmemory.WithHumanPrefix("User"),
+    langchainmemory.WithAIPrefix("Assistant"),
 )
 ```
 
