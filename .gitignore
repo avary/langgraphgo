@@ -22,3 +22,4 @@ example_summary.txt
 
 # Comic generation output
 examples/comic_skill_example/comic/
+.loop-state.json
