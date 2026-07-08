@@ -109,6 +109,22 @@
 //		},
 //	})
 //
+// ## Choosing a Plan-Execute Agent
+// Three factories implement the "plan then execute" idea with different topologies;
+// pick by how execution and verification should work:
+//
+//   - CreatePlanningAgent: plans a workflow graph, then runs it once. Best when the
+//     task decomposes into a static DAG of the available nodes.
+//   - CreateManusAgent: multi-phase plan persisted to Markdown files, executed phase
+//     by phase with progress checkboxes. Best for long-running, resumable tasks.
+//   - CreatePEVAgent: plan → execute → verify loop that replans failed steps up to a
+//     retry budget. Best when steps need validation before proceeding.
+//
+// All three share one functional-option surface (WithVerbose, WithSystemMessage,
+// WithMaxRetries, WithVerificationPrompt, WithWorkDir, WithAutoSave, ...). The older
+// ManusConfig / PEVAgentConfig struct entry points still work but are deprecated in
+// favor of these options.
+//
 // ## Reflection Agent
 // Uses self-reflection to improve responses:
 //

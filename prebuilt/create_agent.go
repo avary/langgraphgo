@@ -14,7 +14,12 @@ import (
 	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
-// CreateAgentOptions contains options for creating an agent
+// CreateAgentOptions contains options for creating an agent.
+//
+// The plan-execute family (CreatePlanningAgent, CreateManusAgent, CreatePEVAgent)
+// shares this option surface. Fields below the common set are consumed only by the
+// factories they apply to: MaxRetries/VerificationPrompt by the PEV agent, and
+// WorkDir/PlanPath/NotesPath/OutputPath/AutoSave by the Manus agent.
 type CreateAgentOptions struct {
 	skillDir               string
 	Verbose                bool
@@ -22,6 +27,17 @@ type CreateAgentOptions struct {
 	StateModifier          func(messages []llmtypes.MessageContent) []llmtypes.MessageContent
 	MaxIterations          int
 	DisableModelInvocation bool
+
+	// PEV agent options.
+	MaxRetries         int
+	VerificationPrompt string
+
+	// Manus agent options.
+	WorkDir    string
+	PlanPath   string
+	NotesPath  string
+	OutputPath string
+	AutoSave   bool
 }
 
 type CreateAgentOption func(*CreateAgentOptions)
@@ -48,6 +64,41 @@ func WithMaxIterations(maxIterations int) CreateAgentOption {
 
 func WithDisableModelInvocation(disable bool) CreateAgentOption {
 	return func(o *CreateAgentOptions) { o.DisableModelInvocation = disable }
+}
+
+// WithMaxRetries sets the maximum replanning retries for the PEV agent.
+func WithMaxRetries(maxRetries int) CreateAgentOption {
+	return func(o *CreateAgentOptions) { o.MaxRetries = maxRetries }
+}
+
+// WithVerificationPrompt sets the verification system prompt for the PEV agent.
+func WithVerificationPrompt(prompt string) CreateAgentOption {
+	return func(o *CreateAgentOptions) { o.VerificationPrompt = prompt }
+}
+
+// WithWorkDir sets the working directory for the Manus agent's persistent files.
+func WithWorkDir(dir string) CreateAgentOption {
+	return func(o *CreateAgentOptions) { o.WorkDir = dir }
+}
+
+// WithPlanPath sets the plan file path for the Manus agent.
+func WithPlanPath(path string) CreateAgentOption {
+	return func(o *CreateAgentOptions) { o.PlanPath = path }
+}
+
+// WithNotesPath sets the notes file path for the Manus agent.
+func WithNotesPath(path string) CreateAgentOption {
+	return func(o *CreateAgentOptions) { o.NotesPath = path }
+}
+
+// WithOutputPath sets the output file path for the Manus agent.
+func WithOutputPath(path string) CreateAgentOption {
+	return func(o *CreateAgentOptions) { o.OutputPath = path }
+}
+
+// WithAutoSave toggles persisting plan/notes/output to disk for the Manus agent.
+func WithAutoSave(autoSave bool) CreateAgentOption {
+	return func(o *CreateAgentOptions) { o.AutoSave = autoSave }
 }
 
 // CreateAgentMap creates a new agent graph with map[string]any state
