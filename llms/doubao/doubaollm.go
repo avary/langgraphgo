@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tmc/langchaingo/callbacks"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime"
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime/model"
 )
@@ -20,13 +19,12 @@ var (
 // LLM is a client for Doubao (Volcengine Ark) LLM.
 // It supports chat completions and embeddings using the volcengine-go-sdk.
 type LLM struct {
-	client           *arkruntime.Client
-	model            ModelName
-	embeddingModel   ModelName
-	CallbacksHandler callbacks.Handler
+	client         *arkruntime.Client
+	model          ModelName
+	embeddingModel ModelName
 }
 
-var _ llms.Model = (*LLM)(nil)
+var _ llmtypes.Model = (*LLM)(nil)
 
 // New returns a new Doubao LLM client.
 //
@@ -94,32 +92,31 @@ func New(opts ...Option) (*LLM, error) {
 	}
 
 	return &LLM{
-		client:           client,
-		model:            options.model,
-		embeddingModel:   options.embeddingModel,
-		CallbacksHandler: options.callbacksHandler,
+		client:         client,
+		model:          options.model,
+		embeddingModel: options.embeddingModel,
 	}, nil
 }
 
 // Call generates a response from the LLM for the given prompt.
-func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
+func (o *LLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+	return llmtypes.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
 // GenerateContent implements the Model interface.
 // Uses Doubao chat completion API for text generation.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (o *LLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
 	if len(messages) == 0 {
 		return nil, errors.New("no messages provided")
 	}
 
 	// Parse call options
-	opts := llms.CallOptions{}
+	opts := llmtypes.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
 
-	// Convert langchaingo messages to arkruntime messages
+	// Convert framework messages to arkruntime messages
 	arkMessages := make([]*model.ChatCompletionMessage, 0, len(messages))
 	for _, msg := range messages {
 		arkMsg, err := convertMessage(msg)
@@ -172,7 +169,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			default:
 				req.ToolChoice = model.ToolChoiceStringTypeAuto
 			}
-		case llms.ToolChoice:
+		case llmtypes.ToolChoice:
 			// ToolChoice struct
 			switch v.Type {
 			case "none":
@@ -219,25 +216,25 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, ErrEmptyResponse
 	}
 
-	// Convert response to langchaingo format
-	choices := make([]*llms.ContentChoice, 0, len(resp.Choices))
+	// Convert response to framework format
+	choices := make([]*llmtypes.ContentChoice, 0, len(resp.Choices))
 	for _, choice := range resp.Choices {
 		content := getContentString(choice.Message.Content)
 		stopReason := string(choice.FinishReason)
 
-		contentChoice := &llms.ContentChoice{
+		contentChoice := &llmtypes.ContentChoice{
 			Content:    content,
 			StopReason: stopReason,
 		}
 
 		// Handle ToolCalls
 		if len(choice.Message.ToolCalls) > 0 {
-			toolCalls := make([]llms.ToolCall, 0, len(choice.Message.ToolCalls))
+			toolCalls := make([]llmtypes.ToolCall, 0, len(choice.Message.ToolCalls))
 			for _, tc := range choice.Message.ToolCalls {
-				toolCalls = append(toolCalls, llms.ToolCall{
+				toolCalls = append(toolCalls, llmtypes.ToolCall{
 					ID:   tc.ID,
 					Type: string(tc.Type),
-					FunctionCall: &llms.FunctionCall{
+					FunctionCall: &llmtypes.FunctionCall{
 						Name:      tc.Function.Name,
 						Arguments: tc.Function.Arguments,
 					},
@@ -248,7 +245,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 		// Handle legacy FunctionCall (for backward compatibility)
 		if choice.Message.FunctionCall != nil {
-			contentChoice.FuncCall = &llms.FunctionCall{
+			contentChoice.FuncCall = &llmtypes.FunctionCall{
 				Name:      choice.Message.FunctionCall.Name,
 				Arguments: choice.Message.FunctionCall.Arguments,
 			}
@@ -257,7 +254,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		choices = append(choices, contentChoice)
 	}
 
-	return &llms.ContentResponse{
+	return &llmtypes.ContentResponse{
 		Choices: choices,
 	}, nil
 }
@@ -308,8 +305,8 @@ func (o *LLM) CreateEmbedding(ctx context.Context, texts []string) ([][]float32,
 	return embeddings, nil
 }
 
-// convertMessage converts a langchaingo MessageContent to an arkruntime ChatCompletionMessage.
-func convertMessage(msg llms.MessageContent) (*model.ChatCompletionMessage, error) {
+// convertMessage converts an llmtypes.MessageContent to an arkruntime ChatCompletionMessage.
+func convertMessage(msg llmtypes.MessageContent) (*model.ChatCompletionMessage, error) {
 	// Get role as string
 	role := string(msg.Role)
 
@@ -325,12 +322,12 @@ func convertMessage(msg llms.MessageContent) (*model.ChatCompletionMessage, erro
 	// Process parts based on role
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
-		case llms.TextContent:
+		case llmtypes.TextContent:
 			// Text content
 			if arkMsg.Content == nil {
 				arkMsg.Content = createMessageContent(p.Text)
 			}
-		case llms.ToolCallResponse:
+		case llmtypes.ToolCallResponse:
 			// Tool response (from tool role)
 			if role == "tool" {
 				arkMsg.Content = createMessageContent(p.Content)
@@ -346,9 +343,9 @@ func convertMessage(msg llms.MessageContent) (*model.ChatCompletionMessage, erro
 	if role == "tool" && arkMsg.Content == nil {
 		var content strings.Builder
 		for _, part := range msg.Parts {
-			if text, ok := part.(llms.TextContent); ok {
+			if text, ok := part.(llmtypes.TextContent); ok {
 				content.WriteString(text.Text)
-			} else if tr, ok := part.(llms.ToolCallResponse); ok {
+			} else if tr, ok := part.(llmtypes.ToolCallResponse); ok {
 				content.WriteString(tr.Content)
 				if tr.ToolCallID != "" {
 					arkMsg.ToolCallID = tr.ToolCallID
@@ -364,7 +361,7 @@ func convertMessage(msg llms.MessageContent) (*model.ChatCompletionMessage, erro
 	if arkMsg.Content == nil && role != "tool" {
 		var content strings.Builder
 		for _, part := range msg.Parts {
-			if text, ok := part.(llms.TextContent); ok {
+			if text, ok := part.(llmtypes.TextContent); ok {
 				content.WriteString(text.Text)
 			}
 		}

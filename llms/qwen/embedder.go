@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/tmc/langchaingo/embeddings"
 )
 
 // NewEmbedder creates a new Qwen embedder that supports encoding_format parameter.
@@ -155,12 +153,10 @@ func (e *Embedder) GetDimension() int {
 	return 2560
 }
 
-// Dimension returns the dimension of the embeddings (for langchaingo compatibility).
+// Dimension returns the dimension of the embeddings.
 func (e *Embedder) Dimension() int {
 	return e.GetDimension()
 }
-
-var _ embeddings.Embedder = (*Embedder)(nil)
 
 type embeddingResponse struct {
 	Object string `json:"object"`

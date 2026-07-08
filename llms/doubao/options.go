@@ -3,8 +3,6 @@ package doubao
 import (
 	"net/http"
 	"os"
-
-	"github.com/tmc/langchaingo/callbacks"
 )
 
 // ModelName represents the model identifier for Doubao (Volcengine Ark) API.
@@ -22,15 +20,14 @@ import (
 type ModelName string
 
 type options struct {
-	apiKey           string
-	accessKey        string
-	secretKey        string
-	model            ModelName
-	embeddingModel   ModelName
-	httpClient       *http.Client
-	callbacksHandler callbacks.Handler
-	baseURL          string
-	region           string
+	apiKey         string
+	accessKey      string
+	secretKey      string
+	model          ModelName
+	embeddingModel ModelName
+	httpClient     *http.Client
+	baseURL        string
+	region         string
 }
 
 // Option is a function that configures an LLM.
@@ -78,13 +75,6 @@ func WithEmbeddingModel(model ModelName) Option {
 func WithHTTPClient(client *http.Client) Option {
 	return func(opts *options) {
 		opts.httpClient = client
-	}
-}
-
-// WithCallbacks sets the callbacks handler for the LLM.
-func WithCallbacks(handler callbacks.Handler) Option {
-	return func(opts *options) {
-		opts.callbacksHandler = handler
 	}
 }
 
