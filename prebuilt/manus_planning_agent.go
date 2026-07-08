@@ -14,7 +14,12 @@ import (
 	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
-// ManusConfig configures a Manus-style planning agent with persistent files
+// ManusConfig configures a Manus-style planning agent with persistent files.
+//
+// Deprecated: prefer passing the equivalent functional options to CreateManusAgent
+// (WithWorkDir, WithPlanPath, WithNotesPath, WithOutputPath, WithAutoSave,
+// WithVerbose), which share the plan-execute option surface. ManusConfig remains
+// supported; when both are supplied, non-zero ManusConfig fields take precedence.
 type ManusConfig struct {
 	WorkDir    string
 	PlanPath   string
@@ -30,6 +35,10 @@ type ManusConfig struct {
 // 3. Tracks progress with checkboxes
 // 4. Supports human-in-the-loop intervention
 // 5. Maintains persistent state across sessions
+//
+// The agent can be configured via the ManusConfig struct or via the shared
+// functional options (WithWorkDir, WithAutoSave, WithVerbose, ...). Non-zero
+// ManusConfig fields take precedence over the corresponding options.
 func CreateManusAgent(
 	model llmtypes.Model,
 	availableNodes []graph.TypedNode[map[string]any],
@@ -37,6 +46,8 @@ func CreateManusAgent(
 	config ManusConfig,
 	opts ...CreateAgentOption,
 ) (*graph.StateRunnable[map[string]any], error) {
+	config = applyManusOptions(config, opts...)
+
 	// Validate config
 	if config.WorkDir == "" {
 		config.WorkDir = "./work"
@@ -270,6 +281,37 @@ func CreateManusAgent(
 	// workflow.InterruptBefore([]string{"planner"})
 
 	return workflow.Compile()
+}
+
+// applyManusOptions folds shared functional options into a ManusConfig. Non-zero
+// ManusConfig fields win; options only fill fields the caller left unset.
+func applyManusOptions(config ManusConfig, opts ...CreateAgentOption) ManusConfig {
+	if len(opts) == 0 {
+		return config
+	}
+	o := &CreateAgentOptions{}
+	for _, opt := range opts {
+		opt(o)
+	}
+	if config.WorkDir == "" {
+		config.WorkDir = o.WorkDir
+	}
+	if config.PlanPath == "" {
+		config.PlanPath = o.PlanPath
+	}
+	if config.NotesPath == "" {
+		config.NotesPath = o.NotesPath
+	}
+	if config.OutputPath == "" {
+		config.OutputPath = o.OutputPath
+	}
+	if !config.AutoSave {
+		config.AutoSave = o.AutoSave
+	}
+	if !config.Verbose {
+		config.Verbose = o.Verbose
+	}
+	return config
 }
 
 // Phase represents a single phase in the Manus plan

@@ -11,7 +11,12 @@ import (
 	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
-// PEVAgentConfig configures the PEV (Plan, Execute, Verify) agent
+// PEVAgentConfig configures a Plan-Execute-Verify agent.
+//
+// Deprecated: prefer the shared functional options on CreatePEVAgentMap
+// (WithMaxRetries, WithSystemMessage, WithVerificationPrompt, WithVerbose), which
+// align the PEV agent with the rest of the plan-execute family. The config struct
+// remains supported; non-zero config fields take precedence over options.
 type PEVAgentConfig struct {
 	Model              llmtypes.Model
 	Tools              []tooltypes.Tool
@@ -27,8 +32,38 @@ type VerificationResult struct {
 	Reasoning    string `json:"reasoning"`
 }
 
-// CreatePEVAgentMap creates a new PEV Agent with map[string]any state
-func CreatePEVAgentMap(config PEVAgentConfig) (*graph.StateRunnable[map[string]any], error) {
+// applyPEVOptions folds shared functional options into a PEVAgentConfig. Non-zero
+// config fields win; options only fill fields the caller left unset.
+func applyPEVOptions(config PEVAgentConfig, opts ...CreateAgentOption) PEVAgentConfig {
+	if len(opts) == 0 {
+		return config
+	}
+	o := &CreateAgentOptions{}
+	for _, opt := range opts {
+		opt(o)
+	}
+	if config.MaxRetries == 0 {
+		config.MaxRetries = o.MaxRetries
+	}
+	if config.SystemMessage == "" {
+		config.SystemMessage = o.SystemMessage
+	}
+	if config.VerificationPrompt == "" {
+		config.VerificationPrompt = o.VerificationPrompt
+	}
+	if !config.Verbose {
+		config.Verbose = o.Verbose
+	}
+	return config
+}
+
+// CreatePEVAgentMap creates a new PEV Agent with map[string]any state.
+//
+// Behavior can be configured via the PEVAgentConfig struct or the shared
+// functional options (WithMaxRetries, WithSystemMessage, WithVerificationPrompt,
+// WithVerbose). Non-zero config fields take precedence over options.
+func CreatePEVAgentMap(config PEVAgentConfig, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
+	config = applyPEVOptions(config, opts...)
 	if config.Model == nil {
 		return nil, fmt.Errorf("model is required")
 	}
@@ -182,7 +217,9 @@ func CreatePEVAgent[S any](
 	setVerificationResult func(S, string) S,
 	getFinalAnswer func(S) string,
 	setFinalAnswer func(S, string) S,
+	opts ...CreateAgentOption,
 ) (*graph.StateRunnable[S], error) {
+	config = applyPEVOptions(config, opts...)
 	if config.Model == nil {
 		return nil, fmt.Errorf("model is required")
 	}
