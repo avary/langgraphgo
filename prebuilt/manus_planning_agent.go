@@ -10,7 +10,7 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // ManusConfig configures a Manus-style planning agent with persistent files
@@ -32,7 +32,7 @@ type ManusConfig struct {
 func CreateManusAgent(
 	model llmtypes.Model,
 	availableNodes []graph.TypedNode[map[string]any],
-	inputTools []tools.Tool,
+	inputTools []tooltypes.Tool,
 	config ManusConfig,
 	opts ...CreateAgentOption,
 ) (*graph.StateRunnable[map[string]any], error) {

@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // ChatAgent represents a session with a user and can handle multi-turn conversations.
@@ -20,7 +20,7 @@ type ChatAgent struct {
 	// Conversation history
 	messages []llmtypes.MessageContent
 	// Dynamic tools that can be updated at runtime
-	dynamicTools []tools.Tool
+	dynamicTools []tooltypes.Tool
 	// Model reference for streaming (optional)
 	model llmtypes.Model
 	// Options used when creating the agent
@@ -29,7 +29,7 @@ type ChatAgent struct {
 
 // NewChatAgent creates a new ChatAgent.
 // It wraps the underlying agent graph and manages conversation history automatically.
-func NewChatAgent(model llmtypes.Model, inputTools []tools.Tool, opts ...CreateAgentOption) (*ChatAgent, error) {
+func NewChatAgent(model llmtypes.Model, inputTools []tooltypes.Tool, opts ...CreateAgentOption) (*ChatAgent, error) {
 	// Parse options
 	options := &CreateAgentOptions{}
 	for _, opt := range opts {
@@ -49,7 +49,7 @@ func NewChatAgent(model llmtypes.Model, inputTools []tools.Tool, opts ...CreateA
 		Runnable:     agent,
 		threadID:     threadID,
 		messages:     make([]llmtypes.MessageContent, 0),
-		dynamicTools: make([]tools.Tool, 0),
+		dynamicTools: make([]tooltypes.Tool, 0),
 		model:        model,
 		options:      options,
 	}, nil
@@ -129,14 +129,14 @@ func (c *ChatAgent) PrintStream(ctx context.Context, message string, w io.Writer
 
 // SetTools replaces all dynamic tools with the provided tools.
 // Note: This does not affect the base tools provided when creating the agent.
-func (c *ChatAgent) SetTools(newTools []tools.Tool) {
-	c.dynamicTools = make([]tools.Tool, len(newTools))
+func (c *ChatAgent) SetTools(newTools []tooltypes.Tool) {
+	c.dynamicTools = make([]tooltypes.Tool, len(newTools))
 	copy(c.dynamicTools, newTools)
 }
 
 // AddTool adds a new tool to the dynamic tools list.
 // If a tool with the same name already exists, it will be replaced.
-func (c *ChatAgent) AddTool(tool tools.Tool) {
+func (c *ChatAgent) AddTool(tool tooltypes.Tool) {
 	// Check if tool with same name exists
 	for i, t := range c.dynamicTools {
 		if t.Name() == tool.Name() {
@@ -163,15 +163,15 @@ func (c *ChatAgent) RemoveTool(toolName string) bool {
 
 // GetTools returns a copy of the current dynamic tools list.
 // Note: This does not include the base tools provided when creating the agent.
-func (c *ChatAgent) GetTools() []tools.Tool {
-	toolsCopy := make([]tools.Tool, len(c.dynamicTools))
+func (c *ChatAgent) GetTools() []tooltypes.Tool {
+	toolsCopy := make([]tooltypes.Tool, len(c.dynamicTools))
 	copy(toolsCopy, c.dynamicTools)
 	return toolsCopy
 }
 
 // ClearTools removes all dynamic tools.
 func (c *ChatAgent) ClearTools() {
-	c.dynamicTools = make([]tools.Tool, 0)
+	c.dynamicTools = make([]tooltypes.Tool, 0)
 }
 
 // AsyncChat sends a message to the agent and returns a channel for streaming the response.

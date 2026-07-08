@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // PTCToolNode is a graph node that handles programmatic tool calling
@@ -16,12 +16,12 @@ type PTCToolNode struct {
 }
 
 // NewPTCToolNode creates a new PTC tool node with default execution mode (direct)
-func NewPTCToolNode(language ExecutionLanguage, toolList []tools.Tool) *PTCToolNode {
+func NewPTCToolNode(language ExecutionLanguage, toolList []tooltypes.Tool) *PTCToolNode {
 	return NewPTCToolNodeWithMode(language, toolList, ModeDirect)
 }
 
 // NewPTCToolNodeWithMode creates a new PTC tool node with specified execution mode
-func NewPTCToolNodeWithMode(language ExecutionLanguage, toolList []tools.Tool, mode ExecutionMode) *PTCToolNode {
+func NewPTCToolNodeWithMode(language ExecutionLanguage, toolList []tooltypes.Tool, mode ExecutionMode) *PTCToolNode {
 	return &PTCToolNode{
 		Executor: NewCodeExecutorWithMode(language, toolList, mode),
 	}

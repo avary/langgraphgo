@@ -11,7 +11,7 @@ import (
 	"github.com/smallnest/goskills"
 	goskillstool "github.com/smallnest/goskills/tool"
 	langgraphtool "github.com/smallnest/langgraphgo/tool"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // ToolConfig 定义工具的配置，可以从 SKILL.md 或单独的配置文件中读取
@@ -91,7 +91,7 @@ func buildToolConfigFromSkill(skill *goskills.SkillPackage) *ToolConfig {
 	return config
 }
 
-// SkillTool implements tools.Tool for goskills.
+// SkillTool implements tooltypes.Tool for goskills.
 type SkillTool struct {
 	name        string
 	description string
@@ -102,7 +102,7 @@ type SkillTool struct {
 	skill       *goskills.SkillPackage // 保留对 skill 包的引用以获取工具定义
 }
 
-var _ tools.Tool = &SkillTool{}
+var _ tooltypes.Tool = &SkillTool{}
 var _ interface{ Schema() map[string]any } = &SkillTool{}
 
 func (t *SkillTool) Name() string {
@@ -369,10 +369,10 @@ type SkillsToToolsOptions struct {
 	ToolConfig *ToolConfig
 }
 
-// SkillsToTools converts a goskills.SkillPackage to a slice of tools.Tool.
+// SkillsToTools converts a goskills.SkillPackage to a slice of tooltypes.Tool.
 // 自动从 SKILL.md 读取工具定义，如果没有定义则自动生成。
 // 支持通过 ToolConfig 覆盖或补充 SKILL.md 中的定义。
-func SkillsToTools(skill *goskills.SkillPackage, opts ...SkillsToToolsOptions) ([]tools.Tool, error) {
+func SkillsToTools(skill *goskills.SkillPackage, opts ...SkillsToToolsOptions) ([]tooltypes.Tool, error) {
 	var config *ToolConfig
 
 	// 1. 首先尝试从 SKILL.md 自动构建配置
@@ -405,7 +405,7 @@ func SkillsToTools(skill *goskills.SkillPackage, opts ...SkillsToToolsOptions) (
 	}
 
 	availableTools, scriptMap := goskills.GenerateToolDefinitions(skill)
-	var result []tools.Tool
+	var result []tooltypes.Tool
 
 	for _, t := range availableTools {
 		if t.Function.Name == "" {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // MockLLM for testing PiAgent
@@ -100,7 +100,7 @@ func TestPiAgentMessageDuplication(t *testing.T) {
 	agent.state.SystemPrompt = "You are a helpful assistant."
 
 	// Build the graph
-	inputTools := []tools.Tool{&mockCalculatorTool{}}
+	inputTools := []tooltypes.Tool{&mockCalculatorTool{}}
 	runnable, err := buildPiAgentGraph(agent, mockLLM, inputTools)
 	if err != nil {
 		t.Fatalf("Failed to build agent graph: %v", err)

@@ -7,7 +7,7 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // PTCAgentConfig configures a PTC agent
@@ -16,7 +16,7 @@ type PTCAgentConfig struct {
 	Model llmtypes.Model
 
 	// Tools are the available tools
-	Tools []tools.Tool
+	Tools []tooltypes.Tool
 
 	// Language is the execution language for code
 	Language ExecutionLanguage

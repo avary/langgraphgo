@@ -8,13 +8,13 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // PEVAgentConfig configures the PEV (Plan, Execute, Verify) agent
 type PEVAgentConfig struct {
 	Model              llmtypes.Model
-	Tools              []tools.Tool
+	Tools              []tooltypes.Tool
 	MaxRetries         int
 	SystemMessage      string
 	VerificationPrompt string

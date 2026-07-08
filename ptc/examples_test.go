@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // MockTool for testing
@@ -30,7 +30,7 @@ func (t MockTool) Call(ctx context.Context, input string) (string, error) {
 }
 
 func TestCodeExecutor(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Performs calculations",
@@ -64,7 +64,7 @@ print(f"Result: {result}")
 }
 
 func TestToolServer(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "test_tool",
 			description: "A test tool",
@@ -97,7 +97,7 @@ func ExampleCreatePTCAgent() {
 	// Note: This requires a real LLM and won't run in tests
 
 	// Create tools
-	_ = []tools.Tool{
+	_ = []tooltypes.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Performs arithmetic calculations",
@@ -122,7 +122,7 @@ func ExampleCreatePTCAgent() {
 }
 
 func ExampleCodeExecutor_Execute() {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "get_data",
 			description: "Gets some data",
@@ -154,7 +154,7 @@ print(f"Total: {total}")
 }
 
 func TestToolDefinitions(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "tool1",
 			description: "Description 1",
@@ -208,7 +208,7 @@ func findSubstring(s, substr string) bool {
 
 // Example of using PTC with different execution languages
 func ExampleExecutionLanguage() {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{name: "tool1", description: "A tool", response: "response"},
 	}
 

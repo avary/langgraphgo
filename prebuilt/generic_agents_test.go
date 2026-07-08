@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // Mock Reflection LLM
@@ -122,7 +122,7 @@ func TestCreatePEVAgent(t *testing.T) {
 			"Final",
 		},
 	}
-	config := PEVAgentConfig{Model: mockLLM, Tools: []tools.Tool{PEVMockTool{name: "calculator"}}}
+	config := PEVAgentConfig{Model: mockLLM, Tools: []tooltypes.Tool{PEVMockTool{name: "calculator"}}}
 	agent, err := CreatePEVAgent(
 		config,
 		func(s PEVAgentState) []llmtypes.MessageContent { return s.Messages },

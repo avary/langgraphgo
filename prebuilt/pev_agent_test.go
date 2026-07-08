@@ -3,7 +3,7 @@ package prebuilt
 import (
 	"testing"
 
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 func TestCreatePEVAgentMap(t *testing.T) {
@@ -16,7 +16,7 @@ func TestCreatePEVAgentMap(t *testing.T) {
 	}
 	config := PEVAgentConfig{
 		Model:      mockLLM,
-		Tools:      []tools.Tool{PEVMockTool{name: "calculator"}},
+		Tools:      []tooltypes.Tool{PEVMockTool{name: "calculator"}},
 		MaxRetries: 3,
 	}
 	agent, err := CreatePEVAgentMap(config)

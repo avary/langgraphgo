@@ -32,13 +32,13 @@
 //	import (
 //		"github.com/smallnest/langgraphgo/ptc"
 //		"github.com/smallnest/langgraphgo/llmtypes"
-//		"github.com/tmc/langchaingo/tools"
+//		"github.com/smallnest/langgraphgo/tooltypes"
 //	)
 //
 //	// Create agent with Python execution
 //	agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
 //		Model:       llm,
-//		Tools:       []tools.Tool{calculator, weatherTool},
+//		Tools:       []tooltypes.Tool{calculator, weatherTool},
 //		Language:    ptc.LanguagePython,
 //		MaxIterations: 10,
 //	})
@@ -71,7 +71,8 @@
 //
 //		"github.com/smallnest/langgraphgo/ptc"
 //		"github.com/tmc/langchaingo/llms/openai"
-//		"github.com/tmc/langchaingo/tools"
+//		"github.com/smallnest/langgraphgo/tooltypes"
+//		"github.com/tmc/langchaingo/tools" // langchaingo tools satisfy tooltypes.Tool
 //	)
 //
 //	func main() {
@@ -84,7 +85,7 @@
 //		// Create PTC agent
 //		agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
 //			Model:    llm,
-//			Tools:    []tools.Tool{calculator},
+//			Tools:    []tooltypes.Tool{calculator},
 //			Language: ptc.LanguagePython,
 //		})
 //		if err != nil {
@@ -129,7 +130,7 @@
 //	weather := &WeatherTool{}
 //	agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
 //		Model:    llm,
-//		Tools:    []tools.Tool{weather},
+//		Tools:    []tooltypes.Tool{weather},
 //		Language: ptc.LanguageJavaScript,
 //	})
 //

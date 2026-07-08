@@ -9,11 +9,11 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // CreatePlanningAgentMap creates a planning agent with map[string]any state
-func CreatePlanningAgentMap(model llmtypes.Model, availableNodes []graph.TypedNode[map[string]any], inputTools []tools.Tool, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
+func CreatePlanningAgentMap(model llmtypes.Model, availableNodes []graph.TypedNode[map[string]any], inputTools []tooltypes.Tool, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
 	options := &CreateAgentOptions{}
 	for _, opt := range opts {
 		opt(options)

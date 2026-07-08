@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/tooltypes"
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/tools"
 )
 
 func TestCreateAgentMap(t *testing.T) {
 	mockLLM := &MockLLM{}
-	inputTools := []tools.Tool{}
+	inputTools := []tooltypes.Tool{}
 	systemMessage := "You are a helpful assistant."
 
 	t.Run("Basic Agent Creation", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestCreateAgentMap(t *testing.T) {
 
 	t.Run("Agent with tools", func(t *testing.T) {
 		mockTool := &MockToolWithResponse{name: "test_tool", description: "A test tool", response: "Tool response"}
-		agent, err := CreateAgentMap(mockLLM, []tools.Tool{mockTool}, 0)
+		agent, err := CreateAgentMap(mockLLM, []tooltypes.Tool{mockTool}, 0)
 		assert.NoError(t, err)
 		assert.NotNil(t, agent)
 	})
@@ -87,7 +87,7 @@ func TestCreateAgentGeneric(t *testing.T) {
 	mockLLM := &MockLLM{}
 
 	t.Run("Create generic AgentState agent", func(t *testing.T) {
-		inputTools := []tools.Tool{}
+		inputTools := []tooltypes.Tool{}
 
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
@@ -97,8 +97,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 				s.Messages = msgs
 				return s
 			},
-			func(s AgentState) []tools.Tool { return s.ExtraTools },
-			func(s AgentState, tools []tools.Tool) AgentState {
+			func(s AgentState) []tooltypes.Tool { return s.ExtraTools },
+			func(s AgentState, tools []tooltypes.Tool) AgentState {
 				s.ExtraTools = tools
 				return s
 			},
@@ -108,7 +108,7 @@ func TestCreateAgentGeneric(t *testing.T) {
 	})
 
 	t.Run("Create generic agent with system message", func(t *testing.T) {
-		inputTools := []tools.Tool{}
+		inputTools := []tooltypes.Tool{}
 		systemMsg := "You are a helpful assistant."
 
 		agent, err := CreateAgent[AgentState](
@@ -119,8 +119,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 				s.Messages = msgs
 				return s
 			},
-			func(s AgentState) []tools.Tool { return s.ExtraTools },
-			func(s AgentState, tools []tools.Tool) AgentState {
+			func(s AgentState) []tooltypes.Tool { return s.ExtraTools },
+			func(s AgentState, tools []tooltypes.Tool) AgentState {
 				s.ExtraTools = tools
 				return s
 			},
@@ -131,7 +131,7 @@ func TestCreateAgentGeneric(t *testing.T) {
 	})
 
 	t.Run("Create generic agent with state modifier", func(t *testing.T) {
-		inputTools := []tools.Tool{}
+		inputTools := []tooltypes.Tool{}
 		modifier := func(messages []llmtypes.MessageContent) []llmtypes.MessageContent {
 			return append(messages, llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, "Modified"))
 		}
@@ -144,8 +144,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 				s.Messages = msgs
 				return s
 			},
-			func(s AgentState) []tools.Tool { return s.ExtraTools },
-			func(s AgentState, tools []tools.Tool) AgentState {
+			func(s AgentState) []tooltypes.Tool { return s.ExtraTools },
+			func(s AgentState, tools []tooltypes.Tool) AgentState {
 				s.ExtraTools = tools
 				return s
 			},
@@ -156,7 +156,7 @@ func TestCreateAgentGeneric(t *testing.T) {
 	})
 
 	t.Run("Generic agent invoke", func(t *testing.T) {
-		inputTools := []tools.Tool{}
+		inputTools := []tooltypes.Tool{}
 
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
@@ -166,8 +166,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 				s.Messages = msgs
 				return s
 			},
-			func(s AgentState) []tools.Tool { return s.ExtraTools },
-			func(s AgentState, tools []tools.Tool) AgentState {
+			func(s AgentState) []tooltypes.Tool { return s.ExtraTools },
+			func(s AgentState, tools []tooltypes.Tool) AgentState {
 				s.ExtraTools = tools
 				return s
 			},
@@ -185,7 +185,7 @@ func TestCreateAgentGeneric(t *testing.T) {
 	})
 
 	t.Run("Generic agent with extra tools", func(t *testing.T) {
-		inputTools := []tools.Tool{
+		inputTools := []tooltypes.Tool{
 			&MockToolWithResponse{name: "base_tool", description: "Base tool", response: "base response"},
 		}
 
@@ -197,8 +197,8 @@ func TestCreateAgentGeneric(t *testing.T) {
 				s.Messages = msgs
 				return s
 			},
-			func(s AgentState) []tools.Tool { return s.ExtraTools },
-			func(s AgentState, tools []tools.Tool) AgentState {
+			func(s AgentState) []tooltypes.Tool { return s.ExtraTools },
+			func(s AgentState, tools []tooltypes.Tool) AgentState {
 				s.ExtraTools = tools
 				return s
 			},
@@ -209,7 +209,7 @@ func TestCreateAgentGeneric(t *testing.T) {
 			Messages: []llmtypes.MessageContent{
 				llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Hello"),
 			},
-			ExtraTools: []tools.Tool{
+			ExtraTools: []tooltypes.Tool{
 				&MockToolWithResponse{name: "extra_tool", description: "Extra tool", response: "extra response"},
 			},
 		}
@@ -229,7 +229,7 @@ func TestCreateAgentWithToolCalls(t *testing.T) {
 			response:    "Tool executed successfully",
 		}
 
-		agent, err := CreateAgentMap(mockLLM, []tools.Tool{mockTool}, 0)
+		agent, err := CreateAgentMap(mockLLM, []tooltypes.Tool{mockTool}, 0)
 		assert.NoError(t, err)
 
 		messages := []llmtypes.MessageContent{
@@ -251,14 +251,14 @@ func TestCreateAgentWithToolCalls(t *testing.T) {
 
 		agent, err := CreateAgent[AgentState](
 			mockLLM,
-			[]tools.Tool{mockTool},
+			[]tooltypes.Tool{mockTool},
 			func(s AgentState) []llmtypes.MessageContent { return s.Messages },
 			func(s AgentState, msgs []llmtypes.MessageContent) AgentState {
 				s.Messages = msgs
 				return s
 			},
-			func(s AgentState) []tools.Tool { return s.ExtraTools },
-			func(s AgentState, tools []tools.Tool) AgentState {
+			func(s AgentState) []tooltypes.Tool { return s.ExtraTools },
+			func(s AgentState, tools []tooltypes.Tool) AgentState {
 				s.ExtraTools = tools
 				return s
 			},

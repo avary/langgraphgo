@@ -7,7 +7,7 @@ import (
 
 	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // MockLLM for testing
@@ -34,7 +34,7 @@ func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.C
 
 // TestPTCToolNode tests PTCToolNode functionality
 func TestPTCToolNode(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Performs calculations",
@@ -84,7 +84,7 @@ func TestPTCToolNode(t *testing.T) {
 
 // TestPTCToolNodeWithGoCode tests PTCToolNode with Go code
 func TestPTCToolNodeWithGoCode(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "greet",
 			description: "Greets someone",
@@ -124,7 +124,7 @@ func TestPTCToolNodeWithGoCode(t *testing.T) {
 
 // TestPTCToolNodeErrorHandling tests error handling in PTCToolNode
 func TestPTCToolNodeErrorHandling(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test tool",
@@ -169,7 +169,7 @@ func TestPTCToolNodeErrorHandling(t *testing.T) {
 
 // TestPTCToolNodeWithoutCode tests PTCToolNode with plain text (no code blocks)
 func TestPTCToolNodeWithoutCode(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test",
@@ -206,7 +206,7 @@ func TestPTCToolNodeWithoutCode(t *testing.T) {
 
 // TestPTCAgentConfig tests PTCAgentConfig validation
 func TestPTCAgentConfig(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test",
@@ -233,7 +233,7 @@ func TestPTCAgentConfig(t *testing.T) {
 
 // TestPTCAgentDefaultConfig tests default configuration
 func TestPTCAgentDefaultConfig(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Calculates",
@@ -258,7 +258,7 @@ func TestPTCAgentDefaultConfig(t *testing.T) {
 
 // TestPTCAgentWithCustomConfig tests custom configuration
 func TestPTCAgentWithCustomConfig(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test",
@@ -287,7 +287,7 @@ func TestPTCAgentWithCustomConfig(t *testing.T) {
 // TestSanitizeFunctionName tests function name sanitization
 // This is an indirect test through tool definitions
 func TestSanitizeFunctionName(t *testing.T) {
-	tools := []tools.Tool{
+	tools := []tooltypes.Tool{
 		MockTool{
 			name:        "tool-with-dashes",
 			description: "Test tool with dashes",

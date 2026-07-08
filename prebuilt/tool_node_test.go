@@ -5,13 +5,13 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/tooltypes"
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/tools"
 )
 
 func TestToolNodeMap(t *testing.T) {
 	mockTool := &MockTool{name: "test-tool"}
-	executor := NewToolExecutor([]tools.Tool{mockTool})
+	executor := NewToolExecutor([]tooltypes.Tool{mockTool})
 	node := ToolNodeMap(executor)
 
 	// Construct state with AIMessage containing ToolCall

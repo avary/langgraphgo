@@ -10,7 +10,7 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // =============================================================================
@@ -35,7 +35,7 @@ type PiAgentState struct {
 	Model         string                    `json:"model"`
 	ThinkingLevel string                    `json:"thinking_level"` // off, minimal, low, medium, high, xhigh
 	Messages      []llmtypes.MessageContent `json:"messages"`
-	Tools         []tools.Tool              `json:"-"`
+	Tools         []tooltypes.Tool          `json:"-"`
 
 	// Streaming state
 	IsStreaming   bool                     `json:"is_streaming"`
@@ -62,7 +62,7 @@ type PiAgentState struct {
 func NewPiAgentState() *PiAgentState {
 	return &PiAgentState{
 		Messages:         make([]llmtypes.MessageContent, 0),
-		Tools:            make([]tools.Tool, 0),
+		Tools:            make([]tooltypes.Tool, 0),
 		PendingToolCalls: make(map[string]bool),
 		SteeringQueue:    make([]llmtypes.MessageContent, 0),
 		SteeringMode:     QueueModeAll,
@@ -311,7 +311,7 @@ func WithPiMaxIterations(max int) PiAgentOption {
 
 // NewPiAgent creates a new PiAgent
 // Inspired by pi-mono's Agent class constructor
-func NewPiAgent(model llmtypes.Model, inputTools []tools.Tool, opts ...PiAgentOption) (*PiAgent, error) {
+func NewPiAgent(model llmtypes.Model, inputTools []tooltypes.Tool, opts ...PiAgentOption) (*PiAgent, error) {
 	state := NewPiAgentState()
 	state.Model = "model"
 	state.Tools = inputTools
@@ -378,7 +378,7 @@ func (a *PiAgent) SetSystemPrompt(prompt string) {
 
 // SetTools updates the available tools
 // Inspired by pi-mono's Agent.setTools()
-func (a *PiAgent) SetTools(tools []tools.Tool) {
+func (a *PiAgent) SetTools(tools []tooltypes.Tool) {
 	a.state.Tools = tools
 }
 
@@ -591,7 +591,7 @@ func (a *PiAgent) PromptWithStream(ctx context.Context, msg llmtypes.MessageCont
 
 // buildPiAgentGraph builds the agent execution graph
 // Inspired by pi-mono's agentLoop function
-func buildPiAgentGraph(agent *PiAgent, model llmtypes.Model, inputTools []tools.Tool) (*graph.StateRunnable[*PiAgentState], error) {
+func buildPiAgentGraph(agent *PiAgent, model llmtypes.Model, inputTools []tooltypes.Tool) (*graph.StateRunnable[*PiAgentState], error) {
 	// Create state graph with schema
 	g := graph.NewStateGraph[*PiAgentState]()
 
@@ -672,7 +672,7 @@ func mergePiAgentState(current, new *PiAgentState) (*PiAgentState, error) {
 
 // newPiAgentNode builds the "agent" node function that calls the LLM and
 // returns a single new AI llmtypes.
-func newPiAgentNode(agent *PiAgent, model llmtypes.Model, inputTools []tools.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
+func newPiAgentNode(agent *PiAgent, model llmtypes.Model, inputTools []tooltypes.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
 	maxIterations := agent.maxIterations
 	return func(ctx context.Context, state *PiAgentState) (*PiAgentState, error) {
 		iterationCount := 0
@@ -739,7 +739,7 @@ func newPiAgentNode(agent *PiAgent, model llmtypes.Model, inputTools []tools.Too
 
 // newPiToolsNode builds the "tools" node function that executes the tool calls
 // from the last AI message and returns the resulting tool messages.
-func newPiToolsNode(agent *PiAgent, inputTools []tools.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
+func newPiToolsNode(agent *PiAgent, inputTools []tooltypes.Tool) func(context.Context, *PiAgentState) (*PiAgentState, error) {
 	return func(ctx context.Context, state *PiAgentState) (*PiAgentState, error) {
 		if len(state.Messages) == 0 {
 			return &PiAgentState{}, nil

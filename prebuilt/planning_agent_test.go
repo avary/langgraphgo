@@ -6,8 +6,8 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/tooltypes"
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/tools"
 )
 
 // MockPlanningLLM is a mock LLM that returns a workflow plan
@@ -104,7 +104,7 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 	}
 
 	// Create Planning Agent
-	agent, err := CreatePlanningAgentMap(mockLLM, testNodes, []tools.Tool{})
+	agent, err := CreatePlanningAgentMap(mockLLM, testNodes, []tooltypes.Tool{})
 	assert.NoError(t, err)
 	assert.NotNil(t, agent)
 

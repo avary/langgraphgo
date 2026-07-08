@@ -10,7 +10,7 @@ import (
 	adapter "github.com/smallnest/langgraphgo/adapter/goskills"
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // CreateAgentOptions contains options for creating an agent
@@ -50,7 +50,7 @@ func WithDisableModelInvocation(disable bool) CreateAgentOption {
 }
 
 // CreateAgentMap creates a new agent graph with map[string]any state
-func CreateAgentMap(model llmtypes.Model, inputTools []tools.Tool, maxIterations int, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
+func CreateAgentMap(model llmtypes.Model, inputTools []tooltypes.Tool, maxIterations int, opts ...CreateAgentOption) (*graph.StateRunnable[map[string]any], error) {
 	options := &CreateAgentOptions{}
 	for _, opt := range opts {
 		opt(options)
@@ -108,9 +108,9 @@ func CreateAgentMap(model llmtypes.Model, inputTools []tools.Tool, maxIterations
 
 	workflow.AddNode("agent", "Agent decision node", func(ctx context.Context, state map[string]any) (map[string]any, error) {
 		messages, _ := state["messages"].([]llmtypes.MessageContent)
-		var allTools []tools.Tool
+		var allTools []tooltypes.Tool
 		allTools = append(allTools, inputTools...)
-		if extra, ok := state["extra_tools"].([]tools.Tool); ok {
+		if extra, ok := state["extra_tools"].([]tooltypes.Tool); ok {
 			allTools = append(allTools, extra...)
 		}
 
@@ -207,9 +207,9 @@ func CreateAgentMap(model llmtypes.Model, inputTools []tools.Tool, maxIterations
 	workflow.AddNode("tools", "Tool execution node", func(ctx context.Context, state map[string]any) (map[string]any, error) {
 		messages := state["messages"].([]llmtypes.MessageContent)
 		lastMsg := messages[len(messages)-1]
-		var allTools []tools.Tool
+		var allTools []tooltypes.Tool
 		allTools = append(allTools, inputTools...)
-		if extra, ok := state["extra_tools"].([]tools.Tool); ok {
+		if extra, ok := state["extra_tools"].([]tooltypes.Tool); ok {
 			allTools = append(allTools, extra...)
 		}
 		toolExecutor := NewToolExecutor(allTools)
@@ -279,11 +279,11 @@ func CreateAgentMap(model llmtypes.Model, inputTools []tools.Tool, maxIterations
 // CreateAgent creates a generic agent graph
 func CreateAgent[S any](
 	model llmtypes.Model,
-	inputTools []tools.Tool,
+	inputTools []tooltypes.Tool,
 	getMessages func(S) []llmtypes.MessageContent,
 	setMessages func(S, []llmtypes.MessageContent) S,
-	getExtraTools func(S) []tools.Tool,
-	setExtraTools func(S, []tools.Tool) S,
+	getExtraTools func(S) []tooltypes.Tool,
+	setExtraTools func(S, []tooltypes.Tool) S,
 	opts ...CreateAgentOption,
 ) (*graph.StateRunnable[S], error) {
 	options := &CreateAgentOptions{}

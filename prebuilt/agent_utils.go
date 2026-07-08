@@ -3,12 +3,12 @@ package prebuilt
 import (
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
-// BuildToolDefinitions converts a slice of tools.Tool to llmtypes.Tool definitions.
+// BuildToolDefinitions converts a slice of tooltypes.Tool to llmtypes.Tool definitions.
 // This is a common pattern used across different agent implementations.
-func BuildToolDefinitions(inputTools []tools.Tool, getSchema func(tools.Tool) map[string]any) []llmtypes.Tool {
+func BuildToolDefinitions(inputTools []tooltypes.Tool, getSchema func(tooltypes.Tool) map[string]any) []llmtypes.Tool {
 	var toolDefs []llmtypes.Tool
 	for _, t := range inputTools {
 		toolDefs = append(toolDefs, llmtypes.Tool{

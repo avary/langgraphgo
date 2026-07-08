@@ -7,14 +7,14 @@ import (
 
 	"github.com/smallnest/langgraphgo/graph"
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // CreateReactAgentMap creates a new ReAct agent graph with map[string]any state
 //
 // Deprecated: Use CreateAgentMap instead, which now includes the same iteration limiting functionality.
 // This function is kept for backward compatibility and will be removed in a future version.
-func CreateReactAgentMap(model llmtypes.Model, inputTools []tools.Tool, maxIterations int) (*graph.StateRunnable[map[string]any], error) {
+func CreateReactAgentMap(model llmtypes.Model, inputTools []tooltypes.Tool, maxIterations int) (*graph.StateRunnable[map[string]any], error) {
 	if maxIterations == 0 {
 		maxIterations = 20
 	}
@@ -172,7 +172,7 @@ func CreateReactAgentMap(model llmtypes.Model, inputTools []tools.Tool, maxItera
 // CreateReactAgent creates a new typed ReAct agent graph
 func CreateReactAgent[S any](
 	model llmtypes.Model,
-	inputTools []tools.Tool,
+	inputTools []tooltypes.Tool,
 	getMessages func(S) []llmtypes.MessageContent,
 	setMessages func(S, []llmtypes.MessageContent) S,
 	getIterationCount func(S) int,

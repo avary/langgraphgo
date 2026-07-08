@@ -6,11 +6,11 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/tooltypes"
 	"github.com/stretchr/testify/assert"
-	"github.com/tmc/langchaingo/tools"
 )
 
-// WeatherTool implements tools.Tool for testing
+// WeatherTool implements tooltypes.Tool for testing
 type WeatherTool struct {
 	currentTemp int
 }
@@ -56,7 +56,7 @@ func TestReactAgentWithWeatherTool(t *testing.T) {
 			{Choices: []*llmtypes.ContentChoice{{Content: "Beijing is 25°C."}}},
 		},
 	}
-	agent, err := CreateReactAgentMap(mockLLM, []tools.Tool{weatherTool}, 5)
+	agent, err := CreateReactAgentMap(mockLLM, []tooltypes.Tool{weatherTool}, 5)
 	assert.NoError(t, err)
 	res, err := agent.Invoke(context.Background(), map[string]any{"messages": []llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Weather in Beijing?")}})
 	assert.NoError(t, err)

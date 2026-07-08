@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // MockModel is a simple mock for llmtypes.Model
@@ -168,7 +168,7 @@ func TestChatAgent_DynamicTools(t *testing.T) {
 	// Test SetTools
 	tool3 := &MockTool{name: "tool3"}
 	tool4 := &MockTool{name: "tool4"}
-	agent.SetTools([]tools.Tool{tool3, tool4})
+	agent.SetTools([]tooltypes.Tool{tool3, tool4})
 	if len(agent.GetTools()) != 2 {
 		t.Errorf("Expected 2 tools after SetTools, got %d", len(agent.GetTools()))
 	}

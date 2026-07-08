@@ -14,13 +14,14 @@
 //	import (
 //		"github.com/smallnest/langgraphgo/prebuilt"
 //		"github.com/smallnest/langgraphgo/llmtypes"
-//		"github.com/tmc/langchaingo/tools"
+//		"github.com/smallnest/langgraphgo/tooltypes"
+//		"github.com/tmc/langchaingo/tools" // langchaingo tools satisfy tooltypes.Tool
 //	)
 //
 //	// Create a ReAct agent with tools
 //	agent, err := prebuilt.CreateReactAgent(
 //		llm,           // Language model
-//		[]tools.Tool{  // Available tools
+//		[]tooltypes.Tool{  // Available tools
 //			&tools.CalculatorTool{},
 //			weatherTool,
 //		},
@@ -239,7 +240,7 @@
 //
 //	// Use with any agent
 //	weatherTool := &WeatherTool{}
-//	agent, err := prebuilt.CreateReactAgent(llm, []tools.Tool{weatherTool}, 10)
+//	agent, err := prebuilt.CreateReactAgent(llm, []tooltypes.Tool{weatherTool}, 10)
 //
 // # Agent Configuration
 //

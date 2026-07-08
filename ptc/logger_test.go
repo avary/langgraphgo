@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/log"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // TestLogger tests the logging functionality using package-level logger
@@ -21,7 +21,7 @@ func TestLogger(t *testing.T) {
 	logger := log.NewCustomLogger(&buf, log.LogLevelDebug)
 	log.SetDefaultLogger(logger)
 
-	toolList := []tools.Tool{
+	toolList := []tooltypes.Tool{
 		newMockTool("test", "Test tool", "ok"),
 	}
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // ========================================
@@ -70,7 +70,7 @@ func NewRetrieverTool(engine Engine, name, description string) *RetrieverTool {
 	}
 }
 
-var _ tools.Tool = &RetrieverTool{}
+var _ tooltypes.Tool = &RetrieverTool{}
 
 // Name returns the name of the tool.
 func (t *RetrieverTool) Name() string {

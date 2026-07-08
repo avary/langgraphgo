@@ -2,7 +2,7 @@ package prebuilt
 
 import (
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
 // AgentState represents the general agent state.
@@ -12,7 +12,7 @@ type AgentState struct {
 	Messages []llmtypes.MessageContent
 
 	// ExtraTools contains additional tools available to the agent
-	ExtraTools []tools.Tool
+	ExtraTools []tooltypes.Tool
 }
 
 // ReactAgentState represents the default state for a ReAct agent
@@ -125,7 +125,7 @@ type ChatAgentState struct {
 	SystemPrompt string
 
 	// ExtraTools contains additional tools available to the agent
-	ExtraTools []tools.Tool
+	ExtraTools []tooltypes.Tool
 }
 
 // SupervisorState represents the state for a supervisor workflow

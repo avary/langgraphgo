@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/tooltypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tmc/langchaingo/tools"
 )
 
 // MockTool for testing
@@ -109,7 +109,7 @@ func TestContainsCode(t *testing.T) {
 
 func TestBuildSystemPrompt(t *testing.T) {
 	executor := &CodeExecutor{
-		Tools: []tools.Tool{
+		Tools: []tooltypes.Tool{
 			&MockTool{name: "test_tool", description: "A test tool"},
 		},
 	}
@@ -176,7 +176,7 @@ func TestCreatePTCAgent(t *testing.T) {
 
 	config := PTCAgentConfig{
 		Model:         mockLLM,
-		Tools:         []tools.Tool{tool},
+		Tools:         []tooltypes.Tool{tool},
 		Language:      LanguagePython,
 		ExecutionMode: ModeServer, // Use server mode for testing
 	}
@@ -191,8 +191,8 @@ func TestCreatePTCAgent(t *testing.T) {
 	config.Model = mockLLM
 
 	// Test without tools
-	config.Tools = []tools.Tool{}
+	config.Tools = []tooltypes.Tool{}
 	_, err = CreatePTCAgent(config)
 	assert.Error(t, err)
-	config.Tools = []tools.Tool{tool}
+	config.Tools = []tooltypes.Tool{tool}
 }

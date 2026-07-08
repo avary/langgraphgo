@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/tools"
+	"github.com/smallnest/langgraphgo/tooltypes"
 )
 
-// Enforce that MockToolError implements tools.Tool
-var _ tools.Tool = (*MockToolError)(nil)
+// Enforce that MockToolError implements tooltypes.Tool
+var _ tooltypes.Tool = (*MockToolError)(nil)
 
 // MockLLMError for testing GenerateContent error
 type MockLLMError struct{}
