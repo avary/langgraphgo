@@ -57,7 +57,7 @@ test-race:
 ## test-coverage: Run tests with coverage report
 test-coverage:
 	@echo "$(COLOR_BLUE)Running tests with coverage...$(COLOR_RESET)"
-	$(GOTEST) -coverprofile=$(COVERAGE_FILE) -covermode=atomic `go list ./... | grep -v -e '/examples' -e '/showcases'`
+	$(GOTEST) -coverprofile=$(COVERAGE_FILE) -covermode=atomic `go list ./... | grep -v -e '/examples'`
 	@echo "$(COLOR_GREEN)Coverage report generated: $(COVERAGE_FILE)$(COLOR_RESET)"
 	$(GOCMD) tool cover -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML)
 	@echo "$(COLOR_GREEN)HTML coverage report: $(COVERAGE_HTML)$(COLOR_RESET)"
@@ -164,19 +164,6 @@ examples-basic:
 		$(GOBUILD) -o bin/examples/$$example ./examples/$$example || exit 1; \
 	done
 	@echo "$(COLOR_GREEN)Basic examples built$(COLOR_RESET)"
-
-## showcases: Build showcases
-showcases:
-	@echo "$(COLOR_BLUE)Building showcases...$(COLOR_RESET)"
-	@mkdir -p bin/showcases
-	@for dir in showcases/*/; do \
-		if [ -f "$$dir/main.go" ]; then \
-			showcase=$$(basename $$dir); \
-			echo "  Building $$showcase..."; \
-			$(GOBUILD) -o bin/showcases/$$showcase ./showcases/$$showcase || exit 1; \
-		fi \
-	done
-	@echo "$(COLOR_GREEN)All showcases built successfully$(COLOR_RESET)"
 
 ## ci: Run continuous integration checks
 ci: deps check test-race test-coverage

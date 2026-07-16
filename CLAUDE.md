@@ -38,7 +38,6 @@ make install-tools      # Install golangci-lint
 
 # Other
 make examples           # Build all examples
-make showcases          # Build showcases
 make clean              # Clean artifacts
 make info               # Display project info
 ```
