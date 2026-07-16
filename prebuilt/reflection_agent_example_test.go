@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/smallnest/langgraphgo/prebuilt"
 	"github.com/tmc/langchaingo/llms/openai"
 )
@@ -19,7 +19,7 @@ func ExampleCreateReflectionAgent() {
 
 	// Configure reflection agent
 	config := prebuilt.ReflectionAgentConfig{
-		Model:         llmtypes.Wrap(model),
+		Model:         llms.Wrap(model),
 		MaxIterations: 3,
 		Verbose:       true,
 		SystemMessage: "You are an expert technical writer. Create clear, accurate, and comprehensive responses.",
@@ -33,10 +33,10 @@ func ExampleCreateReflectionAgent() {
 
 	// Prepare initial state
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart("Explain the CAP theorem in distributed systems")},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("Explain the CAP theorem in distributed systems")},
 			},
 		},
 	}
@@ -48,13 +48,13 @@ func ExampleCreateReflectionAgent() {
 	}
 
 	// Extract final response
-	messages := result["messages"].([]llmtypes.MessageContent)
+	messages := result["messages"].([]llms.MessageContent)
 
 	fmt.Println("=== Final Response ===")
 	for _, msg := range messages {
-		if msg.Role == llmtypes.ChatMessageTypeAI {
+		if msg.Role == llms.ChatMessageTypeAI {
 			for _, part := range msg.Parts {
-				if textPart, ok := part.(llmtypes.TextContent); ok {
+				if textPart, ok := part.(llms.TextContent); ok {
 					fmt.Println(textPart.Text)
 				}
 			}
@@ -77,8 +77,8 @@ func ExampleCreateReflectionAgent_withSeparateReflector() {
 
 	// Configure with separate models
 	config := prebuilt.ReflectionAgentConfig{
-		Model:           llmtypes.Wrap(generationModel),
-		ReflectionModel: llmtypes.Wrap(reflectionModel),
+		Model:           llms.Wrap(generationModel),
+		ReflectionModel: llms.Wrap(reflectionModel),
 		MaxIterations:   2,
 		Verbose:         true,
 		SystemMessage:   "You are a helpful assistant providing detailed explanations.",
@@ -98,10 +98,10 @@ Be specific in your feedback.`,
 	}
 
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart("What is a Merkle tree and how is it used in blockchain?")},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("What is a Merkle tree and how is it used in blockchain?")},
 			},
 		},
 	}
@@ -125,7 +125,7 @@ func ExampleCreateReflectionAgent_customCriteria() {
 
 	// Custom reflection criteria for code quality
 	config := prebuilt.ReflectionAgentConfig{
-		Model:         llmtypes.Wrap(model),
+		Model:         llms.Wrap(model),
 		MaxIterations: 2,
 		Verbose:       true,
 		SystemMessage: "You are a senior software engineer reviewing code.",
@@ -144,10 +144,10 @@ Provide specific, actionable feedback.`,
 	}
 
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart("Review this SQL query function for issues")},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("Review this SQL query function for issues")},
 			},
 		},
 	}

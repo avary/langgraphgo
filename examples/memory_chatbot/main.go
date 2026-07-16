@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	langchainadapter "github.com/smallnest/langgraphgo/memory/langchainadapter"
 	langchainmemory "github.com/tmc/langchaingo/memory"
 )
@@ -81,9 +81,9 @@ func runChatbotSimulation(ctx context.Context, memoryType string, windowSize int
 		}
 
 		// Get historical messages
-		var historyMessages []llmtypes.ChatMessage
+		var historyMessages []llms.ChatMessage
 		if history, ok := memVars["history"]; ok {
-			if msgs, ok := history.([]llmtypes.ChatMessage); ok {
+			if msgs, ok := history.([]llms.ChatMessage); ok {
 				historyMessages = msgs
 			}
 		}

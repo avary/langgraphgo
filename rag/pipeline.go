@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // RAGState represents the state flowing through a RAG pipeline
@@ -44,7 +44,7 @@ type PipelineConfig struct {
 	VectorStore VectorStore
 	Retriever   Retriever
 	Reranker    Reranker
-	LLM         llmtypes.Model
+	LLM         llms.Model
 }
 
 // DefaultPipelineConfig returns a default RAG configuration
@@ -327,9 +327,9 @@ func (p *RAGPipeline) generateNode(ctx context.Context, state map[string]any) (m
 	// Build prompt
 	prompt := fmt.Sprintf("Context:\n%s\n\nQuestion: %s\n\nAnswer:", contextStr, query)
 
-	messages := []llmtypes.MessageContent{
-		llmtypes.TextParts("system", p.config.SystemPrompt),
-		llmtypes.TextParts("human", prompt),
+	messages := []llms.MessageContent{
+		llms.TextParts("system", p.config.SystemPrompt),
+		llms.TextParts("human", prompt),
 	}
 
 	// Generate answer

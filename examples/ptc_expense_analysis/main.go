@@ -6,10 +6,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// Create expense tools
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		GetTeamMembersTool{},
 		GetExpensesTool{},
 		GetCustomBudgetTool{},
@@ -62,11 +62,11 @@ Only count approved expenses.`,
 
 		// Create initial state
 		initialState := map[string]any{
-			"messages": []llmtypes.MessageContent{
+			"messages": []llms.MessageContent{
 				{
-					Role: llmtypes.ChatMessageTypeHuman,
-					Parts: []llmtypes.ContentPart{
-						llmtypes.TextPart(query),
+					Role: llms.ChatMessageTypeHuman,
+					Parts: []llms.ContentPart{
+						llms.TextPart(query),
 					},
 				},
 			},
@@ -82,25 +82,25 @@ Only count approved expenses.`,
 		elapsed := time.Since(startTime)
 
 		// Extract final answer
-		messages := result["messages"].([]llmtypes.MessageContent)
+		messages := result["messages"].([]llms.MessageContent)
 
 		fmt.Println("\n--- Conversation Flow ---")
 		for idx, msg := range messages {
 			role := "Unknown"
 			switch msg.Role {
-			case llmtypes.ChatMessageTypeHuman:
+			case llms.ChatMessageTypeHuman:
 				role = "Human"
-			case llmtypes.ChatMessageTypeAI:
+			case llms.ChatMessageTypeAI:
 				role = "AI"
-			case llmtypes.ChatMessageTypeTool:
+			case llms.ChatMessageTypeTool:
 				role = "Tool Result"
-			case llmtypes.ChatMessageTypeSystem:
+			case llms.ChatMessageTypeSystem:
 				role = "System"
 			}
 
 			fmt.Printf("\n[%d] %s:\n", idx+1, role)
 			for _, part := range msg.Parts {
-				if textPart, ok := part.(llmtypes.TextContent); ok {
+				if textPart, ok := part.(llms.TextContent); ok {
 					text := textPart.Text
 					if len(text) > 500 {
 						fmt.Printf("%s... (truncated)\n", text[:500])
@@ -117,10 +117,10 @@ Only count approved expenses.`,
 
 		// Get last AI message as final answer
 		for i := len(messages) - 1; i >= 0; i-- {
-			if messages[i].Role == llmtypes.ChatMessageTypeAI {
+			if messages[i].Role == llms.ChatMessageTypeAI {
 				fmt.Printf("\n--- Final Answer ---")
 				for _, part := range messages[i].Parts {
-					if textPart, ok := part.(llmtypes.TextContent); ok {
+					if textPart, ok := part.(llms.TextContent); ok {
 						fmt.Println(textPart.Text)
 					}
 				}

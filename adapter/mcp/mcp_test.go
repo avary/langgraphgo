@@ -8,14 +8,14 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	mcpclient "github.com/smallnest/goskills/mcp"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestMCPTool_Interface(t *testing.T) {
-	// Verify that MCPTool implements tooltypes.Tool interface
-	var _ tooltypes.Tool = &MCPTool{}
+	// Verify that MCPTool implements tool.Tool interface
+	var _ tool.Tool = &MCPTool{}
 }
 
 func TestMCPTool_NameAndDescription(t *testing.T) {
@@ -71,7 +71,7 @@ func TestMCPToTools_EmptyConversion(t *testing.T) {
 	_ = ctx
 
 	// Type check
-	var fn func(context.Context, any) ([]tooltypes.Tool, error)
+	var fn func(context.Context, any) ([]tool.Tool, error)
 	_ = fn
 }
 
@@ -204,7 +204,7 @@ func TestMCPTool_Call_ClientError(t *testing.T) {
 // TestMCPToTools_FunctionSignature 测试 MCPToTools 函数签名
 func TestMCPToTools_FunctionSignature(t *testing.T) {
 	// 验证函数存在并有正确的签名
-	var _ func(context.Context, *mcpclient.Client) ([]tooltypes.Tool, error) = MCPToTools
+	var _ func(context.Context, *mcpclient.Client) ([]tool.Tool, error) = MCPToTools
 }
 
 // TestNewClientFromConfig_NonExistentFile 测试不存在的配置文件

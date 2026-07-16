@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // ReflectionAgentConfig configures the reflection agent
 type ReflectionAgentConfig struct {
-	Model            llmtypes.Model
-	ReflectionModel  llmtypes.Model
+	Model            llms.Model
+	ReflectionModel  llms.Model
 	MaxIterations    int
 	SystemMessage    string
 	ReflectionPrompt string
@@ -45,21 +45,21 @@ func CreateReflectionAgentMap(config ReflectionAgentConfig) (*graph.StateRunnabl
 
 	workflow.AddNode("generate", "Generate or revise response", func(ctx context.Context, state map[string]any) (map[string]any, error) {
 		iteration, _ := state["iteration"].(int)
-		messages, ok := state["messages"].([]llmtypes.MessageContent)
+		messages, ok := state["messages"].([]llms.MessageContent)
 		if !ok || len(messages) == 0 {
 			return nil, fmt.Errorf("no messages found")
 		}
 
-		var promptMessages []llmtypes.MessageContent
+		var promptMessages []llms.MessageContent
 		if iteration == 0 {
-			promptMessages = append([]llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}}}, messages...)
+			promptMessages = append([]llms.MessageContent{{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}}}, messages...)
 		} else {
 			reflection, _ := state["reflection"].(string)
 			draft, _ := state["draft"].(string)
 			revisionPrompt := fmt.Sprintf("Revise based on reflection:\nRequest: %s\nDraft: %s\nReflection: %s", getOriginalRequest(messages), draft, reflection)
-			promptMessages = []llmtypes.MessageContent{
-				{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}},
-				{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(revisionPrompt)}},
+			promptMessages = []llms.MessageContent{
+				{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}},
+				{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(revisionPrompt)}},
 			}
 		}
 
@@ -69,7 +69,7 @@ func CreateReflectionAgentMap(config ReflectionAgentConfig) (*graph.StateRunnabl
 		}
 		draft := resp.Choices[0].Content
 		return map[string]any{
-			"messages":  []llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{llmtypes.TextPart(draft)}}},
+			"messages":  []llms.MessageContent{{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{llms.TextPart(draft)}}},
 			"draft":     draft,
 			"iteration": iteration + 1,
 		}, nil
@@ -77,10 +77,10 @@ func CreateReflectionAgentMap(config ReflectionAgentConfig) (*graph.StateRunnabl
 
 	workflow.AddNode("reflect", "Reflect on response", func(ctx context.Context, state map[string]any) (map[string]any, error) {
 		draft, _ := state["draft"].(string)
-		messages := state["messages"].([]llmtypes.MessageContent)
-		reflectionMessages := []llmtypes.MessageContent{
-			{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.ReflectionPrompt)}},
-			{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(fmt.Sprintf("Request: %s\nResponse: %s", getOriginalRequest(messages), draft))}},
+		messages := state["messages"].([]llms.MessageContent)
+		reflectionMessages := []llms.MessageContent{
+			{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.ReflectionPrompt)}},
+			{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(fmt.Sprintf("Request: %s\nResponse: %s", getOriginalRequest(messages), draft))}},
 		}
 		resp, err := reflectionModel.GenerateContent(ctx, reflectionMessages)
 		if err != nil {
@@ -111,8 +111,8 @@ func CreateReflectionAgentMap(config ReflectionAgentConfig) (*graph.StateRunnabl
 // CreateReflectionAgent creates a generic reflection agent
 func CreateReflectionAgent[S any](
 	config ReflectionAgentConfig,
-	getMessages func(S) []llmtypes.MessageContent,
-	setMessages func(S, []llmtypes.MessageContent) S,
+	getMessages func(S) []llms.MessageContent,
+	setMessages func(S, []llms.MessageContent) S,
 	getDraft func(S) string,
 	setDraft func(S, string) S,
 	getIteration func(S) int,
@@ -146,16 +146,16 @@ func CreateReflectionAgent[S any](
 			return state, fmt.Errorf("no messages found")
 		}
 
-		var promptMessages []llmtypes.MessageContent
+		var promptMessages []llms.MessageContent
 		if iteration == 0 {
-			promptMessages = append([]llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}}}, messages...)
+			promptMessages = append([]llms.MessageContent{{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}}}, messages...)
 		} else {
 			reflection := getReflection(state)
 			draft := getDraft(state)
 			revisionPrompt := fmt.Sprintf("Revise based on reflection:\nRequest: %s\nDraft: %s\nReflection: %s", getOriginalRequest(messages), draft, reflection)
-			promptMessages = []llmtypes.MessageContent{
-				{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}},
-				{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(revisionPrompt)}},
+			promptMessages = []llms.MessageContent{
+				{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}},
+				{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(revisionPrompt)}},
 			}
 		}
 
@@ -164,7 +164,7 @@ func CreateReflectionAgent[S any](
 			return state, err
 		}
 		draft := resp.Choices[0].Content
-		aiMsg := llmtypes.MessageContent{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{llmtypes.TextPart(draft)}}
+		aiMsg := llms.MessageContent{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{llms.TextPart(draft)}}
 		state = setMessages(state, append(messages, aiMsg))
 		state = setDraft(state, draft)
 		state = setIteration(state, iteration+1)
@@ -174,9 +174,9 @@ func CreateReflectionAgent[S any](
 	workflow.AddNode("reflect", "Reflect on response", func(ctx context.Context, state S) (S, error) {
 		draft := getDraft(state)
 		messages := getMessages(state)
-		reflectionMessages := []llmtypes.MessageContent{
-			{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.ReflectionPrompt)}},
-			{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(fmt.Sprintf("Request: %s\nResponse: %s", getOriginalRequest(messages), draft))}},
+		reflectionMessages := []llms.MessageContent{
+			{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.ReflectionPrompt)}},
+			{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(fmt.Sprintf("Request: %s\nResponse: %s", getOriginalRequest(messages), draft))}},
 		}
 		resp, err := reflectionModel.GenerateContent(ctx, reflectionMessages)
 		if err != nil {
@@ -214,11 +214,11 @@ func isResponseSatisfactory(reflection string) bool {
 	return false
 }
 
-func getOriginalRequest(messages []llmtypes.MessageContent) string {
+func getOriginalRequest(messages []llms.MessageContent) string {
 	for _, msg := range messages {
-		if msg.Role == llmtypes.ChatMessageTypeHuman {
+		if msg.Role == llms.ChatMessageTypeHuman {
 			for _, part := range msg.Parts {
-				if textPart, ok := part.(llmtypes.TextContent); ok {
+				if textPart, ok := part.(llms.TextContent); ok {
 					return textPart.Text
 				}
 			}

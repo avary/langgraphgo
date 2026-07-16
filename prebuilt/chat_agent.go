@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // ChatAgent represents a session with a user and can handle multi-turn conversations.
@@ -18,18 +18,18 @@ type ChatAgent struct {
 	// The session ID for this conversation
 	threadID string
 	// Conversation history
-	messages []llmtypes.MessageContent
+	messages []llms.MessageContent
 	// Dynamic tools that can be updated at runtime
-	dynamicTools []tooltypes.Tool
+	dynamicTools []tool.Tool
 	// Model reference for streaming (optional)
-	model llmtypes.Model
+	model llms.Model
 	// Options used when creating the agent
 	options *CreateAgentOptions
 }
 
 // NewChatAgent creates a new ChatAgent.
 // It wraps the underlying agent graph and manages conversation history automatically.
-func NewChatAgent(model llmtypes.Model, inputTools []tooltypes.Tool, opts ...CreateAgentOption) (*ChatAgent, error) {
+func NewChatAgent(model llms.Model, inputTools []tool.Tool, opts ...CreateAgentOption) (*ChatAgent, error) {
 	// Parse options
 	options := &CreateAgentOptions{}
 	for _, opt := range opts {
@@ -48,8 +48,8 @@ func NewChatAgent(model llmtypes.Model, inputTools []tooltypes.Tool, opts ...Cre
 	return &ChatAgent{
 		Runnable:     agent,
 		threadID:     threadID,
-		messages:     make([]llmtypes.MessageContent, 0),
-		dynamicTools: make([]tooltypes.Tool, 0),
+		messages:     make([]llms.MessageContent, 0),
+		dynamicTools: make([]tool.Tool, 0),
 		model:        model,
 		options:      options,
 	}, nil
@@ -64,7 +64,7 @@ func (c *ChatAgent) ThreadID() string {
 // It maintains the conversation context by accumulating message history.
 func (c *ChatAgent) Chat(ctx context.Context, message string) (string, error) {
 	// 1. Add user message to history
-	userMsg := llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, message)
+	userMsg := llms.TextParts(llms.ChatMessageTypeHuman, message)
 	c.messages = append(c.messages, userMsg)
 
 	// 2. Construct input with full conversation history and dynamic tools
@@ -92,7 +92,7 @@ func (c *ChatAgent) Chat(ctx context.Context, message string) (string, error) {
 
 	// 5. Extract messages from response
 	// resp is already map[string]any from StateRunnable[map[string]any]
-	messages, ok := resp["messages"].([]llmtypes.MessageContent)
+	messages, ok := resp["messages"].([]llms.MessageContent)
 	if !ok || len(messages) == 0 {
 		return "", fmt.Errorf("no messages in response")
 	}
@@ -107,7 +107,7 @@ func (c *ChatAgent) Chat(ctx context.Context, message string) (string, error) {
 	}
 
 	switch part := lastMsg.Parts[0].(type) {
-	case llmtypes.TextContent:
+	case llms.TextContent:
 		return part.Text, nil
 	default:
 		return fmt.Sprintf("%v", part), nil
@@ -129,14 +129,14 @@ func (c *ChatAgent) PrintStream(ctx context.Context, message string, w io.Writer
 
 // SetTools replaces all dynamic tools with the provided tools.
 // Note: This does not affect the base tools provided when creating the agent.
-func (c *ChatAgent) SetTools(newTools []tooltypes.Tool) {
-	c.dynamicTools = make([]tooltypes.Tool, len(newTools))
+func (c *ChatAgent) SetTools(newTools []tool.Tool) {
+	c.dynamicTools = make([]tool.Tool, len(newTools))
 	copy(c.dynamicTools, newTools)
 }
 
 // AddTool adds a new tool to the dynamic tools list.
 // If a tool with the same name already exists, it will be replaced.
-func (c *ChatAgent) AddTool(tool tooltypes.Tool) {
+func (c *ChatAgent) AddTool(tool tool.Tool) {
 	// Check if tool with same name exists
 	for i, t := range c.dynamicTools {
 		if t.Name() == tool.Name() {
@@ -163,15 +163,15 @@ func (c *ChatAgent) RemoveTool(toolName string) bool {
 
 // GetTools returns a copy of the current dynamic tools list.
 // Note: This does not include the base tools provided when creating the agent.
-func (c *ChatAgent) GetTools() []tooltypes.Tool {
-	toolsCopy := make([]tooltypes.Tool, len(c.dynamicTools))
+func (c *ChatAgent) GetTools() []tool.Tool {
+	toolsCopy := make([]tool.Tool, len(c.dynamicTools))
 	copy(toolsCopy, c.dynamicTools)
 	return toolsCopy
 }
 
 // ClearTools removes all dynamic tools.
 func (c *ChatAgent) ClearTools() {
-	c.dynamicTools = make([]tooltypes.Tool, 0)
+	c.dynamicTools = make([]tool.Tool, 0)
 }
 
 // AsyncChat sends a message to the agent and returns a channel for streaming the response.
@@ -183,7 +183,7 @@ func (c *ChatAgent) AsyncChat(ctx context.Context, message string) (<-chan strin
 	outputChan := make(chan string, 100)
 
 	// Add user message to history
-	userMsg := llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, message)
+	userMsg := llms.TextParts(llms.ChatMessageTypeHuman, message)
 	c.messages = append(c.messages, userMsg)
 
 	// Prepare messages to send
@@ -191,8 +191,8 @@ func (c *ChatAgent) AsyncChat(ctx context.Context, message string) (<-chan strin
 
 	// Apply system message if provided
 	if c.options != nil && c.options.SystemMessage != "" {
-		sysMsg := llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, c.options.SystemMessage)
-		msgsToSend = append([]llmtypes.MessageContent{sysMsg}, msgsToSend...)
+		sysMsg := llms.TextParts(llms.ChatMessageTypeSystem, c.options.SystemMessage)
+		msgsToSend = append([]llms.MessageContent{sysMsg}, msgsToSend...)
 	}
 
 	// Apply state modifier if provided
@@ -220,16 +220,16 @@ func (c *ChatAgent) AsyncChat(ctx context.Context, message string) (<-chan strin
 		}
 
 		// Call model with streaming enabled
-		_, err := c.model.GenerateContent(ctx, msgsToSend, llmtypes.WithStreamingFunc(streamingFunc))
+		_, err := c.model.GenerateContent(ctx, msgsToSend, llms.WithStreamingFunc(streamingFunc))
 		if err != nil {
 			// Error during streaming, channel will be closed
 			return
 		}
 
 		// Add AI response to history
-		aiMsg := llmtypes.MessageContent{
-			Role:  llmtypes.ChatMessageTypeAI,
-			Parts: []llmtypes.ContentPart{llmtypes.TextPart(fullResponse)},
+		aiMsg := llms.MessageContent{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{llms.TextPart(fullResponse)},
 		}
 		c.messages = append(c.messages, aiMsg)
 	}()

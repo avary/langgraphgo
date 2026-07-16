@@ -6,17 +6,17 @@ import (
 	"io"
 
 	goopenai "github.com/sashabaranov/go-openai"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // Call generates a completion from a single prompt.
-func (o *LLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
-	return llmtypes.GenerateFromSinglePrompt(ctx, o, prompt, options...)
+func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
 // GenerateContent generates a completion from a sequence of messages.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
-	opts := llmtypes.CallOptions{Model: o.model}
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	opts := llms.CallOptions{Model: o.model}
 	for _, apply := range options {
 		apply(&opts)
 	}
@@ -29,19 +29,19 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageCo
 	return o.generate(ctx, req)
 }
 
-func (o *LLM) generate(ctx context.Context, req goopenai.ChatCompletionRequest) (*llmtypes.ContentResponse, error) {
+func (o *LLM) generate(ctx context.Context, req goopenai.ChatCompletionRequest) (*llms.ContentResponse, error) {
 	req.Stream = false
 	resp, err := o.client.CreateChatCompletion(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	if len(resp.Choices) == 0 {
-		return nil, llmtypes.ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 
-	out := &llmtypes.ContentResponse{Choices: make([]*llmtypes.ContentChoice, len(resp.Choices))}
+	out := &llms.ContentResponse{Choices: make([]*llms.ContentChoice, len(resp.Choices))}
 	for i, c := range resp.Choices {
-		out.Choices[i] = &llmtypes.ContentChoice{
+		out.Choices[i] = &llms.ContentChoice{
 			Content:          c.Message.Content,
 			StopReason:       string(c.FinishReason),
 			ReasoningContent: c.Message.ReasoningContent,
@@ -56,7 +56,7 @@ func (o *LLM) generate(ctx context.Context, req goopenai.ChatCompletionRequest) 
 	return out, nil
 }
 
-func (o *LLM) generateStreaming(ctx context.Context, req goopenai.ChatCompletionRequest, streamingFunc func(context.Context, []byte) error) (*llmtypes.ContentResponse, error) {
+func (o *LLM) generateStreaming(ctx context.Context, req goopenai.ChatCompletionRequest, streamingFunc func(context.Context, []byte) error) (*llms.ContentResponse, error) {
 	req.Stream = true
 	stream, err := o.client.CreateChatCompletionStream(ctx, req)
 	if err != nil {
@@ -122,8 +122,8 @@ func (o *LLM) generateStreaming(ctx context.Context, req goopenai.ChatCompletion
 		assembled = append(assembled, *toolCalls[idx])
 	}
 
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{{
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{{
 			Content:          content,
 			StopReason:       stopReason,
 			ReasoningContent: reasoning,

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	goopenai "github.com/sashabaranov/go-openai"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 func TestNew(t *testing.T) {
@@ -37,13 +37,13 @@ func TestNew(t *testing.T) {
 }
 
 func TestToOpenAIRole(t *testing.T) {
-	cases := map[llmtypes.ChatMessageType]string{
-		llmtypes.ChatMessageTypeSystem:   goopenai.ChatMessageRoleSystem,
-		llmtypes.ChatMessageTypeAI:       goopenai.ChatMessageRoleAssistant,
-		llmtypes.ChatMessageTypeTool:     goopenai.ChatMessageRoleTool,
-		llmtypes.ChatMessageTypeFunction: goopenai.ChatMessageRoleFunction,
-		llmtypes.ChatMessageTypeHuman:    goopenai.ChatMessageRoleUser,
-		llmtypes.ChatMessageTypeGeneric:  goopenai.ChatMessageRoleUser,
+	cases := map[llms.ChatMessageType]string{
+		llms.ChatMessageTypeSystem:   goopenai.ChatMessageRoleSystem,
+		llms.ChatMessageTypeAI:       goopenai.ChatMessageRoleAssistant,
+		llms.ChatMessageTypeTool:     goopenai.ChatMessageRoleTool,
+		llms.ChatMessageTypeFunction: goopenai.ChatMessageRoleFunction,
+		llms.ChatMessageTypeHuman:    goopenai.ChatMessageRoleUser,
+		llms.ChatMessageTypeGeneric:  goopenai.ChatMessageRoleUser,
 	}
 	for in, want := range cases {
 		if got := toOpenAIRole(in); got != want {
@@ -53,17 +53,17 @@ func TestToOpenAIRole(t *testing.T) {
 }
 
 func TestToOpenAIMessages(t *testing.T) {
-	msgs := []llmtypes.MessageContent{
-		{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextContent{Text: "be brief"}}},
-		{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{
-			llmtypes.TextContent{Text: "describe this"},
-			llmtypes.ImageURLContent{URL: "http://img", Detail: "low"},
+	msgs := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextContent{Text: "be brief"}}},
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{
+			llms.TextContent{Text: "describe this"},
+			llms.ImageURLContent{URL: "http://img", Detail: "low"},
 		}},
-		{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{
-			llmtypes.ToolCall{ID: "c1", Type: "function", FunctionCall: &llmtypes.FunctionCall{Name: "f", Arguments: "{}"}},
+		{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{
+			llms.ToolCall{ID: "c1", Type: "function", FunctionCall: &llms.FunctionCall{Name: "f", Arguments: "{}"}},
 		}},
-		{Role: llmtypes.ChatMessageTypeTool, Parts: []llmtypes.ContentPart{
-			llmtypes.ToolCallResponse{ToolCallID: "c1", Name: "f", Content: "42"},
+		{Role: llms.ChatMessageTypeTool, Parts: []llms.ContentPart{
+			llms.ToolCallResponse{ToolCallID: "c1", Name: "f", Content: "42"},
 		}},
 	}
 
@@ -89,10 +89,10 @@ func TestToOpenAIMessages(t *testing.T) {
 func TestToOpenAIMessagesTextWithToolCall(t *testing.T) {
 	// An assistant turn with both text and a tool call must keep string
 	// Content: the Chat Completions API rejects array content for assistant.
-	got := toOpenAIMessages([]llmtypes.MessageContent{
-		{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{
-			llmtypes.TextContent{Text: "let me search"},
-			llmtypes.ToolCall{ID: "c1", Type: "function", FunctionCall: &llmtypes.FunctionCall{Name: "f", Arguments: "{}"}},
+	got := toOpenAIMessages([]llms.MessageContent{
+		{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{
+			llms.TextContent{Text: "let me search"},
+			llms.ToolCall{ID: "c1", Type: "function", FunctionCall: &llms.FunctionCall{Name: "f", Arguments: "{}"}},
 		}},
 	})
 	if len(got) != 1 {
@@ -110,9 +110,9 @@ func TestToOpenAIMessagesTextWithToolCall(t *testing.T) {
 }
 
 func TestToolConversion(t *testing.T) {
-	tools := []llmtypes.Tool{{
+	tools := []llms.Tool{{
 		Type: "function",
-		Function: &llmtypes.FunctionDefinition{
+		Function: &llms.FunctionDefinition{
 			Name:        "search",
 			Description: "search the web",
 			Parameters:  map[string]any{"type": "object"},
@@ -123,7 +123,7 @@ func TestToolConversion(t *testing.T) {
 		t.Fatalf("tool not converted: %+v", out)
 	}
 
-	choice := toOpenAIToolChoice(llmtypes.ToolChoice{Type: "function", Function: &llmtypes.FunctionReference{Name: "search"}})
+	choice := toOpenAIToolChoice(llms.ToolChoice{Type: "function", Function: &llms.FunctionReference{Name: "search"}})
 	tc, ok := choice.(goopenai.ToolChoice)
 	if !ok || tc.Function.Name != "search" {
 		t.Fatalf("tool choice not converted: %+v", choice)

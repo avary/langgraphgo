@@ -6,10 +6,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 
 	// 3. Create Agent with Skill Selection
 	// We pass an empty list of initial tools, as we rely on dynamic skill selection
-	agent, err := prebuilt.CreateAgentMap(llm, []tooltypes.Tool{}, 0,
+	agent, err := prebuilt.CreateAgentMap(llm, []tool.Tool{}, 0,
 		prebuilt.WithSkillDir(skillsDir),
 		prebuilt.WithVerbose(true),
 		prebuilt.WithSystemMessage("You are a helpful assistant."),
@@ -51,8 +51,8 @@ func main() {
 
 	fmt.Println("User:", input)
 	resp, err := agent.Invoke(ctx, map[string]any{
-		"messages": []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, input),
+		"messages": []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, input),
 		},
 	})
 	if err != nil {

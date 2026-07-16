@@ -36,8 +36,8 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // ==================== Data Models ====================
@@ -188,8 +188,8 @@ REASONING: [brief reasoning for the proposed strategy]`,
 		agentState.RealMarket.GetStateString())
 
 	// Call LLM
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("analyst LLM call failed: %w", err)
 	}
@@ -333,8 +333,8 @@ REASONING: [final reasoning, referencing simulation results]`,
 		int(positiveCount), len(agentState.SimulationResults))
 
 	// Call LLM
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("risk manager LLM call failed: %w", err)
 	}

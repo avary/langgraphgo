@@ -1,6 +1,6 @@
 package openairesponses
 
-import "github.com/smallnest/langgraphgo/llmtypes"
+import "github.com/smallnest/langgraphgo/llms"
 
 // --- Response wire types (subset of the Responses API response body) ---
 
@@ -48,11 +48,11 @@ func (e *responseError) Error() string { return "openairesponses: " + e.Message 
 
 // toContentResponse flattens the Responses output array into the framework's
 // single-choice ContentResponse, collecting text, reasoning, and tool calls.
-func (r *response) toContentResponse() *llmtypes.ContentResponse {
+func (r *response) toContentResponse() *llms.ContentResponse {
 	var (
 		text      string
 		reasoning string
-		toolCalls []llmtypes.ToolCall
+		toolCalls []llms.ToolCall
 	)
 	for _, item := range r.Output {
 		switch item.Type {
@@ -67,10 +67,10 @@ func (r *response) toContentResponse() *llmtypes.ContentResponse {
 				reasoning += part.Text
 			}
 		case "function_call":
-			toolCalls = append(toolCalls, llmtypes.ToolCall{
+			toolCalls = append(toolCalls, llms.ToolCall{
 				ID:   item.CallID,
 				Type: "function",
-				FunctionCall: &llmtypes.FunctionCall{
+				FunctionCall: &llms.FunctionCall{
 					Name:      item.Name,
 					Arguments: item.Arguments,
 				},
@@ -78,7 +78,7 @@ func (r *response) toContentResponse() *llmtypes.ContentResponse {
 		}
 	}
 
-	choice := &llmtypes.ContentChoice{
+	choice := &llms.ContentChoice{
 		Content:          text,
 		ReasoningContent: reasoning,
 		ToolCalls:        toolCalls,
@@ -94,5 +94,5 @@ func (r *response) toContentResponse() *llmtypes.ContentResponse {
 			"total_tokens":      r.Usage.TotalTokens,
 		}
 	}
-	return &llmtypes.ContentResponse{Choices: []*llmtypes.ContentChoice{choice}}
+	return &llms.ContentResponse{Choices: []*llms.ContentChoice{choice}}
 }

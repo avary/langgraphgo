@@ -4,30 +4,30 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
-// Enforce that MockToolError implements tooltypes.Tool
-var _ tooltypes.Tool = (*MockToolError)(nil)
+// Enforce that MockToolError implements tool.Tool
+var _ tool.Tool = (*MockToolError)(nil)
 
 // MockLLMError for testing GenerateContent error
 type MockLLMError struct{}
 
-func (m *MockLLMError) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+func (m *MockLLMError) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	return nil, fmt.Errorf("mock LLM GenerateContent error")
 }
 
-func (m *MockLLMError) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *MockLLMError) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return "", fmt.Errorf("mock LLM Call error")
 }
 
 // MockLLMEmptyContent for testing empty content response
 type MockLLMEmptyContent struct{}
 
-func (m *MockLLMEmptyContent) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{
+func (m *MockLLMEmptyContent) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
 			{
 				Content: "", // Empty content
 			},
@@ -35,7 +35,7 @@ func (m *MockLLMEmptyContent) GenerateContent(ctx context.Context, messages []ll
 	}, nil
 }
 
-func (m *MockLLMEmptyContent) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *MockLLMEmptyContent) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return "", nil // Not used for this test scenario
 }
 

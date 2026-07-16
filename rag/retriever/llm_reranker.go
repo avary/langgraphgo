@@ -6,7 +6,7 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/smallnest/langgraphgo/rag"
 )
 
@@ -36,12 +36,12 @@ func DefaultLLMRerankerConfig() LLMRerankerConfig {
 
 // LLMReranker uses an LLM to score query-document pairs for reranking
 type LLMReranker struct {
-	llm    llmtypes.Model
+	llm    llms.Model
 	config LLMRerankerConfig
 }
 
 // NewLLMReranker creates a new LLM-based reranker
-func NewLLMReranker(llm llmtypes.Model, config LLMRerankerConfig) *LLMReranker {
+func NewLLMReranker(llm llms.Model, config LLMRerankerConfig) *LLMReranker {
 	if config.TopK <= 0 {
 		config.TopK = 5
 	}
@@ -164,9 +164,9 @@ func (r *LLMReranker) scoreBatch(ctx context.Context, query string, documents []
 
 	prompt := strings.Join(promptParts, "")
 
-	messages := []llmtypes.MessageContent{
-		llmtypes.TextParts("system", r.config.SystemPrompt),
-		llmtypes.TextParts("human", prompt),
+	messages := []llms.MessageContent{
+		llms.TextParts("system", r.config.SystemPrompt),
+		llms.TextParts("human", prompt),
 	}
 
 	// Generate response

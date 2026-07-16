@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/smallnest/langgraphgo/rag"
 	"github.com/smallnest/langgraphgo/rag/retriever"
 	"github.com/smallnest/langgraphgo/rag/store"
@@ -120,7 +120,7 @@ func main() {
 	// Configure RAG pipeline
 	config := rag.DefaultPipelineConfig()
 	config.Retriever = vectorRetriever
-	config.LLM = llmtypes.Wrap(llm)
+	config.LLM = llms.Wrap(llm)
 
 	// Build basic RAG pipeline
 	fmt.Println("Building RAG pipeline...")

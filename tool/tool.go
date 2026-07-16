@@ -1,15 +1,13 @@
-// Package tooltypes defines langgraphgo's own agent-tool vocabulary. A Tool is
-// an executable capability an agent can invoke by name with a string input.
+package tool
+
+import "context"
+
+// Tool is an executable capability an LLM agent can invoke.
 //
 // The interface is intentionally identical in shape to
 // github.com/tmc/langchaingo/tools.Tool, so any value implementing one also
 // implements the other. This lets the framework own its tool abstraction while
 // remaining a drop-in for langchaingo tools without conversion.
-package tooltypes
-
-import "context"
-
-// Tool is an executable capability an LLM agent can invoke.
 type Tool interface {
 	// Name returns the tool's unique identifier.
 	Name() string

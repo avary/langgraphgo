@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 func TestNew(t *testing.T) {
@@ -48,17 +48,17 @@ func TestNew(t *testing.T) {
 }
 
 func TestToInputItems(t *testing.T) {
-	msgs := []llmtypes.MessageContent{
-		{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextContent{Text: "be brief"}}},
-		{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{
-			llmtypes.TextContent{Text: "hi"},
-			llmtypes.ImageURLContent{URL: "http://img"},
+	msgs := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextContent{Text: "be brief"}}},
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{
+			llms.TextContent{Text: "hi"},
+			llms.ImageURLContent{URL: "http://img"},
 		}},
-		{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{
-			llmtypes.ToolCall{ID: "call_1", Type: "function", FunctionCall: &llmtypes.FunctionCall{Name: "f", Arguments: "{}"}},
+		{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{
+			llms.ToolCall{ID: "call_1", Type: "function", FunctionCall: &llms.FunctionCall{Name: "f", Arguments: "{}"}},
 		}},
-		{Role: llmtypes.ChatMessageTypeTool, Parts: []llmtypes.ContentPart{
-			llmtypes.ToolCallResponse{ToolCallID: "call_1", Content: "result"},
+		{Role: llms.ChatMessageTypeTool, Parts: []llms.ContentPart{
+			llms.ToolCallResponse{ToolCallID: "call_1", Content: "result"},
 		}},
 	}
 	items := toInputItems(msgs)
@@ -82,10 +82,10 @@ func TestToInputItems(t *testing.T) {
 func TestToInputItemsOrdering(t *testing.T) {
 	// An assistant turn carrying both text and a tool call must flatten as
 	// [message, function_call] so the text precedes the call it introduces.
-	items := toInputItems([]llmtypes.MessageContent{
-		{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{
-			llmtypes.TextContent{Text: "let me look that up"},
-			llmtypes.ToolCall{ID: "call_1", Type: "function", FunctionCall: &llmtypes.FunctionCall{Name: "f", Arguments: "{}"}},
+	items := toInputItems([]llms.MessageContent{
+		{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{
+			llms.TextContent{Text: "let me look that up"},
+			llms.ToolCall{ID: "call_1", Type: "function", FunctionCall: &llms.FunctionCall{Name: "f", Arguments: "{}"}},
 		}},
 	})
 	if len(items) != 2 {
@@ -127,10 +127,10 @@ func TestGenerateContent(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	resp, err := llm.GenerateContent(context.Background(), []llmtypes.MessageContent{
-		{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextContent{Text: "hi"}}},
-	}, llmtypes.WithTools([]llmtypes.Tool{
-		{Type: "function", Function: &llmtypes.FunctionDefinition{Name: "lookup", Description: "d"}},
+	resp, err := llm.GenerateContent(context.Background(), []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextContent{Text: "hi"}}},
+	}, llms.WithTools([]llms.Tool{
+		{Type: "function", Function: &llms.FunctionDefinition{Name: "lookup", Description: "d"}},
 	}))
 	if err != nil {
 		t.Fatalf("GenerateContent: %v", err)
@@ -177,9 +177,9 @@ func TestGenerateContentStreaming(t *testing.T) {
 	}
 
 	var chunks strings.Builder
-	resp, err := llm.GenerateContent(context.Background(), []llmtypes.MessageContent{
-		{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextContent{Text: "hi"}}},
-	}, llmtypes.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
+	resp, err := llm.GenerateContent(context.Background(), []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextContent{Text: "hi"}}},
+	}, llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 		chunks.Write(chunk)
 		return nil
 	}))
@@ -206,8 +206,8 @@ func TestGenerateContentError(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	_, err = llm.GenerateContent(context.Background(), []llmtypes.MessageContent{
-		{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextContent{Text: "hi"}}},
+	_, err = llm.GenerateContent(context.Background(), []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextContent{Text: "hi"}}},
 	})
 	if err == nil || !strings.Contains(err.Error(), "bad model") {
 		t.Fatalf("want bad model error, got %v", err)

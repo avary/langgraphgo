@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // PEVAgentConfig configures a Plan-Execute-Verify agent.
@@ -18,8 +18,8 @@ import (
 // align the PEV agent with the rest of the plan-execute family. The config struct
 // remains supported; non-zero config fields take precedence over options.
 type PEVAgentConfig struct {
-	Model              llmtypes.Model
-	Tools              []tooltypes.Tool
+	Model              llms.Model
+	Tools              []tool.Tool
 	MaxRetries         int
 	SystemMessage      string
 	VerificationPrompt string
@@ -86,21 +86,21 @@ func CreatePEVAgentMap(config PEVAgentConfig, opts ...CreateAgentOption) (*graph
 
 	workflow.AddNode("planner", "Create or revise execution plan", func(ctx context.Context, state map[string]any) (map[string]any, error) {
 		retries, _ := state["retries"].(int)
-		messages, ok := state["messages"].([]llmtypes.MessageContent)
+		messages, ok := state["messages"].([]llms.MessageContent)
 		if !ok || len(messages) == 0 {
 			return nil, fmt.Errorf("no messages found")
 		}
 
-		var promptMessages []llmtypes.MessageContent
+		var promptMessages []llms.MessageContent
 		if retries == 0 {
-			promptMessages = append([]llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}}}, messages...)
+			promptMessages = append([]llms.MessageContent{{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}}}, messages...)
 		} else {
 			lastResult, _ := state["last_tool_result"].(string)
 			vResult, _ := state["verification_result"].(string)
 			replanPrompt := fmt.Sprintf("Previous failed verification. New plan needed.\nRequest: %s\nLast result: %s\nFeedback: %s", getPEVOriginalRequest(messages), lastResult, vResult)
-			promptMessages = []llmtypes.MessageContent{
-				{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}},
-				{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(replanPrompt)}},
+			promptMessages = []llms.MessageContent{
+				{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}},
+				{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(replanPrompt)}},
 			}
 		}
 
@@ -138,9 +138,9 @@ func CreatePEVAgentMap(config PEVAgentConfig, opts ...CreateAgentOption) (*graph
 		stepDesc := plan[currentStep]
 
 		verifyPrompt := fmt.Sprintf("Verify: Action: %s\nResult: %s", stepDesc, lastResult)
-		promptMessages := []llmtypes.MessageContent{
-			{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.VerificationPrompt)}},
-			{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(verifyPrompt)}},
+		promptMessages := []llms.MessageContent{
+			{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.VerificationPrompt)}},
+			{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(verifyPrompt)}},
 		}
 		resp, err := config.Model.GenerateContent(ctx, promptMessages)
 		if err != nil {
@@ -153,16 +153,16 @@ func CreatePEVAgentMap(config PEVAgentConfig, opts ...CreateAgentOption) (*graph
 	})
 
 	workflow.AddNode("synthesizer", "Synthesize final answer", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages, _ := state["messages"].([]llmtypes.MessageContent)
+		messages, _ := state["messages"].([]llms.MessageContent)
 		steps, _ := state["intermediate_steps"].([]string)
 		prompt := fmt.Sprintf("Synthesize: Request: %s\nSteps: %s", getPEVOriginalRequest(messages), strings.Join(steps, "\n"))
-		resp, err := config.Model.GenerateContent(ctx, []llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(prompt)}}})
+		resp, err := config.Model.GenerateContent(ctx, []llms.MessageContent{{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(prompt)}}})
 		if err != nil {
 			return nil, err
 		}
 		answer := resp.Choices[0].Content
 		return map[string]any{
-			"messages":     []llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{llmtypes.TextPart(answer)}}},
+			"messages":     []llms.MessageContent{{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{llms.TextPart(answer)}}},
 			"final_answer": answer,
 		}, nil
 	})
@@ -201,8 +201,8 @@ func CreatePEVAgentMap(config PEVAgentConfig, opts ...CreateAgentOption) (*graph
 // CreatePEVAgent creates a generic PEV Agent
 func CreatePEVAgent[S any](
 	config PEVAgentConfig,
-	getMessages func(S) []llmtypes.MessageContent,
-	setMessages func(S, []llmtypes.MessageContent) S,
+	getMessages func(S) []llms.MessageContent,
+	setMessages func(S, []llms.MessageContent) S,
 	getPlan func(S) []string,
 	setPlan func(S, []string) S,
 	getCurrentStep func(S) int,
@@ -243,14 +243,14 @@ func CreatePEVAgent[S any](
 			return state, fmt.Errorf("no messages")
 		}
 
-		var promptMessages []llmtypes.MessageContent
+		var promptMessages []llms.MessageContent
 		if retries == 0 {
-			promptMessages = append([]llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}}}, messages...)
+			promptMessages = append([]llms.MessageContent{{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}}}, messages...)
 		} else {
 			replanPrompt := fmt.Sprintf("Re-plan: Request: %s\nLast result: %s\nFeedback: %s", getPEVOriginalRequest(messages), getLastToolResult(state), getVerificationResult(state))
-			promptMessages = []llmtypes.MessageContent{
-				{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.SystemMessage)}},
-				{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(replanPrompt)}},
+			promptMessages = []llms.MessageContent{
+				{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.SystemMessage)}},
+				{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(replanPrompt)}},
 			}
 		}
 
@@ -280,9 +280,9 @@ func CreatePEVAgent[S any](
 
 	workflow.AddNode("verifier", "Verify result", func(ctx context.Context, state S) (S, error) {
 		prompt := fmt.Sprintf("Verify: Action: %s\nResult: %s", getPlan(state)[getCurrentStep(state)], getLastToolResult(state))
-		resp, err := config.Model.GenerateContent(ctx, []llmtypes.MessageContent{
-			{Role: llmtypes.ChatMessageTypeSystem, Parts: []llmtypes.ContentPart{llmtypes.TextPart(config.VerificationPrompt)}},
-			{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(prompt)}},
+		resp, err := config.Model.GenerateContent(ctx, []llms.MessageContent{
+			{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(config.VerificationPrompt)}},
+			{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(prompt)}},
 		})
 		if err != nil {
 			return state, err
@@ -301,12 +301,12 @@ func CreatePEVAgent[S any](
 
 	workflow.AddNode("synthesizer", "Synthesize final answer", func(ctx context.Context, state S) (S, error) {
 		prompt := fmt.Sprintf("Synthesize: Request: %s\nSteps: %s", getPEVOriginalRequest(getMessages(state)), strings.Join(getIntermediateSteps(state), "\n"))
-		resp, err := config.Model.GenerateContent(ctx, []llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(prompt)}}})
+		resp, err := config.Model.GenerateContent(ctx, []llms.MessageContent{{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(prompt)}}})
 		if err != nil {
 			return state, err
 		}
 		answer := resp.Choices[0].Content
-		state = setMessages(state, append(getMessages(state), llmtypes.MessageContent{Role: llmtypes.ChatMessageTypeAI, Parts: []llmtypes.ContentPart{llmtypes.TextPart(answer)}}))
+		state = setMessages(state, append(getMessages(state), llms.MessageContent{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{llms.TextPart(answer)}}))
 		state = setFinalAnswer(state, answer)
 		return state, nil
 	})
@@ -353,7 +353,7 @@ func parsePEVPlanSteps(planText string) []string {
 	return steps
 }
 
-func executePEVStep(ctx context.Context, step string, te *ToolExecutor, model llmtypes.Model) (string, error) {
+func executePEVStep(ctx context.Context, step string, te *ToolExecutor, model llms.Model) (string, error) {
 	if te == nil || len(te.Tools) == 0 {
 		return "Error: No tools", nil
 	}
@@ -362,7 +362,7 @@ func executePEVStep(ctx context.Context, step string, te *ToolExecutor, model ll
 		toolsInfo.WriteString(fmt.Sprintf("- %s: %s\n", name, tool.Description()))
 	}
 	prompt := fmt.Sprintf("Select tool for: %s\nTools:\n%s\nReturn JSON: {\"tool\": \"name\", \"tool_input\": \"input\"}", step, toolsInfo.String())
-	resp, err := model.GenerateContent(ctx, []llmtypes.MessageContent{{Role: llmtypes.ChatMessageTypeHuman, Parts: []llmtypes.ContentPart{llmtypes.TextPart(prompt)}}})
+	resp, err := model.GenerateContent(ctx, []llms.MessageContent{{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart(prompt)}}})
 	if err != nil {
 		return "", err
 	}
@@ -382,11 +382,11 @@ func extractPEVJSON(text string) string {
 	return text
 }
 
-func getPEVOriginalRequest(messages []llmtypes.MessageContent) string {
+func getPEVOriginalRequest(messages []llms.MessageContent) string {
 	for _, m := range messages {
-		if m.Role == llmtypes.ChatMessageTypeHuman {
+		if m.Role == llms.ChatMessageTypeHuman {
 			for _, p := range m.Parts {
-				if t, ok := p.(llmtypes.TextContent); ok {
+				if t, ok := p.(llms.TextContent); ok {
 					return t.Text
 				}
 			}

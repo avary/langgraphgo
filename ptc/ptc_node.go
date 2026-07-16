@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // PTCToolNode is a graph node that handles programmatic tool calling
@@ -16,12 +16,12 @@ type PTCToolNode struct {
 }
 
 // NewPTCToolNode creates a new PTC tool node with default execution mode (direct)
-func NewPTCToolNode(language ExecutionLanguage, toolList []tooltypes.Tool) *PTCToolNode {
+func NewPTCToolNode(language ExecutionLanguage, toolList []tool.Tool) *PTCToolNode {
 	return NewPTCToolNodeWithMode(language, toolList, ModeDirect)
 }
 
 // NewPTCToolNodeWithMode creates a new PTC tool node with specified execution mode
-func NewPTCToolNodeWithMode(language ExecutionLanguage, toolList []tooltypes.Tool, mode ExecutionMode) *PTCToolNode {
+func NewPTCToolNodeWithMode(language ExecutionLanguage, toolList []tool.Tool, mode ExecutionMode) *PTCToolNode {
 	return &PTCToolNode{
 		Executor: NewCodeExecutorWithMode(language, toolList, mode),
 	}
@@ -40,9 +40,9 @@ func (node *PTCToolNode) Invoke(ctx context.Context, state any) (any, error) {
 		return nil, fmt.Errorf("messages not found in state")
 	}
 
-	messages, ok := messagesInterface.([]llmtypes.MessageContent)
+	messages, ok := messagesInterface.([]llms.MessageContent)
 	if !ok {
-		return nil, fmt.Errorf("messages must be []llmtypes.MessageContent")
+		return nil, fmt.Errorf("messages must be []llms.MessageContent")
 	}
 
 	if len(messages) == 0 {
@@ -51,7 +51,7 @@ func (node *PTCToolNode) Invoke(ctx context.Context, state any) (any, error) {
 
 	// Get the last message from the AI
 	lastMsg := messages[len(messages)-1]
-	if lastMsg.Role != llmtypes.ChatMessageTypeAI {
+	if lastMsg.Role != llms.ChatMessageTypeAI {
 		return nil, fmt.Errorf("last message must be from AI")
 	}
 
@@ -67,10 +67,10 @@ func (node *PTCToolNode) Invoke(ctx context.Context, state any) (any, error) {
 	result, err := node.Executor.Execute(ctx, code)
 	if err != nil {
 		// Create error message as system message
-		errorMsg := llmtypes.MessageContent{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart(fmt.Sprintf("[Code Execution Error]\n%v\n\nOutput:\n%s", err, result.Output)),
+		errorMsg := llms.MessageContent{
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart(fmt.Sprintf("[Code Execution Error]\n%v\n\nOutput:\n%s", err, result.Output)),
 			},
 		}
 		mState["messages"] = append(messages, errorMsg)
@@ -78,10 +78,10 @@ func (node *PTCToolNode) Invoke(ctx context.Context, state any) (any, error) {
 	}
 
 	// Create success message with execution results as human message
-	successMsg := llmtypes.MessageContent{
-		Role: llmtypes.ChatMessageTypeHuman,
-		Parts: []llmtypes.ContentPart{
-			llmtypes.TextPart(fmt.Sprintf("[Code Execution Result]\n%s", result.Output)),
+	successMsg := llms.MessageContent{
+		Role: llms.ChatMessageTypeHuman,
+		Parts: []llms.ContentPart{
+			llms.TextPart(fmt.Sprintf("[Code Execution Result]\n%s", result.Output)),
 		},
 	}
 
@@ -94,10 +94,10 @@ func (node *PTCToolNode) Invoke(ctx context.Context, state any) (any, error) {
 // 1. Code in markdown code blocks (```language\ncode\n```)
 // 2. Plain text code
 // 3. JSON with "code" field
-func extractCodeFromMessage(msg llmtypes.MessageContent) (string, error) {
+func extractCodeFromMessage(msg llms.MessageContent) (string, error) {
 	for _, part := range msg.Parts {
 		switch p := part.(type) {
-		case llmtypes.TextContent:
+		case llms.TextContent:
 			code := p.Text
 
 			// Try to extract code from markdown code blocks

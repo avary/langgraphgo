@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // ==================== 数据模型 ====================
@@ -101,8 +101,8 @@ REASONING: [简要理由]
 		strings.Join(agentState.SelfModel.AvailableTools, ", "),
 		agentState.UserQuery)
 
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("元认知分析调用失败: %w", err)
 	}
@@ -122,8 +122,8 @@ func ReasonDirectlyNode(ctx context.Context, state map[string]any) (map[string]a
 
 查询：%s`, agentState.SelfModel.Role, agentState.UserQuery)
 
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, err
 	}
@@ -154,8 +154,8 @@ func SynthesizeToolResponseNode(ctx context.Context, state map[string]any) (map[
 查询：%s
 工具输出：%s`, agentState.SelfModel.Role, agentState.UserQuery, agentState.ToolOutput)
 
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,6 @@
 package openairesponses
 
-import "github.com/smallnest/langgraphgo/llmtypes"
+import "github.com/smallnest/langgraphgo/llms"
 
 // --- Request wire types (subset of the Responses API request body) ---
 
@@ -56,7 +56,7 @@ type requestTool struct {
 	Strict      bool   `json:"strict,omitempty"`
 }
 
-func (o *LLM) buildRequest(messages []llmtypes.MessageContent, opts *llmtypes.CallOptions, stream bool) request {
+func (o *LLM) buildRequest(messages []llms.MessageContent, opts *llms.CallOptions, stream bool) request {
 	req := request{
 		Model:           opts.Model,
 		Input:           toInputItems(messages),
@@ -88,12 +88,12 @@ func (o *LLM) buildRequest(messages []llmtypes.MessageContent, opts *llmtypes.Ca
 
 // toInputItems flattens framework messages into Responses input items. Tool
 // calls and tool results become their own top-level items, as the API expects.
-func toInputItems(messages []llmtypes.MessageContent) []inputItem {
+func toInputItems(messages []llms.MessageContent) []inputItem {
 	items := make([]inputItem, 0, len(messages))
 	for _, m := range messages {
 		role := toResponsesRole(m.Role)
 		textType := "input_text"
-		if m.Role == llmtypes.ChatMessageTypeAI {
+		if m.Role == llms.ChatMessageTypeAI {
 			textType = "output_text"
 		}
 
@@ -106,14 +106,14 @@ func toInputItems(messages []llmtypes.MessageContent) []inputItem {
 		}
 		for _, part := range m.Parts {
 			switch p := part.(type) {
-			case llmtypes.TextContent:
+			case llms.TextContent:
 				parts = append(parts, contentPart{Type: textType, Text: p.Text})
-			case llmtypes.ImageURLContent:
+			case llms.ImageURLContent:
 				parts = append(parts, contentPart{Type: "input_image", ImageURL: p.URL})
-			case llmtypes.ToolCall:
+			case llms.ToolCall:
 				flush()
 				items = append(items, toolCallItem(p))
-			case llmtypes.ToolCallResponse:
+			case llms.ToolCallResponse:
 				flush()
 				items = append(items, inputItem{
 					Type:   "function_call_output",
@@ -127,7 +127,7 @@ func toInputItems(messages []llmtypes.MessageContent) []inputItem {
 	return items
 }
 
-func toolCallItem(tc llmtypes.ToolCall) inputItem {
+func toolCallItem(tc llms.ToolCall) inputItem {
 	item := inputItem{Type: "function_call", CallID: tc.ID}
 	if tc.FunctionCall != nil {
 		item.Name = tc.FunctionCall.Name
@@ -136,18 +136,18 @@ func toolCallItem(tc llmtypes.ToolCall) inputItem {
 	return item
 }
 
-func toResponsesRole(role llmtypes.ChatMessageType) string {
+func toResponsesRole(role llms.ChatMessageType) string {
 	switch role {
-	case llmtypes.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return "system"
-	case llmtypes.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		return "assistant"
 	default:
 		return "user"
 	}
 }
 
-func toResponsesTools(tools []llmtypes.Tool) []requestTool {
+func toResponsesTools(tools []llms.Tool) []requestTool {
 	out := make([]requestTool, 0, len(tools))
 	for _, t := range tools {
 		rt := requestTool{Type: t.Type}
@@ -163,7 +163,7 @@ func toResponsesTools(tools []llmtypes.Tool) []requestTool {
 }
 
 func toResponsesToolChoice(choice any) any {
-	tc, ok := choice.(llmtypes.ToolChoice)
+	tc, ok := choice.(llms.ToolChoice)
 	if !ok {
 		return choice
 	}

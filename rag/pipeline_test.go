@@ -4,21 +4,21 @@ import (
 	"context"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/stretchr/testify/assert"
 )
 
 type mockLLM struct{}
 
-func (m *mockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{
+func (m *mockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
 			{Content: "Mock Answer"},
 		},
 	}, nil
 }
 
-func (m *mockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *mockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return "Mock Answer", nil
 }
 

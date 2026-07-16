@@ -8,10 +8,10 @@ import (
 	"log"
 	"os"
 
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	// Create PiAgent
 	agent, err := prebuilt.NewPiAgent(
 		model,
-		[]tooltypes.Tool{calculator},
+		[]tool.Tool{calculator},
 		prebuilt.WithPiSystemPrompt("You are a helpful assistant that can perform calculations."),
 		prebuilt.WithPiMaxIterations(10),
 	)
@@ -63,7 +63,7 @@ func main() {
 
 	// Example: Simple calculation
 	fmt.Println("\n=== Example: Simple Calculation ===")
-	msg := llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "What is 25 + 17?")
+	msg := llms.TextParts(llms.ChatMessageTypeHuman, "What is 25 + 17?")
 
 	err = agent.Prompt(ctx, msg)
 	if err != nil {
@@ -72,7 +72,7 @@ func main() {
 
 	// Example: Multiple calculations
 	fmt.Println("\n=== Example: Multiple Calculations ===")
-	msg2 := llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "What is 100 * 42 and what is 144 divided by 12?")
+	msg2 := llms.TextParts(llms.ChatMessageTypeHuman, "What is 100 * 42 and what is 144 divided by 12?")
 
 	err = agent.Prompt(ctx, msg2)
 	if err != nil {

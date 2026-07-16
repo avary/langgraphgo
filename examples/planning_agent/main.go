@@ -7,10 +7,10 @@ import (
 	"os"
 
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 func main() {
@@ -70,7 +70,7 @@ func main() {
 	agent, err := prebuilt.CreatePlanningAgentMap(
 		model,
 		nodes,
-		[]tooltypes.Tool{},
+		[]tool.Tool{},
 		prebuilt.WithVerbose(true),
 	)
 	if err != nil {
@@ -95,8 +95,8 @@ func runAgent(agent *graph.StateRunnable[map[string]any], query string) {
 	fmt.Printf("\nUser Query: %s\n\n", query)
 
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, query),
+		"messages": []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, query),
 		},
 	}
 
@@ -107,15 +107,15 @@ func runAgent(agent *graph.StateRunnable[map[string]any], query string) {
 	}
 
 	// Print final result
-	messages := res["messages"].([]llmtypes.MessageContent)
+	messages := res["messages"].([]llms.MessageContent)
 
 	fmt.Println("\n--- Execution Result ---")
 	for i, msg := range messages {
-		if msg.Role == llmtypes.ChatMessageTypeHuman {
+		if msg.Role == llms.ChatMessageTypeHuman {
 			continue // Skip user message
 		}
 		for _, part := range msg.Parts {
-			if textPart, ok := part.(llmtypes.TextContent); ok {
+			if textPart, ok := part.(llms.TextContent); ok {
 				fmt.Printf("Step %d: %s\n", i, textPart.Text)
 			}
 		}
@@ -126,14 +126,14 @@ func runAgent(agent *graph.StateRunnable[map[string]any], query string) {
 // Node implementations
 
 func fetchDataNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llmtypes.MessageContent)
+	messages := state["messages"].([]llms.MessageContent)
 
 	fmt.Println("📥 Fetching data from database...")
 
 	// Simulate data fetching
-	msg := llmtypes.MessageContent{
-		Role:  llmtypes.ChatMessageTypeAI,
-		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Data fetched: 1000 user records retrieved")},
+	msg := llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{llms.TextPart("Data fetched: 1000 user records retrieved")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -141,13 +141,13 @@ func fetchDataNode(ctx context.Context, state map[string]any) (map[string]any, e
 }
 
 func validateDataNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llmtypes.MessageContent)
+	messages := state["messages"].([]llms.MessageContent)
 
 	fmt.Println("✅ Validating data...")
 
-	msg := llmtypes.MessageContent{
-		Role:  llmtypes.ChatMessageTypeAI,
-		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Data validation passed: all records valid")},
+	msg := llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{llms.TextPart("Data validation passed: all records valid")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -155,13 +155,13 @@ func validateDataNode(ctx context.Context, state map[string]any) (map[string]any
 }
 
 func transformDataNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llmtypes.MessageContent)
+	messages := state["messages"].([]llms.MessageContent)
 
 	fmt.Println("🔄 Transforming data...")
 
-	msg := llmtypes.MessageContent{
-		Role:  llmtypes.ChatMessageTypeAI,
-		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Data transformed to JSON format successfully")},
+	msg := llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{llms.TextPart("Data transformed to JSON format successfully")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -169,13 +169,13 @@ func transformDataNode(ctx context.Context, state map[string]any) (map[string]an
 }
 
 func analyzeDataNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llmtypes.MessageContent)
+	messages := state["messages"].([]llms.MessageContent)
 
 	fmt.Println("📊 Analyzing data...")
 
-	msg := llmtypes.MessageContent{
-		Role:  llmtypes.ChatMessageTypeAI,
-		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Analysis complete: avg_age=32.5, total_users=1000, active_rate=78%")},
+	msg := llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{llms.TextPart("Analysis complete: avg_age=32.5, total_users=1000, active_rate=78%")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -183,13 +183,13 @@ func analyzeDataNode(ctx context.Context, state map[string]any) (map[string]any,
 }
 
 func saveResultsNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llmtypes.MessageContent)
+	messages := state["messages"].([]llms.MessageContent)
 
 	fmt.Println("💾 Saving results...")
 
-	msg := llmtypes.MessageContent{
-		Role:  llmtypes.ChatMessageTypeAI,
-		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Results saved to database successfully")},
+	msg := llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{llms.TextPart("Results saved to database successfully")},
 	}
 
 	state["messages"] = append(messages, msg)
@@ -197,13 +197,13 @@ func saveResultsNode(ctx context.Context, state map[string]any) (map[string]any,
 }
 
 func generateReportNode(ctx context.Context, state map[string]any) (map[string]any, error) {
-	messages := state["messages"].([]llmtypes.MessageContent)
+	messages := state["messages"].([]llms.MessageContent)
 
 	fmt.Println("📝 Generating report...")
 
-	msg := llmtypes.MessageContent{
-		Role:  llmtypes.ChatMessageTypeAI,
-		Parts: []llmtypes.ContentPart{llmtypes.TextPart("Report generated: summary.pdf created with all analysis results")},
+	msg := llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{llms.TextPart("Report generated: summary.pdf created with all analysis results")},
 	}
 
 	state["messages"] = append(messages, msg)

@@ -1,110 +1,79 @@
-linters:
-  # Only enable essential linters that catch real bugs and issues
-  enable:
-    # Critical bug detection
-    - errcheck      # Check for unchecked errors
-    - gosimple      # Simplify code
-    - govet         # Standard Go vet checks
-    - ineffassign   # Detect ineffectual assignments
-    - staticcheck   # Advanced static analysis
-    - typecheck     # Type checking errors
-    - unused        # Unused code detection
-    
-    # Security and performance
-    - gosec         # Security issues
-    - misspell      # Spelling errors
-    - goimports     # Import formatting
-    
-  # Disable problematic linters that cause endless iterations
-  disable:
-    # Style and formatting (not critical)
-    - gofmt
-    - gofumpt
-    - gci
-    - whitespace
-    - wsl
-    - nlreturn
-    - lll
-    - godot
-    
-    # Complexity (subjective, not bugs)
-    - cyclop
-    - gocognit 
-    - funlen
-    - gocyclo
-    - maintidx
-    
-    # Test-specific issues (often intentional)
-    - forcetypeassert  # Type assertions in tests are often acceptable
-    - exhaustive       # Switch completeness not always required
-    - revive           # Style rules, not bugs
-    
-    # Parameter usage (common in interfaces/tests)
-    - unparam
-    
-    # Documentation (not critical)
-    - godox
-    - tagliatelle
-    - varnamelen
-    
-    # Error handling style (not bugs)
-    - errorlint
-    - wrapcheck
-    - err113
-    
-    # Import organization (not critical)
-    - depguard
-    - testpackage
-    - nolintlint
-    
-    # Interface patterns (often intentional)
-    - ireturn
-    
-    # Code organization (not bugs)
-    - exhaustruct
-    - mnd
-
-linters-settings:
-  # Reasonable settings for enabled linters
-  errcheck:
-    # Allow some common patterns
-    exclude-functions:
-      - fmt.Print
-      - fmt.Printf
-      - fmt.Println
-      
-  gosec:
-    # Allow weak random for non-security purposes (like jitter)
-    excludes:
-      - G404
-
-issues:
-  # Exclude test files from some checks
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gosec
-        - errcheck
-    
-    # Exclude generated files
-    - path: ".*\\.pb\\.go"
-      linters:
-        - lll
-        - unused
-        - gosec
-    
-    # Exclude vendor directory
-    - path: "vendor/"
-      linters:
-        - unused
-        - gosec
-  
-  # Don't skip any issues
-  max-same-issues: 0
-  max-issues-per-linter: 0
-
+version: "2"
 run:
-  timeout: 5m
   tests: true
-
-# Note: skip-dirs and skip-files moved to issues section for current golangci-lint versions
+linters:
+  enable:
+    - gosec
+    - misspell
+  disable:
+    - cyclop
+    - depguard
+    - err113
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - forcetypeassert
+    - funlen
+    - gocognit
+    - gocyclo
+    - godot
+    - godox
+    - ireturn
+    - lll
+    - maintidx
+    - mnd
+    - nlreturn
+    - nolintlint
+    - revive
+    - tagliatelle
+    - testpackage
+    - unparam
+    - varnamelen
+    - whitespace
+    - wrapcheck
+    - wsl
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Print
+        - fmt.Printf
+        - fmt.Println
+    gosec:
+      excludes:
+        - G404
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - errcheck
+          - gosec
+        path: _test\.go
+      - linters:
+          - gosec
+          - lll
+          - unused
+        path: .*\.pb\.go
+      - linters:
+          - gosec
+          - unused
+        path: vendor/
+    paths:
+      - third_party$
+      - builtin$
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+formatters:
+  enable:
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

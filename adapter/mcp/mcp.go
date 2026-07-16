@@ -7,10 +7,10 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	mcpclient "github.com/smallnest/goskills/mcp"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
-// MCPTool implements tooltypes.Tool for MCP (Model Context Protocol) tools.
+// MCPTool implements tool.Tool for MCP (Model Context Protocol) tools.
 type MCPTool struct {
 	name        string
 	description string
@@ -18,7 +18,7 @@ type MCPTool struct {
 	parameters  any // JSON schema for the tool parameters
 }
 
-var _ tooltypes.Tool = &MCPTool{}
+var _ tool.Tool = &MCPTool{}
 
 func (t *MCPTool) Name() string {
 	return t.name
@@ -59,8 +59,8 @@ func (t *MCPTool) Call(ctx context.Context, input string) (string, error) {
 
 // MCPToTools converts MCP tools from a client to langchaingo tools.
 // It fetches all available tools from the connected MCP servers and wraps them
-// as langchaingo tooltypes.Tool instances.
-func MCPToTools(ctx context.Context, client *mcpclient.Client) ([]tooltypes.Tool, error) {
+// as langchaingo tool.Tool instances.
+func MCPToTools(ctx context.Context, client *mcpclient.Client) ([]tool.Tool, error) {
 	// Get all OpenAI tools from MCP servers
 	openaiTools, err := client.GetTools(ctx)
 	if err != nil {
@@ -68,7 +68,7 @@ func MCPToTools(ctx context.Context, client *mcpclient.Client) ([]tooltypes.Tool
 	}
 
 	// Convert to langchaingo tools
-	var result []tooltypes.Tool
+	var result []tool.Tool
 	for _, t := range openaiTools {
 		if t.Function == nil || t.Function.Name == "" {
 			continue
@@ -103,7 +103,7 @@ func NewClientFromConfig(ctx context.Context, configPath string) (*mcpclient.Cli
 
 // GetToolSchema returns the JSON schema for a tool's parameters.
 // This can be useful for debugging or generating documentation.
-func GetToolSchema(tool tooltypes.Tool) (any, bool) {
+func GetToolSchema(tool tool.Tool) (any, bool) {
 	if mcpTool, ok := tool.(*MCPTool); ok {
 		return mcpTool.parameters, true
 	}

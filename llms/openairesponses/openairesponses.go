@@ -1,11 +1,11 @@
 // Package openairesponses is an OpenAI Responses API provider that implements
-// github.com/smallnest/langgraphgo/llmtypes.Model directly, with no dependency
+// github.com/smallnest/langgraphgo/llms.Model directly, with no dependency
 // on github.com/tmc/langchaingo and no dependency on a third-party OpenAI SDK.
 //
 // It targets the /v1/responses endpoint (OpenAI's newer, stateful generation
 // API) rather than /v1/chat/completions, and speaks raw HTTP so it also works
 // against OpenAI-compatible endpoints via WithBaseURL. Because it satisfies
-// llmtypes.Model, it can be plugged straight into the graph engine, prebuilt
+// llms.Model, it can be plugged straight into the graph engine, prebuilt
 // agents, and memory without any adapter.
 package openairesponses
 
@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // ErrMissingToken is returned by New when no API token is configured.
@@ -28,7 +28,7 @@ const DefaultModel = "gpt-4o-mini"
 // DefaultBaseURL is the OpenAI API root used when WithBaseURL is not given.
 const DefaultBaseURL = "https://api.openai.com/v1"
 
-// LLM is an OpenAI Responses API model implementing llmtypes.Model.
+// LLM is an OpenAI Responses API model implementing llms.Model.
 type LLM struct {
 	httpClient *http.Client
 	token      string
@@ -39,7 +39,7 @@ type LLM struct {
 
 // Compile-time proof that LLM satisfies the framework Model interface with no
 // langchaingo involvement.
-var _ llmtypes.Model = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 type config struct {
 	token      string

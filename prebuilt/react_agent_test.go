@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 	"github.com/stretchr/testify/assert"
 )
 
-// WeatherTool implements tooltypes.Tool for testing
+// WeatherTool implements tool.Tool for testing
 type WeatherTool struct {
 	currentTemp int
 }
@@ -25,16 +25,16 @@ func (t *WeatherTool) Call(ctx context.Context, input string) (string, error) {
 	return fmt.Sprintf("Weather: %d°C", t.currentTemp), nil
 }
 
-// ReactMockLLM implements llmtypes.Model for testing
+// ReactMockLLM implements llms.Model for testing
 type ReactMockLLM struct {
-	responses []llmtypes.ContentResponse
+	responses []llms.ContentResponse
 	callCount int
 }
 
-func (m *ReactMockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+func (m *ReactMockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	if m.callCount >= len(m.responses) {
-		return &llmtypes.ContentResponse{
-			Choices: []*llmtypes.ContentChoice{
+		return &llms.ContentResponse{
+			Choices: []*llms.ContentChoice{
 				{Content: "No more responses"},
 			},
 		}, nil
@@ -44,22 +44,22 @@ func (m *ReactMockLLM) GenerateContent(ctx context.Context, messages []llmtypes.
 	return &resp, nil
 }
 
-func (m *ReactMockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *ReactMockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return "", nil
 }
 
 func TestReactAgentWithWeatherTool(t *testing.T) {
 	weatherTool := NewWeatherTool(25)
 	mockLLM := &ReactMockLLM{
-		responses: []llmtypes.ContentResponse{
-			{Choices: []*llmtypes.ContentChoice{{ToolCalls: []llmtypes.ToolCall{{ID: "call-1", Type: "function", FunctionCall: &llmtypes.FunctionCall{Name: "get_weather", Arguments: `{"input": "beijing"}`}}}}}},
-			{Choices: []*llmtypes.ContentChoice{{Content: "Beijing is 25°C."}}},
+		responses: []llms.ContentResponse{
+			{Choices: []*llms.ContentChoice{{ToolCalls: []llms.ToolCall{{ID: "call-1", Type: "function", FunctionCall: &llms.FunctionCall{Name: "get_weather", Arguments: `{"input": "beijing"}`}}}}}},
+			{Choices: []*llms.ContentChoice{{Content: "Beijing is 25°C."}}},
 		},
 	}
-	agent, err := CreateReactAgentMap(mockLLM, []tooltypes.Tool{weatherTool}, 5)
+	agent, err := CreateReactAgentMap(mockLLM, []tool.Tool{weatherTool}, 5)
 	assert.NoError(t, err)
-	res, err := agent.Invoke(context.Background(), map[string]any{"messages": []llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Weather in Beijing?")}})
+	res, err := agent.Invoke(context.Background(), map[string]any{"messages": []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "Weather in Beijing?")}})
 	assert.NoError(t, err)
-	messages := res["messages"].([]llmtypes.MessageContent)
+	messages := res["messages"].([]llms.MessageContent)
 	assert.True(t, len(messages) >= 2)
 }

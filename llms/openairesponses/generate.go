@@ -10,18 +10,18 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // Call generates a completion from a single prompt.
-func (o *LLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
-	return llmtypes.GenerateFromSinglePrompt(ctx, o, prompt, options...)
+func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	return llms.GenerateFromSinglePrompt(ctx, o, prompt, options...)
 }
 
 // GenerateContent generates a completion from a sequence of messages via the
 // OpenAI Responses API.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
-	opts := llmtypes.CallOptions{Model: o.model}
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	opts := llms.CallOptions{Model: o.model}
 	for _, apply := range options {
 		apply(&opts)
 	}
@@ -51,7 +51,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageCo
 		return nil, resp.Error
 	}
 	if len(resp.Output) == 0 {
-		return nil, llmtypes.ErrEmptyResponse
+		return nil, llms.ErrEmptyResponse
 	}
 	return resp.toContentResponse(), nil
 }
@@ -92,7 +92,7 @@ func (o *LLM) decodeError(resp *http.Response) error {
 // parseStream consumes the SSE event stream, forwarding text deltas to
 // streamingFunc and returning the final response assembled from the completed
 // event (falling back to accumulated text if none arrives).
-func (o *LLM) parseStream(ctx context.Context, body io.Reader, streamingFunc func(context.Context, []byte) error) (*llmtypes.ContentResponse, error) {
+func (o *LLM) parseStream(ctx context.Context, body io.Reader, streamingFunc func(context.Context, []byte) error) (*llms.ContentResponse, error) {
 	scanner := bufio.NewScanner(body)
 	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 
@@ -135,8 +135,8 @@ func (o *LLM) parseStream(ctx context.Context, body io.Reader, streamingFunc fun
 	if final != nil {
 		return final.toContentResponse(), nil
 	}
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{{Content: accumulated.String(), StopReason: "completed"}},
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{{Content: accumulated.String(), StopReason: "completed"}},
 	}, nil
 }
 

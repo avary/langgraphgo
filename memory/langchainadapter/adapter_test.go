@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	langchainmemory "github.com/tmc/langchaingo/memory"
@@ -44,9 +44,9 @@ func TestLangChainMemory_ConversationBuffer(t *testing.T) {
 	assert.Len(t, messages, 4) // 2 user messages + 2 AI messages
 
 	// Verify message content
-	assert.Equal(t, llmtypes.ChatMessageTypeHuman, messages[0].GetType())
+	assert.Equal(t, llms.ChatMessageTypeHuman, messages[0].GetType())
 	assert.Equal(t, "Hello, my name is Alice", messages[0].GetContent())
-	assert.Equal(t, llmtypes.ChatMessageTypeAI, messages[1].GetType())
+	assert.Equal(t, llms.ChatMessageTypeAI, messages[1].GetType())
 	assert.Equal(t, "Hi Alice! Nice to meet you.", messages[1].GetContent())
 
 	// Test Clear
@@ -113,7 +113,7 @@ func TestChatMessageHistory(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test AddMessage with custom message
-	err = history.AddMessage(ctx, llmtypes.SystemChatMessage{
+	err = history.AddMessage(ctx, llms.SystemChatMessage{
 		Content: "You are a helpful assistant.",
 	})
 	require.NoError(t, err)
@@ -123,11 +123,11 @@ func TestChatMessageHistory(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, messages, 3)
 
-	assert.Equal(t, llmtypes.ChatMessageTypeHuman, messages[0].GetType())
+	assert.Equal(t, llms.ChatMessageTypeHuman, messages[0].GetType())
 	assert.Equal(t, "Hello!", messages[0].GetContent())
-	assert.Equal(t, llmtypes.ChatMessageTypeAI, messages[1].GetType())
+	assert.Equal(t, llms.ChatMessageTypeAI, messages[1].GetType())
 	assert.Equal(t, "Hi there!", messages[1].GetContent())
-	assert.Equal(t, llmtypes.ChatMessageTypeSystem, messages[2].GetType())
+	assert.Equal(t, llms.ChatMessageTypeSystem, messages[2].GetType())
 	assert.Equal(t, "You are a helpful assistant.", messages[2].GetContent())
 
 	// Test Clear
@@ -143,13 +143,13 @@ func TestChatMessageHistory_WithPreviousMessages(t *testing.T) {
 	ctx := context.Background()
 
 	// Create history with previous messages
-	previousMessages := []llmtypes.ChatMessage{
-		llmtypes.HumanChatMessage{Content: "Previous message 1"},
-		llmtypes.AIChatMessage{Content: "Previous response 1"},
+	previousMessages := []llms.ChatMessage{
+		llms.HumanChatMessage{Content: "Previous message 1"},
+		llms.AIChatMessage{Content: "Previous response 1"},
 	}
 
 	history := NewChatMessageHistory(
-		langchainmemory.WithPreviousMessages(llmtypes.ToLangchainMessages(previousMessages)),
+		langchainmemory.WithPreviousMessages(llms.ToLangchainMessages(previousMessages)),
 	)
 
 	// Verify previous messages are loaded

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // CalculatorTool performs arithmetic operations
@@ -47,14 +47,14 @@ func (t WeatherTool) Call(ctx context.Context, input string) (string, error) {
 func main() {
 	fmt.Println("=== Simple PTC Example ===\n")
 
-	// Create model (supports any LLM that implements llmtypes.Model)
+	// Create model (supports any LLM that implements llms.Model)
 	model, err := openai.New()
 	if err != nil {
 		log.Fatalf("Failed to create model: %v", err)
 	}
 
 	// Define tools
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		CalculatorTool{},
 		WeatherTool{},
 	}
@@ -76,10 +76,10 @@ func main() {
 	fmt.Printf("Query: %s\n\n", query)
 
 	result, err := agent.Invoke(context.Background(), map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart(query)},
 			},
 		},
 	})
@@ -88,12 +88,12 @@ func main() {
 	}
 
 	// Print result
-	messages := result["messages"].([]llmtypes.MessageContent)
+	messages := result["messages"].([]llms.MessageContent)
 	lastMsg := messages[len(messages)-1]
 
 	fmt.Println("Answer:")
 	for _, part := range lastMsg.Parts {
-		if textPart, ok := part.(llmtypes.TextContent); ok {
+		if textPart, ok := part.(llms.TextContent); ok {
 			fmt.Println(textPart.Text)
 		}
 	}

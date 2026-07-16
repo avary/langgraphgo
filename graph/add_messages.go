@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // MessageWithID is an interface that allows messages to have an ID for deduplication/upsert.
@@ -12,25 +12,25 @@ import (
 // For now, we'll check if the message implements this interface or is a map with an "id" key.
 type MessageWithID interface {
 	GetID() string
-	GetContent() llmtypes.MessageContent
+	GetContent() llms.MessageContent
 }
 
 // AddMessages is a reducer designed for merging chat messages.
 // It handles ID-based deduplication and upserts.
 // If a new message has the same ID as an existing one, it replaces the existing one.
-// Otherwise, it appends the new llmtypes.
+// Otherwise, it appends the new llms.
 func AddMessages(current, new any) (any, error) {
 	if current == nil {
 		return new, nil
 	}
 
-	// Optimization: Fast path for []llmtypes.MessageContent
-	if currentSlice, ok := current.([]llmtypes.MessageContent); ok {
-		var newSlice []llmtypes.MessageContent
-		if ns, ok := new.([]llmtypes.MessageContent); ok {
+	// Optimization: Fast path for []llms.MessageContent
+	if currentSlice, ok := current.([]llms.MessageContent); ok {
+		var newSlice []llms.MessageContent
+		if ns, ok := new.([]llms.MessageContent); ok {
 			newSlice = ns
-		} else if n, ok := new.(llmtypes.MessageContent); ok {
-			newSlice = []llmtypes.MessageContent{n}
+		} else if n, ok := new.(llms.MessageContent); ok {
+			newSlice = []llms.MessageContent{n}
 		} else {
 			// Fallback to reflection if new is not compatible
 			goto ReflectionPath
@@ -98,11 +98,11 @@ ReflectionPath:
 	}
 
 	// Convert back to the original slice type if possible, or []any
-	// If current was []llmtypes.MessageContent, we try to return that.
+	// If current was []llms.MessageContent, we try to return that.
 	// But if we mixed types (e.g. wrapped messages), we might need to return []any
 	// or fail if types are incompatible.
 
-	// For simplicity in this implementation, if the original type was []llmtypes.MessageContent,
+	// For simplicity in this implementation, if the original type was []llms.MessageContent,
 	// and we are just appending standard messages, we return that type.
 	// If we are doing advanced ID stuff, we assume the user is using a compatible slice type.
 

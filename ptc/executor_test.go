@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // TestModeDirectExecution tests that ModeDirect mode actually executes tools
 func TestModeDirectExecution(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "echo",
 			description: "Echoes input",
@@ -55,7 +55,7 @@ print(result)
 
 // TestModeServerExecution tests that ModeServer mode works
 func TestModeServerExecution(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Performs calculations",
@@ -94,7 +94,7 @@ print(result)
 
 // TestExecutorTimeout tests execution timeout
 func TestExecutorTimeout(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test tool",
@@ -127,7 +127,7 @@ print("done")
 
 // TestGoCodeExecution tests Go code execution
 func TestGoCodeExecution(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "greet",
 			description: "Greets someone",
@@ -162,7 +162,7 @@ fmt.Println(result)
 
 // TestMultipleTools tests execution with multiple tools
 func TestMultipleTools(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "add",
 			description: "Adds numbers",
@@ -208,7 +208,7 @@ print(f"Results: {a}, {b}, {c}")
 
 // TestErrorHandling tests error handling in tool execution
 func TestErrorHandling(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test tool",
@@ -238,7 +238,7 @@ print("unclosed string
 
 // TestToolDefinitionsGeneration tests tool definition generation
 func TestToolDefinitionsGeneration(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Performs calculations",
@@ -270,7 +270,7 @@ func TestToolDefinitionsGeneration(t *testing.T) {
 
 // TestConcurrentExecution tests concurrent code execution
 func TestConcurrentExecution(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test tool",
@@ -316,7 +316,7 @@ print(result)
 
 // TestStopWithoutStart tests that Stop works even if Start wasn't called
 func TestStopWithoutStart(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test",

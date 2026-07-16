@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/smallnest/langgraphgo/prebuilt"
 )
 
@@ -19,13 +19,13 @@ func Example_manusAgent() {
 			Name:        "research",
 			Description: "Research and gather information from external sources",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				fmt.Println("🔍 Researching...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Research complete: Found 15 relevant sources")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Research complete: Found 15 relevant sources")},
 				}
 
 				return map[string]any{
@@ -37,13 +37,13 @@ func Example_manusAgent() {
 			Name:        "compile",
 			Description: "Compile findings into organized notes",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				fmt.Println("📝 Compiling findings...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Notes compiled: 5 key findings organized")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Notes compiled: 5 key findings organized")},
 				}
 
 				return map[string]any{
@@ -55,13 +55,13 @@ func Example_manusAgent() {
 			Name:        "write",
 			Description: "Write final deliverable based on research",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				fmt.Println("✍️  Writing final output...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Final document written: 2000 words summary")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Final document written: 2000 words summary")},
 				}
 
 				return map[string]any{
@@ -73,13 +73,13 @@ func Example_manusAgent() {
 			Name:        "review",
 			Description: "Review and validate the output",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				fmt.Println("✅ Reviewing...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Review complete: Output validated successfully")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Review complete: Output validated successfully")},
 				}
 
 				return map[string]any{
@@ -101,10 +101,10 @@ func Example_manusAgent() {
 
 	// Create initial state with user request
 	_ = map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart("Research TypeScript benefits and write a summary")},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("Research TypeScript benefits and write a summary")},
 			},
 		},
 		"goal": "Research and document the benefits of TypeScript for development teams",

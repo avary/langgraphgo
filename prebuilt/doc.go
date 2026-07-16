@@ -13,15 +13,15 @@
 //
 //	import (
 //		"github.com/smallnest/langgraphgo/prebuilt"
-//		"github.com/smallnest/langgraphgo/llmtypes"
-//		"github.com/smallnest/langgraphgo/tooltypes"
-//		"github.com/tmc/langchaingo/tools" // langchaingo tools satisfy tooltypes.Tool
+//		"github.com/smallnest/langgraphgo/llms"
+//		"github.com/smallnest/langgraphgo/tool"
+//		"github.com/tmc/langchaingo/tools" // langchaingo tools satisfy tool.Tool
 //	)
 //
 //	// Create a ReAct agent with tools
 //	agent, err := prebuilt.CreateReactAgent(
 //		llm,           // Language model
-//		[]tooltypes.Tool{  // Available tools
+//		[]tool.Tool{  // Available tools
 //			&tools.CalculatorTool{},
 //			weatherTool,
 //		},
@@ -30,11 +30,11 @@
 //
 //	// Execute agent
 //	result, err := agent.Invoke(ctx, map[string]any{
-//		"messages": []llmtypes.MessageContent{
+//		"messages": []llms.MessageContent{
 //			{
-//				Role: llmtypes.ChatMessageTypeHuman,
-//				Parts: []llmtypes.ContentPart{
-//					llmtypes.TextPart("What's the weather in London and calculate 15% of 100?"),
+//				Role: llms.ChatMessageTypeHuman,
+//				Parts: []llms.ContentPart{
+//					llms.TextPart("What's the weather in London and calculate 15% of 100?"),
 //				},
 //			},
 //		},
@@ -44,7 +44,7 @@
 // A type-safe version of the ReAct agent using Go generics:
 //
 //	type AgentState struct {
-//		Messages       []llmtypes.MessageContent `json:"messages"`
+//		Messages       []llms.MessageContent `json:"messages"`
 //		IterationCount int                    `json:"iteration_count"`
 //	}
 //
@@ -78,11 +78,11 @@
 //
 //	// Use supervisor to route tasks
 //	result, err := supervisor.Invoke(ctx, map[string]any{
-//		"messages": []llmtypes.MessageContent{
+//		"messages": []llms.MessageContent{
 //			{
-//				Role: llmtypes.ChatMessageTypeHuman,
-//				Parts: []llmtypes.ContentPart{
-//					llmtypes.TextPart("Calculate the distance between London and Paris"),
+//				Role: llms.ChatMessageTypeHuman,
+//				Parts: []llms.ContentPart{
+//					llms.TextPart("Calculate the distance between London and Paris"),
 //				},
 //			},
 //		},
@@ -99,11 +99,11 @@
 //
 //	// The agent will create a plan, then execute each step
 //	result, err := planner.Invoke(ctx, map[string]any{
-//		"messages": []llmtypes.MessageContent{
+//		"messages": []llms.MessageContent{
 //			{
-//				Role: llmtypes.ChatMessageTypeHuman,
-//				Parts: []llmtypes.ContentPart{
-//					llmtypes.TextPart("Plan and execute a research report on renewable energy"),
+//				Role: llms.ChatMessageTypeHuman,
+//				Parts: []llms.ContentPart{
+//					llms.TextPart("Plan and execute a research report on renewable energy"),
 //				},
 //			},
 //		},
@@ -135,11 +135,11 @@
 //
 //	// The agent will reflect on and potentially revise its answers
 //	result, err := reflectionAgent.Invoke(ctx, map[string]any{
-//		"messages": []llmtypes.MessageContent{
+//		"messages": []llms.MessageContent{
 //			{
-//				Role: llmtypes.ChatMessageTypeHuman,
-//				Parts: []llmtypes.ContentPart{
-//					llmtypes.TextPart("Explain quantum computing"),
+//				Role: llms.ChatMessageTypeHuman,
+//				Parts: []llms.ContentPart{
+//					llms.TextPart("Explain quantum computing"),
 //				},
 //			},
 //		},
@@ -156,11 +156,11 @@
 //
 //	// The agent will generate and evaluate multiple reasoning paths
 //	result, err := totAgent.Invoke(ctx, map[string]any{
-//		"messages": []llmtypes.MessageContent{
+//		"messages": []llms.MessageContent{
 //			{
-//				Role: llmtypes.ChatMessageTypeHuman,
-//				Parts: []llmtypes.ContentPart{
-//					llmtypes.TextPart("Solve this complex math problem step by step"),
+//				Role: llms.ChatMessageTypeHuman,
+//				Parts: []llms.ContentPart{
+//					llms.TextPart("Solve this complex math problem step by step"),
 //				},
 //			},
 //		},
@@ -201,11 +201,11 @@
 //
 //	// The agent will retrieve relevant documents and generate answers
 //	result, err := rag.Invoke(ctx, map[string]any{
-//		"messages": []llmtypes.MessageContent{
+//		"messages": []llms.MessageContent{
 //			{
-//				Role: llmtypes.ChatMessageTypeHuman,
-//				Parts: []llmtypes.ContentPart{
-//					llmtypes.TextPart("What are the benefits of renewable energy?"),
+//				Role: llms.ChatMessageTypeHuman,
+//				Parts: []llms.ContentPart{
+//					llms.TextPart("What are the benefits of renewable energy?"),
 //				},
 //			},
 //		},
@@ -237,11 +237,11 @@
 //
 //	// The agent maintains conversation context
 //	result, err := chatAgent.Invoke(ctx, map[string]any{
-//		"messages": []llmtypes.MessageContent{
+//		"messages": []llms.MessageContent{
 //			{
-//				Role: llmtypes.ChatMessageTypeHuman,
-//				Parts: []llmtypes.ContentPart{
-//					llmtypes.TextPart("Hello! How are you?"),
+//				Role: llms.ChatMessageTypeHuman,
+//				Parts: []llms.ContentPart{
+//					llms.TextPart("Hello! How are you?"),
 //				},
 //			},
 //		},
@@ -275,7 +275,7 @@
 //
 //	// Use with any agent
 //	weatherTool := &WeatherTool{}
-//	agent, err := prebuilt.CreateReactAgent(llm, []tooltypes.Tool{weatherTool}, 10)
+//	agent, err := prebuilt.CreateReactAgent(llm, []tool.Tool{weatherTool}, 10)
 //
 // # Agent Configuration
 //

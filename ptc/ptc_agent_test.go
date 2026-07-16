@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/smallnest/langgraphgo/ptc"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // MockLLM for testing
@@ -16,10 +16,10 @@ type MockLLM struct {
 	callCount int
 }
 
-func (m *MockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	m.callCount++
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
 			{
 				Content: m.response,
 			},
@@ -27,14 +27,14 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []llmtypes.Messa
 	}, nil
 }
 
-func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	m.callCount++
 	return m.response, nil
 }
 
 // TestPTCToolNode tests PTCToolNode functionality
 func TestPTCToolNode(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Performs calculations",
@@ -53,11 +53,11 @@ func TestPTCToolNode(t *testing.T) {
 
 	// Create state with AI message containing code
 	state := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role: llmtypes.ChatMessageTypeAI,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("```python\nresult = calculator('2+2')\nprint(result)\n```"),
+				Role: llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{
+					llms.TextPart("```python\nresult = calculator('2+2')\nprint(result)\n```"),
 				},
 			},
 		},
@@ -70,21 +70,21 @@ func TestPTCToolNode(t *testing.T) {
 	}
 
 	// Check that a new message was added
-	messages := newState.(map[string]any)["messages"].([]llmtypes.MessageContent)
+	messages := newState.(map[string]any)["messages"].([]llms.MessageContent)
 	if len(messages) != 2 {
 		t.Errorf("Expected 2 messages, got %d", len(messages))
 	}
 
 	// Check that the last message contains execution result
 	lastMsg := messages[len(messages)-1]
-	if lastMsg.Role != llmtypes.ChatMessageTypeHuman {
+	if lastMsg.Role != llms.ChatMessageTypeHuman {
 		t.Errorf("Expected last message to be Human, got %s", lastMsg.Role)
 	}
 }
 
 // TestPTCToolNodeWithGoCode tests PTCToolNode with Go code
 func TestPTCToolNodeWithGoCode(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "greet",
 			description: "Greets someone",
@@ -101,11 +101,11 @@ func TestPTCToolNodeWithGoCode(t *testing.T) {
 	defer node.Close(ctx)
 
 	state := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role: llmtypes.ChatMessageTypeAI,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("```go\nresult, _ := greet(ctx, \"World\")\nfmt.Println(result)\n```"),
+				Role: llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{
+					llms.TextPart("```go\nresult, _ := greet(ctx, \"World\")\nfmt.Println(result)\n```"),
 				},
 			},
 		},
@@ -116,7 +116,7 @@ func TestPTCToolNodeWithGoCode(t *testing.T) {
 		t.Fatalf("Failed to invoke node: %v", err)
 	}
 
-	messages := newState.(map[string]any)["messages"].([]llmtypes.MessageContent)
+	messages := newState.(map[string]any)["messages"].([]llms.MessageContent)
 	if len(messages) != 2 {
 		t.Errorf("Expected 2 messages, got %d", len(messages))
 	}
@@ -124,7 +124,7 @@ func TestPTCToolNodeWithGoCode(t *testing.T) {
 
 // TestPTCToolNodeErrorHandling tests error handling in PTCToolNode
 func TestPTCToolNodeErrorHandling(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test tool",
@@ -142,11 +142,11 @@ func TestPTCToolNodeErrorHandling(t *testing.T) {
 
 	// State with code that has syntax error
 	state := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role: llmtypes.ChatMessageTypeAI,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("```python\nprint('unclosed string\n```"),
+				Role: llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{
+					llms.TextPart("```python\nprint('unclosed string\n```"),
 				},
 			},
 		},
@@ -158,9 +158,9 @@ func TestPTCToolNodeErrorHandling(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	messages := newState.(map[string]any)["messages"].([]llmtypes.MessageContent)
+	messages := newState.(map[string]any)["messages"].([]llms.MessageContent)
 	lastMsg := messages[len(messages)-1]
-	lastText := lastMsg.Parts[0].(llmtypes.TextContent).Text
+	lastText := lastMsg.Parts[0].(llms.TextContent).Text
 
 	if !strings.Contains(lastText, "Error") && !strings.Contains(lastText, "error") {
 		t.Error("Expected error message in output")
@@ -169,7 +169,7 @@ func TestPTCToolNodeErrorHandling(t *testing.T) {
 
 // TestPTCToolNodeWithoutCode tests PTCToolNode with plain text (no code blocks)
 func TestPTCToolNodeWithoutCode(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test",
@@ -187,11 +187,11 @@ func TestPTCToolNodeWithoutCode(t *testing.T) {
 
 	// State with plain text (will be treated as code and may execute or error)
 	state := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role: llmtypes.ChatMessageTypeAI,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("Just some text without code blocks"),
+				Role: llms.ChatMessageTypeAI,
+				Parts: []llms.ContentPart{
+					llms.TextPart("Just some text without code blocks"),
 				},
 			},
 		},
@@ -206,7 +206,7 @@ func TestPTCToolNodeWithoutCode(t *testing.T) {
 
 // TestPTCAgentConfig tests PTCAgentConfig validation
 func TestPTCAgentConfig(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test",
@@ -233,7 +233,7 @@ func TestPTCAgentConfig(t *testing.T) {
 
 // TestPTCAgentDefaultConfig tests default configuration
 func TestPTCAgentDefaultConfig(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "calculator",
 			description: "Calculates",
@@ -258,7 +258,7 @@ func TestPTCAgentDefaultConfig(t *testing.T) {
 
 // TestPTCAgentWithCustomConfig tests custom configuration
 func TestPTCAgentWithCustomConfig(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "test",
 			description: "Test",
@@ -287,7 +287,7 @@ func TestPTCAgentWithCustomConfig(t *testing.T) {
 // TestSanitizeFunctionName tests function name sanitization
 // This is an indirect test through tool definitions
 func TestSanitizeFunctionName(t *testing.T) {
-	tools := []tooltypes.Tool{
+	tools := []tool.Tool{
 		MockTool{
 			name:        "tool-with-dashes",
 			description: "Test tool with dashes",

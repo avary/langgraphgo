@@ -10,13 +10,13 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/log"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // ToolServer provides an HTTP API for tool execution
 // This allows code in any language to call Go tools via HTTP
 type ToolServer struct {
-	tools   map[string]tooltypes.Tool
+	tools   map[string]tool.Tool
 	server  *http.Server
 	port    int
 	mu      sync.RWMutex
@@ -39,8 +39,8 @@ type ToolResponse struct {
 }
 
 // NewToolServer creates a new tool server
-func NewToolServer(toolList []tooltypes.Tool) *ToolServer {
-	toolMap := make(map[string]tooltypes.Tool)
+func NewToolServer(toolList []tool.Tool) *ToolServer {
+	toolMap := make(map[string]tool.Tool)
 	for _, tool := range toolList {
 		toolMap[tool.Name()] = tool
 	}

@@ -2,10 +2,10 @@ package nativeopenai
 
 import (
 	goopenai "github.com/sashabaranov/go-openai"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
-func (o *LLM) buildRequest(messages []llmtypes.MessageContent, opts *llmtypes.CallOptions) goopenai.ChatCompletionRequest {
+func (o *LLM) buildRequest(messages []llms.MessageContent, opts *llms.CallOptions) goopenai.ChatCompletionRequest {
 	req := goopenai.ChatCompletionRequest{
 		Model:            opts.Model,
 		Messages:         toOpenAIMessages(messages),
@@ -35,13 +35,13 @@ func (o *LLM) buildRequest(messages []llmtypes.MessageContent, opts *llmtypes.Ca
 	return req
 }
 
-func toOpenAIMessages(messages []llmtypes.MessageContent) []goopenai.ChatCompletionMessage {
+func toOpenAIMessages(messages []llms.MessageContent) []goopenai.ChatCompletionMessage {
 	out := make([]goopenai.ChatCompletionMessage, 0, len(messages))
 	for _, m := range messages {
 		msg := goopenai.ChatCompletionMessage{Role: toOpenAIRole(m.Role)}
 		hasImage := false
 		for _, part := range m.Parts {
-			if _, ok := part.(llmtypes.ImageURLContent); ok {
+			if _, ok := part.(llms.ImageURLContent); ok {
 				hasImage = true
 				break
 			}
@@ -49,7 +49,7 @@ func toOpenAIMessages(messages []llmtypes.MessageContent) []goopenai.ChatComplet
 		var multi []goopenai.ChatMessagePart
 		for _, part := range m.Parts {
 			switch p := part.(type) {
-			case llmtypes.TextContent:
+			case llms.TextContent:
 				// Only role "user" accepts array content; for text-only
 				// messages (and any assistant/tool message) keep a string
 				// body so tool-call messages stay API-valid.
@@ -61,14 +61,14 @@ func toOpenAIMessages(messages []llmtypes.MessageContent) []goopenai.ChatComplet
 				} else {
 					msg.Content += p.Text
 				}
-			case llmtypes.ImageURLContent:
+			case llms.ImageURLContent:
 				multi = append(multi, goopenai.ChatMessagePart{
 					Type:     goopenai.ChatMessagePartTypeImageURL,
 					ImageURL: &goopenai.ChatMessageImageURL{URL: p.URL, Detail: goopenai.ImageURLDetail(p.Detail)},
 				})
-			case llmtypes.ToolCall:
+			case llms.ToolCall:
 				msg.ToolCalls = append(msg.ToolCalls, toOpenAIToolCall(p))
-			case llmtypes.ToolCallResponse:
+			case llms.ToolCallResponse:
 				msg.ToolCallID = p.ToolCallID
 				msg.Name = p.Name
 				msg.Content = p.Content
@@ -82,22 +82,22 @@ func toOpenAIMessages(messages []llmtypes.MessageContent) []goopenai.ChatComplet
 	return out
 }
 
-func toOpenAIRole(role llmtypes.ChatMessageType) string {
+func toOpenAIRole(role llms.ChatMessageType) string {
 	switch role {
-	case llmtypes.ChatMessageTypeSystem:
+	case llms.ChatMessageTypeSystem:
 		return goopenai.ChatMessageRoleSystem
-	case llmtypes.ChatMessageTypeAI:
+	case llms.ChatMessageTypeAI:
 		return goopenai.ChatMessageRoleAssistant
-	case llmtypes.ChatMessageTypeTool:
+	case llms.ChatMessageTypeTool:
 		return goopenai.ChatMessageRoleTool
-	case llmtypes.ChatMessageTypeFunction:
+	case llms.ChatMessageTypeFunction:
 		return goopenai.ChatMessageRoleFunction
 	default:
 		return goopenai.ChatMessageRoleUser
 	}
 }
 
-func toOpenAITools(tools []llmtypes.Tool) []goopenai.Tool {
+func toOpenAITools(tools []llms.Tool) []goopenai.Tool {
 	out := make([]goopenai.Tool, 0, len(tools))
 	for _, t := range tools {
 		ot := goopenai.Tool{Type: goopenai.ToolType(t.Type)}
@@ -115,7 +115,7 @@ func toOpenAITools(tools []llmtypes.Tool) []goopenai.Tool {
 }
 
 func toOpenAIToolChoice(choice any) any {
-	tc, ok := choice.(llmtypes.ToolChoice)
+	tc, ok := choice.(llms.ToolChoice)
 	if !ok {
 		return choice
 	}
@@ -126,7 +126,7 @@ func toOpenAIToolChoice(choice any) any {
 	return out
 }
 
-func toOpenAIToolCall(tc llmtypes.ToolCall) goopenai.ToolCall {
+func toOpenAIToolCall(tc llms.ToolCall) goopenai.ToolCall {
 	call := goopenai.ToolCall{ID: tc.ID, Type: goopenai.ToolType(tc.Type)}
 	if tc.FunctionCall != nil {
 		call.Function = goopenai.FunctionCall{
@@ -137,16 +137,16 @@ func toOpenAIToolCall(tc llmtypes.ToolCall) goopenai.ToolCall {
 	return call
 }
 
-func fromOpenAIToolCalls(calls []goopenai.ToolCall) []llmtypes.ToolCall {
+func fromOpenAIToolCalls(calls []goopenai.ToolCall) []llms.ToolCall {
 	if len(calls) == 0 {
 		return nil
 	}
-	out := make([]llmtypes.ToolCall, len(calls))
+	out := make([]llms.ToolCall, len(calls))
 	for i, c := range calls {
-		out[i] = llmtypes.ToolCall{
+		out[i] = llms.ToolCall{
 			ID:   c.ID,
 			Type: string(c.Type),
-			FunctionCall: &llmtypes.FunctionCall{
+			FunctionCall: &llms.FunctionCall{
 				Name:      c.Function.Name,
 				Arguments: c.Function.Arguments,
 			},

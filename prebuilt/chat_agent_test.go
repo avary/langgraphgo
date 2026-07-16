@@ -5,17 +5,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
-// MockModel is a simple mock for llmtypes.Model
+// MockModel is a simple mock for llms.Model
 type MockModel struct {
 	responses []string
 	callCount int
 }
 
-func (m *MockModel) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+func (m *MockModel) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	resp := ""
 	if m.callCount < len(m.responses) {
 		resp = m.responses[m.callCount]
@@ -25,7 +25,7 @@ func (m *MockModel) GenerateContent(ctx context.Context, messages []llmtypes.Mes
 	m.callCount++
 
 	// Parse options to check for streaming
-	opts := llmtypes.CallOptions{}
+	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
 	}
@@ -45,14 +45,14 @@ func (m *MockModel) GenerateContent(ctx context.Context, messages []llmtypes.Mes
 		}
 	}
 
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
 			{Content: resp},
 		},
 	}, nil
 }
 
-func (m *MockModel) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *MockModel) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -168,7 +168,7 @@ func TestChatAgent_DynamicTools(t *testing.T) {
 	// Test SetTools
 	tool3 := &MockTool{name: "tool3"}
 	tool4 := &MockTool{name: "tool4"}
-	agent.SetTools([]tooltypes.Tool{tool3, tool4})
+	agent.SetTools([]tool.Tool{tool3, tool4})
 	if len(agent.GetTools()) != 2 {
 		t.Errorf("Expected 2 tools after SetTools, got %d", len(agent.GetTools()))
 	}

@@ -37,8 +37,8 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // ==================== Data Models ====================
@@ -139,8 +139,8 @@ REASONING: [justification]
 		agentState.UserQuery)
 
 	// Call LLM
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("metacognitive analysis LLM call failed: %w", err)
 	}
@@ -172,8 +172,8 @@ Query: %s`,
 		agentState.SelfModel.Role,
 		agentState.UserQuery)
 
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("reason directly LLM call failed: %w", err)
 	}
@@ -219,8 +219,8 @@ Tool Output: %s`,
 		agentState.UserQuery,
 		agentState.ToolOutput)
 
-	llm := state["llm"].(llmtypes.Model)
-	resp, err := llmtypes.GenerateFromSinglePrompt(ctx, llm, prompt)
+	llm := state["llm"].(llms.Model)
+	resp, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt)
 	if err != nil {
 		return nil, fmt.Errorf("synthesize tool response LLM call failed: %w", err)
 	}

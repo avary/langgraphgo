@@ -6,17 +6,17 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // PTCAgentConfig configures a PTC agent
 type PTCAgentConfig struct {
 	// Model is the LLM to use
-	Model llmtypes.Model
+	Model llms.Model
 
 	// Tools are the available tools
-	Tools []tooltypes.Tool
+	Tools []tool.Tool
 
 	// Language is the execution language for code
 	Language ExecutionLanguage
@@ -98,7 +98,7 @@ func CreatePTCAgent(config PTCAgentConfig) (*graph.Runnable, error) {
 
 	// Add conditional routing
 	workflow.AddConditionalEdge("agent", func(ctx context.Context, state map[string]any) string {
-		messages := state["messages"].([]llmtypes.MessageContent)
+		messages := state["messages"].([]llms.MessageContent)
 
 		if len(messages) == 0 {
 			return graph.END
@@ -107,7 +107,7 @@ func CreatePTCAgent(config PTCAgentConfig) (*graph.Runnable, error) {
 		lastMsg := messages[len(messages)-1]
 
 		// Check if the message contains code to execute
-		if lastMsg.Role == llmtypes.ChatMessageTypeAI && ContainsCode(lastMsg) {
+		if lastMsg.Role == llms.ChatMessageTypeAI && ContainsCode(lastMsg) {
 			return "execute_code"
 		}
 
@@ -128,8 +128,8 @@ func CreatePTCAgent(config PTCAgentConfig) (*graph.Runnable, error) {
 }
 
 // agentNode is the main agent logic node
-func agentNode(ctx context.Context, state map[string]any, model llmtypes.Model, systemPrompt string, maxIterations int) (map[string]any, error) {
-	messages := state["messages"].([]llmtypes.MessageContent)
+func agentNode(ctx context.Context, state map[string]any, model llms.Model, systemPrompt string, maxIterations int) (map[string]any, error) {
+	messages := state["messages"].([]llms.MessageContent)
 
 	// Check iteration count
 	iterationCount := 0
@@ -139,13 +139,13 @@ func agentNode(ctx context.Context, state map[string]any, model llmtypes.Model, 
 
 	if iterationCount >= maxIterations {
 		// Max iterations reached, return final message
-		finalMsg := llmtypes.MessageContent{
-			Role: llmtypes.ChatMessageTypeAI,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("Maximum iterations reached. Please try a simpler query."),
+		finalMsg := llms.MessageContent{
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Maximum iterations reached. Please try a simpler query."),
 			},
 		}
-		state["messages"] = []llmtypes.MessageContent{finalMsg}
+		state["messages"] = []llms.MessageContent{finalMsg}
 		return state, nil
 	}
 
@@ -153,12 +153,12 @@ func agentNode(ctx context.Context, state map[string]any, model llmtypes.Model, 
 	state["iteration_count"] = iterationCount + 1
 
 	// Prepend system message if not already present
-	if len(messages) == 0 || messages[0].Role != llmtypes.ChatMessageTypeSystem {
-		messages = append([]llmtypes.MessageContent{
+	if len(messages) == 0 || messages[0].Role != llms.ChatMessageTypeSystem {
+		messages = append([]llms.MessageContent{
 			{
-				Role: llmtypes.ChatMessageTypeSystem,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart(systemPrompt),
+				Role: llms.ChatMessageTypeSystem,
+				Parts: []llms.ContentPart{
+					llms.TextPart(systemPrompt),
 				},
 			},
 		}, messages...)
@@ -171,10 +171,10 @@ func agentNode(ctx context.Context, state map[string]any, model llmtypes.Model, 
 	}
 
 	// Extract response
-	var responseContent []llmtypes.ContentPart
+	var responseContent []llms.ContentPart
 	for _, choice := range resp.Choices {
 		if choice.Content != "" {
-			responseContent = append(responseContent, llmtypes.TextPart(choice.Content))
+			responseContent = append(responseContent, llms.TextPart(choice.Content))
 		}
 	}
 
@@ -183,11 +183,11 @@ func agentNode(ctx context.Context, state map[string]any, model llmtypes.Model, 
 	}
 
 	// Add AI response to messages
-	aiMsg := llmtypes.MessageContent{
-		Role:  llmtypes.ChatMessageTypeAI,
+	aiMsg := llms.MessageContent{
+		Role:  llms.ChatMessageTypeAI,
 		Parts: responseContent,
 	}
-	state["messages"] = append(state["messages"].([]llmtypes.MessageContent), aiMsg)
+	state["messages"] = append(state["messages"].([]llms.MessageContent), aiMsg)
 
 	return state, nil
 }
@@ -232,9 +232,9 @@ Format your code in markdown code blocks:
 
 // containsCode checks if a message contains code to execute
 // ContainsCode checks if a message contains code to execute
-func ContainsCode(msg llmtypes.MessageContent) bool {
+func ContainsCode(msg llms.MessageContent) bool {
 	for _, part := range msg.Parts {
-		if textPart, ok := part.(llmtypes.TextContent); ok {
+		if textPart, ok := part.(llms.TextContent); ok {
 			text := textPart.Text
 			textLower := strings.ToLower(text)
 			if (strings.Contains(textLower, "```python") || strings.Contains(textLower, "```go")) && strings.Count(textLower, "```") >= 2 {

@@ -7,8 +7,8 @@ package langchainadapter
 import (
 	"context"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/tmc/langchaingo/llms"
+	"github.com/smallnest/langgraphgo/llms"
+	lcllms "github.com/tmc/langchaingo/llms"
 	langchainmemory "github.com/tmc/langchaingo/memory"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -22,7 +22,7 @@ type ChatMemory interface {
 	// Clear clears memory contents
 	Clear(ctx context.Context) error
 	// GetMessages returns all messages in memory
-	GetMessages(ctx context.Context) ([]llmtypes.ChatMessage, error)
+	GetMessages(ctx context.Context) ([]llms.ChatMessage, error)
 }
 
 // LangChainMemory adapts langchaingo's memory implementations to our ChatMemory interface
@@ -62,7 +62,7 @@ func (m *LangChainMemory) Clear(ctx context.Context) error {
 
 // GetMessages returns all messages in memory
 // This is a convenience method that extracts messages from the memory buffer
-func (m *LangChainMemory) GetMessages(ctx context.Context) ([]llmtypes.ChatMessage, error) {
+func (m *LangChainMemory) GetMessages(ctx context.Context) ([]llms.ChatMessage, error) {
 	// Load memory variables to get the conversation history
 	memVars, err := m.buffer.LoadMemoryVariables(ctx, map[string]any{})
 	if err != nil {
@@ -75,15 +75,15 @@ func (m *LangChainMemory) GetMessages(ctx context.Context) ([]llmtypes.ChatMessa
 	for _, value := range memVars {
 		// If return_messages is true, langchaingo returns []llms.ChatMessage,
 		// which we convert into the framework's own message type.
-		if messages, ok := value.([]llms.ChatMessage); ok {
-			return llmtypes.FromLangchainMessages(messages), nil
+		if messages, ok := value.([]lcllms.ChatMessage); ok {
+			return llms.FromLangchainMessages(messages), nil
 		}
 	}
 
 	// If return_messages is false, history will be a string
 	// In this case, we can't easily convert back to messages
 	// So we return an empty slice
-	return []llmtypes.ChatMessage{}, nil
+	return []llms.ChatMessage{}, nil
 }
 
 // ChatMessageHistory provides direct access to chat message history
@@ -99,8 +99,8 @@ func NewChatMessageHistory(options ...langchainmemory.ChatMessageHistoryOption) 
 }
 
 // AddMessage adds a message to the history
-func (h *ChatMessageHistory) AddMessage(ctx context.Context, message llmtypes.ChatMessage) error {
-	return h.history.AddMessage(ctx, llmtypes.ToLangchainMessage(message))
+func (h *ChatMessageHistory) AddMessage(ctx context.Context, message llms.ChatMessage) error {
+	return h.history.AddMessage(ctx, llms.ToLangchainMessage(message))
 }
 
 // AddUserMessage adds a user message to the history
@@ -114,12 +114,12 @@ func (h *ChatMessageHistory) AddAIMessage(ctx context.Context, message string) e
 }
 
 // Messages returns all messages in the history
-func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llmtypes.ChatMessage, error) {
+func (h *ChatMessageHistory) Messages(ctx context.Context) ([]llms.ChatMessage, error) {
 	msgs, err := h.history.Messages(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return llmtypes.FromLangchainMessages(msgs), nil
+	return llms.FromLangchainMessages(msgs), nil
 }
 
 // Clear clears all messages from the history
@@ -128,8 +128,8 @@ func (h *ChatMessageHistory) Clear(ctx context.Context) error {
 }
 
 // SetMessages sets the messages in the history
-func (h *ChatMessageHistory) SetMessages(ctx context.Context, messages []llmtypes.ChatMessage) error {
-	return h.history.SetMessages(ctx, llmtypes.ToLangchainMessages(messages))
+func (h *ChatMessageHistory) SetMessages(ctx context.Context, messages []llms.ChatMessage) error {
+	return h.history.SetMessages(ctx, llms.ToLangchainMessages(messages))
 }
 
 // GetHistory returns the underlying langchaingo ChatMessageHistory

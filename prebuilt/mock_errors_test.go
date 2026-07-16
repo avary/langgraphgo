@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,8 +13,8 @@ func TestMockLLMError(t *testing.T) {
 
 	t.Run("GenerateContent returns error", func(t *testing.T) {
 		ctx := context.Background()
-		messages := []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "test"),
+		messages := []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "test"),
 		}
 
 		resp, err := mock.GenerateContent(ctx, messages)
@@ -37,8 +37,8 @@ func TestMockLLMEmptyContent(t *testing.T) {
 
 	t.Run("GenerateContent returns empty content", func(t *testing.T) {
 		ctx := context.Background()
-		messages := []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "test"),
+		messages := []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "test"),
 		}
 
 		resp, err := mock.GenerateContent(ctx, messages)
@@ -85,13 +85,13 @@ func TestMockToolError(t *testing.T) {
 
 func TestMockErrorsImplementInterfaces(t *testing.T) {
 	t.Run("MockLLMError implements Model interface", func(t *testing.T) {
-		var _ llmtypes.Model = (*MockLLMError)(nil)
+		var _ llms.Model = (*MockLLMError)(nil)
 		mock := &MockLLMError{}
 		assert.NotNil(t, mock)
 	})
 
 	t.Run("MockLLMEmptyContent implements Model interface", func(t *testing.T) {
-		var _ llmtypes.Model = (*MockLLMEmptyContent)(nil)
+		var _ llms.Model = (*MockLLMEmptyContent)(nil)
 		mock := &MockLLMEmptyContent{}
 		assert.NotNil(t, mock)
 	})

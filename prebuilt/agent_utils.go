@@ -2,18 +2,18 @@ package prebuilt
 
 import (
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
-// BuildToolDefinitions converts a slice of tooltypes.Tool to llmtypes.Tool definitions.
+// BuildToolDefinitions converts a slice of tool.Tool to llms.Tool definitions.
 // This is a common pattern used across different agent implementations.
-func BuildToolDefinitions(inputTools []tooltypes.Tool, getSchema func(tooltypes.Tool) map[string]any) []llmtypes.Tool {
-	var toolDefs []llmtypes.Tool
+func BuildToolDefinitions(inputTools []tool.Tool, getSchema func(tool.Tool) map[string]any) []llms.Tool {
+	var toolDefs []llms.Tool
 	for _, t := range inputTools {
-		toolDefs = append(toolDefs, llmtypes.Tool{
+		toolDefs = append(toolDefs, llms.Tool{
 			Type: "function",
-			Function: &llmtypes.FunctionDefinition{
+			Function: &llms.FunctionDefinition{
 				Name:        t.Name(),
 				Description: t.Description(),
 				Parameters:  getSchema(t),
@@ -34,13 +34,13 @@ func CreateStandardAgentSchema() *graph.MapSchema {
 // HasToolCallsInLastMessage checks if the last message in the messages slice contains tool calls.
 // This is used for conditional edge routing in agent graphs.
 // Returns true if any part in the last message is a ToolCall.
-func HasToolCallsInLastMessage(messages []llmtypes.MessageContent) bool {
+func HasToolCallsInLastMessage(messages []llms.MessageContent) bool {
 	if len(messages) == 0 {
 		return false
 	}
 	lastMsg := messages[len(messages)-1]
 	for _, part := range lastMsg.Parts {
-		if _, ok := part.(llmtypes.ToolCall); ok {
+		if _, ok := part.(llms.ToolCall); ok {
 			return true
 		}
 	}

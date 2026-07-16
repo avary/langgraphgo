@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // CreateSupervisorMap creates a supervisor graph with map[string]any state
-func CreateSupervisorMap(model llmtypes.Model, members map[string]*graph.StateRunnable[map[string]any]) (*graph.StateRunnable[map[string]any], error) {
+func CreateSupervisorMap(model llms.Model, members map[string]*graph.StateRunnable[map[string]any]) (*graph.StateRunnable[map[string]any], error) {
 	workflow := graph.NewStateGraph[map[string]any]()
 	schema := graph.NewMapSchema()
 	schema.RegisterReducer("messages", graph.AppendReducer)
@@ -23,15 +23,15 @@ func CreateSupervisorMap(model llmtypes.Model, members map[string]*graph.StateRu
 	}
 
 	workflow.AddNode("supervisor", "Supervisor orchestration node", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-		messages, ok := state["messages"].([]llmtypes.MessageContent)
+		messages, ok := state["messages"].([]llms.MessageContent)
 		if !ok {
 			return nil, fmt.Errorf("messages key not found or invalid type")
 		}
 
 		options := append(memberNames, "FINISH")
-		routeTool := llmtypes.Tool{
+		routeTool := llms.Tool{
 			Type: "function",
-			Function: &llmtypes.FunctionDefinition{
+			Function: &llms.FunctionDefinition{
 				Name:        "route",
 				Description: "Select the next role.",
 				Parameters: map[string]any{
@@ -52,10 +52,10 @@ func CreateSupervisorMap(model llmtypes.Model, members map[string]*graph.StateRu
 			strings.Join(memberNames, ", "),
 		)
 
-		inputMessages := append([]llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, systemPrompt)}, messages...)
+		inputMessages := append([]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt)}, messages...)
 
-		toolChoice := llmtypes.ToolChoice{Type: "function", Function: &llmtypes.FunctionReference{Name: "route"}}
-		resp, err := model.GenerateContent(ctx, inputMessages, llmtypes.WithTools([]llmtypes.Tool{routeTool}), llmtypes.WithToolChoice(toolChoice))
+		toolChoice := llms.ToolChoice{Type: "function", Function: &llms.FunctionReference{Name: "route"}}
+		resp, err := model.GenerateContent(ctx, inputMessages, llms.WithTools([]llms.Tool{routeTool}), llms.WithToolChoice(toolChoice))
 		if err != nil {
 			return nil, err
 		}
@@ -101,9 +101,9 @@ func CreateSupervisorMap(model llmtypes.Model, members map[string]*graph.StateRu
 
 // CreateSupervisor creates a generic supervisor graph
 func CreateSupervisor[S any](
-	model llmtypes.Model,
+	model llms.Model,
 	members map[string]*graph.StateRunnable[S],
-	getMessages func(S) []llmtypes.MessageContent,
+	getMessages func(S) []llms.MessageContent,
 	getNext func(S) string,
 	setNext func(S, string) S,
 ) (*graph.StateRunnable[S], error) {
@@ -117,9 +117,9 @@ func CreateSupervisor[S any](
 	workflow.AddNode("supervisor", "Supervisor orchestration node", func(ctx context.Context, state S) (S, error) {
 		messages := getMessages(state)
 		options := append(memberNames, "FINISH")
-		routeTool := llmtypes.Tool{
+		routeTool := llms.Tool{
 			Type: "function",
-			Function: &llmtypes.FunctionDefinition{
+			Function: &llms.FunctionDefinition{
 				Name:        "route",
 				Description: "Select the next role.",
 				Parameters: map[string]any{
@@ -140,10 +140,10 @@ func CreateSupervisor[S any](
 			strings.Join(memberNames, ", "),
 		)
 
-		inputMessages := append([]llmtypes.MessageContent{llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, systemPrompt)}, messages...)
+		inputMessages := append([]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeSystem, systemPrompt)}, messages...)
 
-		toolChoice := llmtypes.ToolChoice{Type: "function", Function: &llmtypes.FunctionReference{Name: "route"}}
-		resp, err := model.GenerateContent(ctx, inputMessages, llmtypes.WithTools([]llmtypes.Tool{routeTool}), llmtypes.WithToolChoice(toolChoice))
+		toolChoice := llms.ToolChoice{Type: "function", Function: &llms.FunctionReference{Name: "route"}}
+		resp, err := model.GenerateContent(ctx, inputMessages, llms.WithTools([]llms.Tool{routeTool}), llms.WithToolChoice(toolChoice))
 		if err != nil {
 			return state, err
 		}

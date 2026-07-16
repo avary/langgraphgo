@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // ToolWithSchema is an optional interface that tools can implement to provide their parameter schema
@@ -20,12 +20,12 @@ type ToolInvocation struct {
 
 // ToolExecutor executes tools based on invocations
 type ToolExecutor struct {
-	Tools map[string]tooltypes.Tool
+	Tools map[string]tool.Tool
 }
 
 // NewToolExecutor creates a new ToolExecutor with the given tools
-func NewToolExecutor(inputTools []tooltypes.Tool) *ToolExecutor {
-	toolMap := make(map[string]tooltypes.Tool)
+func NewToolExecutor(inputTools []tool.Tool) *ToolExecutor {
+	toolMap := make(map[string]tool.Tool)
 	for _, t := range inputTools {
 		toolMap[t.Name()] = t
 	}
@@ -47,7 +47,7 @@ func (te *ToolExecutor) Execute(ctx context.Context, invocation ToolInvocation) 
 // getToolSchema returns the parameter schema for a tool.
 // If the tool implements ToolWithSchema, it uses the tool's custom schema.
 // Otherwise, it returns the default simple schema with an "input" string field.
-func getToolSchema(tool tooltypes.Tool) map[string]any {
+func getToolSchema(tool tool.Tool) map[string]any {
 	if st, ok := tool.(ToolWithSchema); ok {
 		return st.Schema()
 	}

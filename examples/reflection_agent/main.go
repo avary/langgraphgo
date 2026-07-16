@@ -7,8 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
 )
 
@@ -43,7 +43,7 @@ func main() {
 	runCodeReview(model)
 }
 
-func runBasicReflection(model llmtypes.Model) {
+func runBasicReflection(model llms.Model) {
 	config := prebuilt.ReflectionAgentConfig{
 		Model:         model,
 		MaxIterations: 3,
@@ -60,10 +60,10 @@ func runBasicReflection(model llmtypes.Model) {
 	fmt.Printf("Query: %s\n\n", query)
 
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart(query)},
 			},
 		},
 	}
@@ -76,7 +76,7 @@ func runBasicReflection(model llmtypes.Model) {
 	printResults(result)
 }
 
-func runTechnicalWriting(model llmtypes.Model) {
+func runTechnicalWriting(model llms.Model) {
 	config := prebuilt.ReflectionAgentConfig{
 		Model:         model,
 		MaxIterations: 2,
@@ -103,10 +103,10 @@ Provide specific, actionable feedback.`,
 	fmt.Printf("Query: %s\n\n", query)
 
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart(query)},
 			},
 		},
 	}
@@ -119,7 +119,7 @@ Provide specific, actionable feedback.`,
 	printResults(result)
 }
 
-func runCodeReview(model llmtypes.Model) {
+func runCodeReview(model llms.Model) {
 	config := prebuilt.ReflectionAgentConfig{
 		Model:         model,
 		MaxIterations: 2,
@@ -154,10 +154,10 @@ func getUserById(id int) (*User, error) {
 	fmt.Printf("Query: Code review for getUserById function\n\n")
 
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
+		"messages": []llms.MessageContent{
 			{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart(query)},
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart(query)},
 			},
 		},
 	}

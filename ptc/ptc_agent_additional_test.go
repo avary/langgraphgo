@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -42,9 +42,9 @@ type MockLLM struct {
 	response string
 }
 
-func (m *MockLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{
+func (m *MockLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
 			{
 				Content: m.response,
 			},
@@ -52,48 +52,48 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []llmtypes.Messa
 	}, nil
 }
 
-func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *MockLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return m.response, nil
 }
 
 func TestContainsCode(t *testing.T) {
 	tests := []struct {
 		name     string
-		message  llmtypes.MessageContent
+		message  llms.MessageContent
 		expected bool
 	}{
 		{
 			name: "Python code block",
-			message: llmtypes.MessageContent{
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("Here is some python code:\n```python\nprint('Hello, world!')\n```"),
+			message: llms.MessageContent{
+				Parts: []llms.ContentPart{
+					llms.TextPart("Here is some python code:\n```python\nprint('Hello, world!')\n```"),
 				},
 			},
 			expected: true,
 		},
 		{
 			name: "Go code block",
-			message: llmtypes.MessageContent{
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("Here is some go code:\n```go\nfmt.Println(\"Hello, world!\")\n```"),
+			message: llms.MessageContent{
+				Parts: []llms.ContentPart{
+					llms.TextPart("Here is some go code:\n```go\nfmt.Println(\"Hello, world!\")\n```"),
 				},
 			},
 			expected: true,
 		},
 		{
 			name: "No code block",
-			message: llmtypes.MessageContent{
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("This is a regular message."),
+			message: llms.MessageContent{
+				Parts: []llms.ContentPart{
+					llms.TextPart("This is a regular message."),
 				},
 			},
 			expected: false,
 		},
 		{
 			name: "Partial code block",
-			message: llmtypes.MessageContent{
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("This is a partial code block: ```py"),
+			message: llms.MessageContent{
+				Parts: []llms.ContentPart{
+					llms.TextPart("This is a partial code block: ```py"),
 				},
 			},
 			expected: false,
@@ -109,7 +109,7 @@ func TestContainsCode(t *testing.T) {
 
 func TestBuildSystemPrompt(t *testing.T) {
 	executor := &CodeExecutor{
-		Tools: []tooltypes.Tool{
+		Tools: []tool.Tool{
 			&MockTool{name: "test_tool", description: "A test tool"},
 		},
 	}
@@ -149,7 +149,7 @@ func TestAgentNodeMaxIterations(t *testing.T) {
 	maxIterations := 3
 
 	initialState := map[string]any{
-		"messages":        []llmtypes.MessageContent{},
+		"messages":        []llms.MessageContent{},
 		"iteration_count": maxIterations,
 	}
 
@@ -157,15 +157,15 @@ func TestAgentNodeMaxIterations(t *testing.T) {
 	require.NoError(t, err)
 
 	finalState := initialState
-	messages := finalState["messages"].([]llmtypes.MessageContent)
+	messages := finalState["messages"].([]llms.MessageContent)
 	lastMessage := messages[len(messages)-1]
-	lastPart := lastMessage.Parts[0].(llmtypes.TextContent)
+	lastPart := lastMessage.Parts[0].(llms.TextContent)
 	assert.Contains(t, lastPart.Text, "Maximum iterations reached")
 }
 
 func TestCreatePTCAgent(t *testing.T) {
 	mockLLM := &MockLLM{response: "This is a response."}
-	tool := &MockTool{name: "test_tool"}
+	testTool := &MockTool{name: "test_tool"}
 
 	// Create a mock server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -176,7 +176,7 @@ func TestCreatePTCAgent(t *testing.T) {
 
 	config := PTCAgentConfig{
 		Model:         mockLLM,
-		Tools:         []tooltypes.Tool{tool},
+		Tools:         []tool.Tool{testTool},
 		Language:      LanguagePython,
 		ExecutionMode: ModeServer, // Use server mode for testing
 	}
@@ -191,8 +191,8 @@ func TestCreatePTCAgent(t *testing.T) {
 	config.Model = mockLLM
 
 	// Test without tools
-	config.Tools = []tooltypes.Tool{}
+	config.Tools = []tool.Tool{}
 	_, err = CreatePTCAgent(config)
 	assert.Error(t, err)
-	config.Tools = []tooltypes.Tool{tool}
+	config.Tools = []tool.Tool{testTool}
 }

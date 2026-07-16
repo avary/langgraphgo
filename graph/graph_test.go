@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 )
 
@@ -23,20 +23,20 @@ func ExampleStateGraph() {
 	if err != nil {
 		panic(err)
 	}
-	model := llmtypes.Wrap(rawModel)
+	model := llms.Wrap(rawModel)
 
-	g := graph.NewStateGraph[[]llmtypes.MessageContent]()
+	g := graph.NewStateGraph[[]llms.MessageContent]()
 
-	g.AddNode("oracle", "oracle", func(ctx context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
-		r, err := model.GenerateContent(ctx, state, llmtypes.WithTemperature(0.0))
+	g.AddNode("oracle", "oracle", func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+		r, err := model.GenerateContent(ctx, state, llms.WithTemperature(0.0))
 		if err != nil {
 			return nil, err
 		}
 		return append(state,
-			llmtypes.TextParts("ai", r.Choices[0].Content),
+			llms.TextParts("ai", r.Choices[0].Content),
 		), nil
 	})
-	g.AddNode(graph.END, graph.END, func(_ context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
+	g.AddNode(graph.END, graph.END, func(_ context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 		return state, nil
 	})
 
@@ -50,8 +50,8 @@ func ExampleStateGraph() {
 
 	ctx := context.Background()
 	// Let's run it!
-	res, err := runnable.Invoke(ctx, []llmtypes.MessageContent{
-		llmtypes.TextParts("human", "What is 1 + 1?"),
+	res, err := runnable.Invoke(ctx, []llms.MessageContent{
+		llms.TextParts("human", "What is 1 + 1?"),
 	})
 	if err != nil {
 		panic(err)
@@ -64,39 +64,39 @@ func TestStateGraph(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name           string
-		buildGraph     func() *graph.StateGraph[[]llmtypes.MessageContent]
-		inputMessages  []llmtypes.MessageContent
-		expectedOutput []llmtypes.MessageContent
+		buildGraph     func() *graph.StateGraph[[]llms.MessageContent]
+		inputMessages  []llms.MessageContent
+		expectedOutput []llms.MessageContent
 		expectedError  error
 	}{
 		{
 			name: "Simple graph",
-			buildGraph: func() *graph.StateGraph[[]llmtypes.MessageContent] {
-				g := graph.NewStateGraph[[]llmtypes.MessageContent]()
-				g.AddNode("node1", "node1", func(_ context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
-					return append(state, llmtypes.TextParts("ai", "Node 1")), nil
+			buildGraph: func() *graph.StateGraph[[]llms.MessageContent] {
+				g := graph.NewStateGraph[[]llms.MessageContent]()
+				g.AddNode("node1", "node1", func(_ context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+					return append(state, llms.TextParts("ai", "Node 1")), nil
 				})
-				g.AddNode("node2", "node2", func(_ context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
-					return append(state, llmtypes.TextParts("ai", "Node 2")), nil
+				g.AddNode("node2", "node2", func(_ context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
+					return append(state, llms.TextParts("ai", "Node 2")), nil
 				})
 				g.AddEdge("node1", "node2")
 				g.AddEdge("node2", graph.END)
 				g.SetEntryPoint("node1")
 				return g
 			},
-			inputMessages: []llmtypes.MessageContent{llmtypes.TextParts("human", "Input")},
-			expectedOutput: []llmtypes.MessageContent{
-				llmtypes.TextParts("human", "Input"),
-				llmtypes.TextParts("ai", "Node 1"),
-				llmtypes.TextParts("ai", "Node 2"),
+			inputMessages: []llms.MessageContent{llms.TextParts("human", "Input")},
+			expectedOutput: []llms.MessageContent{
+				llms.TextParts("human", "Input"),
+				llms.TextParts("ai", "Node 1"),
+				llms.TextParts("ai", "Node 2"),
 			},
 			expectedError: nil,
 		},
 		{
 			name: "Entry point not set",
-			buildGraph: func() *graph.StateGraph[[]llmtypes.MessageContent] {
-				g := graph.NewStateGraph[[]llmtypes.MessageContent]()
-				g.AddNode("node1", "node1", func(_ context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
+			buildGraph: func() *graph.StateGraph[[]llms.MessageContent] {
+				g := graph.NewStateGraph[[]llms.MessageContent]()
+				g.AddNode("node1", "node1", func(_ context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 					return state, nil
 				})
 				return g
@@ -105,9 +105,9 @@ func TestStateGraph(t *testing.T) {
 		},
 		{
 			name: "Node not found",
-			buildGraph: func() *graph.StateGraph[[]llmtypes.MessageContent] {
-				g := graph.NewStateGraph[[]llmtypes.MessageContent]()
-				g.AddNode("node1", "node1", func(_ context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
+			buildGraph: func() *graph.StateGraph[[]llms.MessageContent] {
+				g := graph.NewStateGraph[[]llms.MessageContent]()
+				g.AddNode("node1", "node1", func(_ context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 					return state, nil
 				})
 				g.AddEdge("node1", "node2")
@@ -118,9 +118,9 @@ func TestStateGraph(t *testing.T) {
 		},
 		{
 			name: "No outgoing edge",
-			buildGraph: func() *graph.StateGraph[[]llmtypes.MessageContent] {
-				g := graph.NewStateGraph[[]llmtypes.MessageContent]()
-				g.AddNode("node1", "node1", func(_ context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
+			buildGraph: func() *graph.StateGraph[[]llms.MessageContent] {
+				g := graph.NewStateGraph[[]llms.MessageContent]()
+				g.AddNode("node1", "node1", func(_ context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 					return state, nil
 				})
 				g.SetEntryPoint("node1")
@@ -130,9 +130,9 @@ func TestStateGraph(t *testing.T) {
 		},
 		{
 			name: "Error in node function",
-			buildGraph: func() *graph.StateGraph[[]llmtypes.MessageContent] {
-				g := graph.NewStateGraph[[]llmtypes.MessageContent]()
-				g.AddNode("node1", "node1", func(_ context.Context, _ []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
+			buildGraph: func() *graph.StateGraph[[]llms.MessageContent] {
+				g := graph.NewStateGraph[[]llms.MessageContent]()
+				g.AddNode("node1", "node1", func(_ context.Context, _ []llms.MessageContent) ([]llms.MessageContent, error) {
 					return nil, errors.New("node error")
 				})
 				g.AddEdge("node1", graph.END)

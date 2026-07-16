@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // TestEmptyGraph tests behavior with empty graphs
@@ -502,17 +502,17 @@ func TestMessageContentEdgeCases(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		initialState []llmtypes.MessageContent
-		transform    func([]llmtypes.MessageContent) []llmtypes.MessageContent
-		validate     func(*testing.T, []llmtypes.MessageContent)
+		initialState []llms.MessageContent
+		transform    func([]llms.MessageContent) []llms.MessageContent
+		validate     func(*testing.T, []llms.MessageContent)
 	}{
 		{
 			name:         "Empty message list",
-			initialState: []llmtypes.MessageContent{},
-			transform: func(msgs []llmtypes.MessageContent) []llmtypes.MessageContent {
-				return append(msgs, llmtypes.TextParts("ai", "Hello"))
+			initialState: []llms.MessageContent{},
+			transform: func(msgs []llms.MessageContent) []llms.MessageContent {
+				return append(msgs, llms.TextParts("ai", "Hello"))
 			},
-			validate: func(t *testing.T, msgs []llmtypes.MessageContent) {
+			validate: func(t *testing.T, msgs []llms.MessageContent) {
 				if len(msgs) != 1 {
 					t.Errorf("Expected 1 message, got %d", len(msgs))
 				}
@@ -520,43 +520,43 @@ func TestMessageContentEdgeCases(t *testing.T) {
 		},
 		{
 			name: "Multiple parts in message",
-			initialState: []llmtypes.MessageContent{
+			initialState: []llms.MessageContent{
 				{
 					Role: "human",
-					Parts: []llmtypes.ContentPart{
-						llmtypes.TextContent{Text: "Part 1"},
-						llmtypes.TextContent{Text: "Part 2"},
+					Parts: []llms.ContentPart{
+						llms.TextContent{Text: "Part 1"},
+						llms.TextContent{Text: "Part 2"},
 					},
 				},
 			},
-			transform: func(msgs []llmtypes.MessageContent) []llmtypes.MessageContent {
+			transform: func(msgs []llms.MessageContent) []llms.MessageContent {
 				// Count total parts
 				totalParts := 0
 				for _, msg := range msgs {
 					totalParts += len(msg.Parts)
 				}
-				return append(msgs, llmtypes.TextParts("ai", fmt.Sprintf("You have %d parts", totalParts)))
+				return append(msgs, llms.TextParts("ai", fmt.Sprintf("You have %d parts", totalParts)))
 			},
-			validate: func(t *testing.T, msgs []llmtypes.MessageContent) {
+			validate: func(t *testing.T, msgs []llms.MessageContent) {
 				if len(msgs) != 2 {
 					t.Errorf("Expected 2 messages, got %d", len(msgs))
 				}
 				lastMsg := msgs[len(msgs)-1]
-				if lastMsg.Parts[0].(llmtypes.TextContent).Text != "You have 2 parts" {
+				if lastMsg.Parts[0].(llms.TextContent).Text != "You have 2 parts" {
 					t.Errorf("Unexpected response: %v", lastMsg.Parts[0])
 				}
 			},
 		},
 		{
 			name: "Very long message",
-			initialState: []llmtypes.MessageContent{
-				llmtypes.TextParts("human", string(make([]byte, 10000))), // 10KB message
+			initialState: []llms.MessageContent{
+				llms.TextParts("human", string(make([]byte, 10000))), // 10KB message
 			},
-			transform: func(msgs []llmtypes.MessageContent) []llmtypes.MessageContent {
+			transform: func(msgs []llms.MessageContent) []llms.MessageContent {
 				// Should handle large messages
-				return append(msgs, llmtypes.TextParts("ai", "Handled large message"))
+				return append(msgs, llms.TextParts("ai", "Handled large message"))
 			},
-			validate: func(t *testing.T, msgs []llmtypes.MessageContent) {
+			validate: func(t *testing.T, msgs []llms.MessageContent) {
 				if len(msgs) != 2 {
 					t.Errorf("Expected 2 messages, got %d", len(msgs))
 				}
@@ -568,8 +568,8 @@ func TestMessageContentEdgeCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			g := graph.NewStateGraph[[]llmtypes.MessageContent]()
-			g.AddNode("process", "process", func(ctx context.Context, state []llmtypes.MessageContent) ([]llmtypes.MessageContent, error) {
+			g := graph.NewStateGraph[[]llms.MessageContent]()
+			g.AddNode("process", "process", func(ctx context.Context, state []llms.MessageContent) ([]llms.MessageContent, error) {
 				return tt.transform(state), nil
 			})
 			g.AddEdge("process", graph.END)

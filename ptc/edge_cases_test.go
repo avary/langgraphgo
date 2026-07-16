@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/log"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // TestPackageLevelLogging tests using package-level logging functions
@@ -19,7 +19,7 @@ func TestPackageLevelLogging(t *testing.T) {
 	// Enable logging for this test
 	log.SetLogLevel(log.LogLevelInfo)
 
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		newMockTool("test", "Test tool", "ok"),
 	}
 
@@ -65,7 +65,7 @@ func TestSanitizeFunctionNameEdgeCases(t *testing.T) {
 
 // TestExecutorWithEmptyTools tests executor with no tools
 func TestExecutorWithEmptyTools(t *testing.T) {
-	executor := NewCodeExecutor(LanguagePython, []tooltypes.Tool{})
+	executor := NewCodeExecutor(LanguagePython, []tool.Tool{})
 
 	ctx := context.Background()
 	if err := executor.Start(ctx); err != nil {
@@ -81,7 +81,7 @@ func TestExecutorWithEmptyTools(t *testing.T) {
 
 // TestExecutorTimeout tests code execution timeout
 func TestExecutorTimeoutShort(t *testing.T) {
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		newMockTool("slow", "Slow tool", "ok"),
 	}
 
@@ -111,7 +111,7 @@ print("done")
 
 // TestExecutorWithMalformedCode tests execution of malformed code
 func TestExecutorWithMalformedCode(t *testing.T) {
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		newMockTool("test", "Test tool", "ok"),
 	}
 
@@ -137,7 +137,7 @@ this is not valid python syntax !!!
 
 // TestExecutorWithLargeCode tests execution of large code blocks
 func TestExecutorWithLargeCode(t *testing.T) {
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		newMockTool("test", "Test tool", "ok"),
 	}
 
@@ -163,7 +163,7 @@ func TestExecutorWithLargeCode(t *testing.T) {
 
 // TestExecutorWithSpecialCharacters tests code with special characters
 func TestExecutorWithSpecialCharacters(t *testing.T) {
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		newMockTool("test", "Test tool", "ok"),
 	}
 
@@ -194,7 +194,7 @@ print("Special chars: ñ é à ü")
 
 // TestStopWithoutStart tests stopping executor that was never started
 func TestStopBeforeStart(t *testing.T) {
-	executor := NewCodeExecutor(LanguagePython, []tooltypes.Tool{})
+	executor := NewCodeExecutor(LanguagePython, []tool.Tool{})
 
 	ctx := context.Background()
 	// Stop without starting should not panic
@@ -207,7 +207,7 @@ func TestStopBeforeStart(t *testing.T) {
 
 // TestMultipleStarts tests starting executor multiple times
 func TestMultipleStarts(t *testing.T) {
-	executor := NewCodeExecutor(LanguagePython, []tooltypes.Tool{})
+	executor := NewCodeExecutor(LanguagePython, []tool.Tool{})
 
 	ctx := context.Background()
 
@@ -227,7 +227,7 @@ func TestMultipleStarts(t *testing.T) {
 
 // TestExecutorWorkDir tests custom work directory
 func TestExecutorWorkDir(t *testing.T) {
-	executor := NewCodeExecutor(LanguagePython, []tooltypes.Tool{})
+	executor := NewCodeExecutor(LanguagePython, []tool.Tool{})
 
 	// Verify default work dir is set
 	if executor.WorkDir == "" {
@@ -243,7 +243,7 @@ func TestExecutorWorkDir(t *testing.T) {
 
 // TestExecutorModeDirect tests Direct mode specific behavior
 func TestExecutorModeDirectSpecific(t *testing.T) {
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		newMockTool("test", "Test tool", "ok"),
 	}
 
@@ -267,7 +267,7 @@ func TestExecutorModeDirectSpecific(t *testing.T) {
 
 // TestExecutorModeServer tests Server mode specific behavior
 func TestExecutorModeServerSpecific(t *testing.T) {
-	toolList := []tooltypes.Tool{
+	toolList := []tool.Tool{
 		newMockTool("test", "Test tool", "ok"),
 	}
 
@@ -291,7 +291,7 @@ func TestExecutorModeServerSpecific(t *testing.T) {
 
 // TestGetToolServerURLBeforeStart tests GetToolServerURL before Start
 func TestGetToolServerURLBeforeStart(t *testing.T) {
-	executor := NewCodeExecutor(LanguagePython, []tooltypes.Tool{})
+	executor := NewCodeExecutor(LanguagePython, []tool.Tool{})
 
 	// GetToolServerURL before Start returns URL with port 0
 	url := executor.GetToolServerURL()

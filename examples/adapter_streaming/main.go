@@ -9,13 +9,13 @@ import (
 
 	"github.com/smallnest/langgraphgo/adapter"
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // State defines the structure for the graph state
 type State struct {
-	Messages []llmtypes.MessageContent
+	Messages []llms.MessageContent
 	Output   strings.Builder
 }
 
@@ -70,9 +70,9 @@ func main() {
 		userInput = strings.Join(os.Args[1:], " ")
 	}
 
-	messages := []llmtypes.MessageContent{
-		llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, "You are a helpful assistant that explains technical concepts clearly."),
-		llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, userInput),
+	messages := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are a helpful assistant that explains technical concepts clearly."),
+		llms.TextParts(llms.ChatMessageTypeHuman, userInput),
 	}
 
 	// Execute the graph

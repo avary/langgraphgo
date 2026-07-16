@@ -31,14 +31,14 @@
 //
 //	import (
 //		"github.com/smallnest/langgraphgo/ptc"
-//		"github.com/smallnest/langgraphgo/llmtypes"
-//		"github.com/smallnest/langgraphgo/tooltypes"
+//		"github.com/smallnest/langgraphgo/llms"
+//		"github.com/smallnest/langgraphgo/tool"
 //	)
 //
 //	// Create agent with Python execution
 //	agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
 //		Model:       llm,
-//		Tools:       []tooltypes.Tool{calculator, weatherTool},
+//		Tools:       []tool.Tool{calculator, weatherTool},
 //		Language:    ptc.LanguagePython,
 //		MaxIterations: 10,
 //	})
@@ -71,8 +71,8 @@
 //
 //		"github.com/smallnest/langgraphgo/ptc"
 //		"github.com/tmc/langchaingo/llms/openai"
-//		"github.com/smallnest/langgraphgo/tooltypes"
-//		"github.com/tmc/langchaingo/tools" // langchaingo tools satisfy tooltypes.Tool
+//		"github.com/smallnest/langgraphgo/tool"
+//		"github.com/tmc/langchaingo/tools" // langchaingo tools satisfy tool.Tool
 //	)
 //
 //	func main() {
@@ -85,7 +85,7 @@
 //		// Create PTC agent
 //		agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
 //			Model:    llm,
-//			Tools:    []tooltypes.Tool{calculator},
+//			Tools:    []tool.Tool{calculator},
 //			Language: ptc.LanguagePython,
 //		})
 //		if err != nil {
@@ -95,11 +95,11 @@
 //		// Execute agent
 //		ctx := context.Background()
 //		result, err := agent.Invoke(ctx, map[string]any{
-//			"messages": []llmtypes.MessageContent{
+//			"messages": []llms.MessageContent{
 //				{
-//					Role: llmtypes.ChatMessageTypeHuman,
-//					Parts: []llmtypes.ContentPart{
-//						llmtypes.TextPart("What is 123 * 456?"),
+//					Role: llms.ChatMessageTypeHuman,
+//					Parts: []llms.ContentPart{
+//						llms.TextPart("What is 123 * 456?"),
 //					},
 //				},
 //			},
@@ -130,7 +130,7 @@
 //	weather := &WeatherTool{}
 //	agent, err := ptc.CreatePTCAgent(ptc.PTCAgentConfig{
 //		Model:    llm,
-//		Tools:    []tooltypes.Tool{weather},
+//		Tools:    []tool.Tool{weather},
 //		Language: ptc.LanguageJavaScript,
 //	})
 //

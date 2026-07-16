@@ -1,8 +1,8 @@
 // Package nativeopenai is an OpenAI-compatible LLM provider that implements
-// github.com/smallnest/langgraphgo/llmtypes.Model directly, with no dependency
+// github.com/smallnest/langgraphgo/llms.Model directly, with no dependency
 // on github.com/tmc/langchaingo. It exists both as a first-class provider and
 // as proof that the framework's Model interface stands on its own: a provider
-// can be written against llmtypes alone and plugged straight into the graph
+// can be written against the llms package alone and plugged straight into the graph
 // engine, prebuilt agents, and memory without any adapter.
 //
 // It uses github.com/sashabaranov/go-openai purely as an HTTP transport for the
@@ -15,7 +15,7 @@ import (
 	"os"
 
 	goopenai "github.com/sashabaranov/go-openai"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // ErrMissingToken is returned by New when no API token is configured.
@@ -24,7 +24,7 @@ var ErrMissingToken = errors.New("nativeopenai: missing API token (set OPENAI_AP
 // DefaultModel is used when no model is set via WithModel or per-call WithModel.
 const DefaultModel = "gpt-4o-mini"
 
-// LLM is an OpenAI-compatible model implementing llmtypes.Model.
+// LLM is an OpenAI-compatible model implementing llms.Model.
 type LLM struct {
 	client *goopenai.Client
 	model  string
@@ -32,7 +32,7 @@ type LLM struct {
 
 // Compile-time proof that LLM satisfies the framework Model interface with no
 // langchaingo involvement.
-var _ llmtypes.Model = (*LLM)(nil)
+var _ llms.Model = (*LLM)(nil)
 
 type config struct {
 	token   string

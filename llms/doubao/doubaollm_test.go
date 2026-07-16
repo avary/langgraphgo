@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/volcengine/volcengine-go-sdk/service/arkruntime/model"
 )
 
@@ -132,11 +132,11 @@ func TestLLM_GenerateContent(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	messages := []llmtypes.MessageContent{
+	messages := []llms.MessageContent{
 		{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("Hello, how are you?"),
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Hello, how are you?"),
 			},
 		},
 	}
@@ -293,23 +293,23 @@ func TestLLM_Conversation(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	messages := []llmtypes.MessageContent{
+	messages := []llms.MessageContent{
 		{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("My name is Alice"),
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("My name is Alice"),
 			},
 		},
 		{
-			Role: llmtypes.ChatMessageTypeAI,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("Hello Alice! Nice to meet you."),
+			Role: llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Hello Alice! Nice to meet you."),
 			},
 		},
 		{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("What's my name?"),
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("What's my name?"),
 			},
 		},
 	}
@@ -452,11 +452,11 @@ func TestLLM_Streaming(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	messages := []llmtypes.MessageContent{
+	messages := []llms.MessageContent{
 		{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("Count from 1 to 5"),
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Count from 1 to 5"),
 			},
 		},
 	}
@@ -497,10 +497,10 @@ func TestLLM_ToolCall(t *testing.T) {
 	ctx := context.Background()
 
 	// Define a simple tool for getting weather
-	tools := []llmtypes.Tool{
+	tools := []llms.Tool{
 		{
 			Type: "function",
-			Function: &llmtypes.FunctionDefinition{
+			Function: &llms.FunctionDefinition{
 				Name:        "get_weather",
 				Description: "Get the current weather in a given location",
 				Parameters: map[string]any{
@@ -522,16 +522,16 @@ func TestLLM_ToolCall(t *testing.T) {
 		},
 	}
 
-	messages := []llmtypes.MessageContent{
+	messages := []llms.MessageContent{
 		{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("What's the weather like in San Francisco, CA?"),
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("What's the weather like in San Francisco, CA?"),
 			},
 		},
 	}
 
-	resp, err := llm.GenerateContent(ctx, messages, llmtypes.WithTools(tools))
+	resp, err := llm.GenerateContent(ctx, messages, llms.WithTools(tools))
 	if err != nil {
 		t.Fatalf("Failed to generate content: %v", err)
 	}
@@ -582,10 +582,10 @@ func TestLLM_ToolChoice(t *testing.T) {
 
 	ctx := context.Background()
 
-	tools := []llmtypes.Tool{
+	tools := []llms.Tool{
 		{
 			Type: "function",
-			Function: &llmtypes.FunctionDefinition{
+			Function: &llms.FunctionDefinition{
 				Name:        "get_current_time",
 				Description: "Get the current time",
 				Parameters: map[string]any{
@@ -613,16 +613,16 @@ func TestLLM_ToolChoice(t *testing.T) {
 		},
 		{
 			name: "tool choice required",
-			toolChoice: llmtypes.ToolChoice{
+			toolChoice: llms.ToolChoice{
 				Type: "required",
 			},
 			desc: "Model must call a tool",
 		},
 		{
 			name: "tool choice specific function",
-			toolChoice: llmtypes.ToolChoice{
+			toolChoice: llms.ToolChoice{
 				Type: "function",
-				Function: &llmtypes.FunctionReference{
+				Function: &llms.FunctionReference{
 					Name: "get_current_time",
 				},
 			},
@@ -632,18 +632,18 @@ func TestLLM_ToolChoice(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			messages := []llmtypes.MessageContent{
+			messages := []llms.MessageContent{
 				{
-					Role: llmtypes.ChatMessageTypeHuman,
-					Parts: []llmtypes.ContentPart{
-						llmtypes.TextPart("What time is it?"),
+					Role: llms.ChatMessageTypeHuman,
+					Parts: []llms.ContentPart{
+						llms.TextPart("What time is it?"),
 					},
 				},
 			}
 
 			resp, err := llm.GenerateContent(ctx, messages,
-				llmtypes.WithTools(tools),
-				llmtypes.WithToolChoice(tt.toolChoice),
+				llms.WithTools(tools),
+				llms.WithToolChoice(tt.toolChoice),
 			)
 			if err != nil {
 				t.Fatalf("Failed to generate content: %v", err)
@@ -689,18 +689,18 @@ func TestLLM_ToolResponse(t *testing.T) {
 	ctx := context.Background()
 
 	// Simulate a conversation with tool call and response
-	messages := []llmtypes.MessageContent{
+	messages := []llms.MessageContent{
 		{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("What's the weather like in Beijing?"),
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("What's the weather like in Beijing?"),
 			},
 		},
 		// Simulated tool response
 		{
-			Role: llmtypes.ChatMessageTypeTool,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.ToolCallResponse{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
 					ToolCallID: "call_123",
 					Content:    `{"temperature": "22°C", "condition": "Sunny"}`,
 				},
@@ -729,16 +729,16 @@ func TestLLM_ToolResponse(t *testing.T) {
 func TestLLM_ConvertMessageWithToolResponse(t *testing.T) {
 	tests := []struct {
 		name     string
-		msg      llmtypes.MessageContent
+		msg      llms.MessageContent
 		wantErr  bool
 		validate func(*testing.T, *model.ChatCompletionMessage)
 	}{
 		{
 			name: "tool response with ToolCallID",
-			msg: llmtypes.MessageContent{
-				Role: llmtypes.ChatMessageTypeTool,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.ToolCallResponse{
+			msg: llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{
 						ToolCallID: "test-call-id",
 						Content:    `{"result": "success"}`,
 					},
@@ -759,10 +759,10 @@ func TestLLM_ConvertMessageWithToolResponse(t *testing.T) {
 		},
 		{
 			name: "tool response with text content",
-			msg: llmtypes.MessageContent{
-				Role: llmtypes.ChatMessageTypeTool,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("some text content"),
+			msg: llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.TextPart("some text content"),
 				},
 			},
 			wantErr: false,
@@ -777,16 +777,16 @@ func TestLLM_ConvertMessageWithToolResponse(t *testing.T) {
 		},
 		{
 			name: "user message with text",
-			msg: llmtypes.MessageContent{
-				Role: llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("Hello, how are you?"),
+			msg: llms.MessageContent{
+				Role: llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{
+					llms.TextPart("Hello, how are you?"),
 				},
 			},
 			wantErr: false,
 			validate: func(t *testing.T, m *model.ChatCompletionMessage) {
-				if m.Role != string(llmtypes.ChatMessageTypeHuman) {
-					t.Errorf("Expected role '%s', got '%s'", llmtypes.ChatMessageTypeHuman, m.Role)
+				if m.Role != string(llms.ChatMessageTypeHuman) {
+					t.Errorf("Expected role '%s', got '%s'", llms.ChatMessageTypeHuman, m.Role)
 				}
 				if m.Content == nil {
 					t.Error("Expected content to be set")
@@ -986,7 +986,7 @@ func TestLLM_GenerateContent_EmptyMessages(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	_, err = llm.GenerateContent(ctx, []llmtypes.MessageContent{})
+	_, err = llm.GenerateContent(ctx, []llms.MessageContent{})
 	if err == nil {
 		t.Error("Expected error for empty messages, got nil")
 	}
@@ -1016,32 +1016,32 @@ func TestLLM_CreateEmbedding_EmptyTexts(t *testing.T) {
 func TestLLM_ConvertMessage_Errors(t *testing.T) {
 	tests := []struct {
 		name    string
-		msg     llmtypes.MessageContent
+		msg     llms.MessageContent
 		wantErr bool
 		errMsg  string
 	}{
 		{
 			name: "message with no parts",
-			msg: llmtypes.MessageContent{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{},
+			msg: llms.MessageContent{
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{},
 			},
 			wantErr: true,
 			errMsg:  "message has no parts",
 		},
 		{
 			name: "message with empty content - actually works with empty string",
-			msg: llmtypes.MessageContent{
-				Role:  llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{llmtypes.TextPart("")},
+			msg: llms.MessageContent{
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("")},
 			},
 			wantErr: false, // The code allows empty strings, it creates content with empty string
 		},
 		{
 			name: "tool message with no valid content",
-			msg: llmtypes.MessageContent{
-				Role:  llmtypes.ChatMessageTypeTool,
-				Parts: []llmtypes.ContentPart{},
+			msg: llms.MessageContent{
+				Role:  llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{},
 			},
 			wantErr: true,
 			errMsg:  "message has no parts",
@@ -1330,17 +1330,17 @@ func TestLLM_GenerateContent_WithOptions(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	messages := []llmtypes.MessageContent{
+	messages := []llms.MessageContent{
 		{
-			Role: llmtypes.ChatMessageTypeHuman,
-			Parts: []llmtypes.ContentPart{
-				llmtypes.TextPart("Say hello"),
+			Role: llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{
+				llms.TextPart("Say hello"),
 			},
 		},
 	}
 
 	// Test with temperature
-	resp, err := llm.GenerateContent(ctx, messages, llmtypes.WithTemperature(0.7))
+	resp, err := llm.GenerateContent(ctx, messages, llms.WithTemperature(0.7))
 	if err != nil {
 		t.Logf("GenerateContent with temperature failed: %v", err)
 	} else {
@@ -1351,7 +1351,7 @@ func TestLLM_GenerateContent_WithOptions(t *testing.T) {
 	}
 
 	// Test with top_p
-	resp, err = llm.GenerateContent(ctx, messages, llmtypes.WithTopP(0.9))
+	resp, err = llm.GenerateContent(ctx, messages, llms.WithTopP(0.9))
 	if err != nil {
 		t.Logf("GenerateContent with top_p failed: %v", err)
 	} else {
@@ -1362,7 +1362,7 @@ func TestLLM_GenerateContent_WithOptions(t *testing.T) {
 	}
 
 	// Test with max tokens
-	resp, err = llm.GenerateContent(ctx, messages, llmtypes.WithMaxTokens(100))
+	resp, err = llm.GenerateContent(ctx, messages, llms.WithMaxTokens(100))
 	if err != nil {
 		t.Logf("GenerateContent with max tokens failed: %v", err)
 	} else {
@@ -1374,9 +1374,9 @@ func TestLLM_GenerateContent_WithOptions(t *testing.T) {
 
 	// Test with all options
 	resp, err = llm.GenerateContent(ctx, messages,
-		llmtypes.WithTemperature(0.5),
-		llmtypes.WithTopP(0.8),
-		llmtypes.WithMaxTokens(50),
+		llms.WithTemperature(0.5),
+		llms.WithTopP(0.8),
+		llms.WithMaxTokens(50),
 	)
 	if err != nil {
 		t.Logf("GenerateContent with all options failed: %v", err)
@@ -1392,17 +1392,17 @@ func TestLLM_GenerateContent_WithOptions(t *testing.T) {
 func TestLLM_ConvertMessage_MultiPart(t *testing.T) {
 	tests := []struct {
 		name     string
-		msg      llmtypes.MessageContent
+		msg      llms.MessageContent
 		wantErr  bool
 		validate func(*testing.T, *model.ChatCompletionMessage)
 	}{
 		{
 			name: "user message with multiple text parts",
-			msg: llmtypes.MessageContent{
-				Role: llmtypes.ChatMessageTypeHuman,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("Hello, "),
-					llmtypes.TextPart("world!"),
+			msg: llms.MessageContent{
+				Role: llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{
+					llms.TextPart("Hello, "),
+					llms.TextPart("world!"),
 				},
 			},
 			wantErr: false,
@@ -1421,10 +1421,10 @@ func TestLLM_ConvertMessage_MultiPart(t *testing.T) {
 		},
 		{
 			name: "system message",
-			msg: llmtypes.MessageContent{
-				Role: llmtypes.ChatMessageTypeSystem,
-				Parts: []llmtypes.ContentPart{
-					llmtypes.TextPart("You are a helpful assistant"),
+			msg: llms.MessageContent{
+				Role: llms.ChatMessageTypeSystem,
+				Parts: []llms.ContentPart{
+					llms.TextPart("You are a helpful assistant"),
 				},
 			},
 			wantErr: false,

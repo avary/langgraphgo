@@ -9,10 +9,10 @@ import (
 
 	"github.com/smallnest/goskills"
 	adapter "github.com/smallnest/langgraphgo/adapter/goskills"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 func main() {
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// 3. 将技能转换为工具（工具配置会从 SKILL.md 自动读取）
-	var allTools []tooltypes.Tool
+	var allTools []tool.Tool
 	var allSystemMessages strings.Builder
 
 	allSystemMessages.WriteString("你是一个有用的助手，可以访问工具来创作漫画。当用户要求创建漫画时，你必须调用 generate_comic_storyboard 函数。\n\n")
@@ -81,7 +81,7 @@ func main() {
 	fmt.Printf("\n总共加载了 %d 个工具\n\n", len(allTools))
 
 	// 4. 筛选出漫画相关工具
-	var comicTools []tooltypes.Tool
+	var comicTools []tool.Tool
 	for _, t := range allTools {
 		if t.Name() == "generate_comic_storyboard" || t.Name() == "generate_comic_image" || t.Name() == "merge_comic_to_pdf" {
 			comicTools = append(comicTools, t)
@@ -151,8 +151,8 @@ func main() {
 
 	ctx := context.Background()
 	resp, err := agent.Invoke(ctx, map[string]any{
-		"messages": []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, input),
+		"messages": []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, input),
 		},
 	})
 	if err != nil {
@@ -164,17 +164,17 @@ func main() {
 	fmt.Println("Agent 响应:")
 	fmt.Println("===========================================")
 
-	if messages, ok := resp["messages"].([]llmtypes.MessageContent); ok && len(messages) > 0 {
+	if messages, ok := resp["messages"].([]llms.MessageContent); ok && len(messages) > 0 {
 		for i, msg := range messages {
 			fmt.Printf("\n[消息 %d - 角色: %s]\n", i+1, msg.Role)
 			for j, part := range msg.Parts {
 				switch p := part.(type) {
-				case llmtypes.TextContent:
+				case llms.TextContent:
 					fmt.Printf("  [部分 %d - 文本]: %s\n", j+1, string(p.Text))
-				case llmtypes.ToolCall:
+				case llms.ToolCall:
 					fmt.Printf("  [部分 %d - 工具调用]: %s\n", j+1, p.FunctionCall.Name)
 					fmt.Printf("    参数: %s\n", p.FunctionCall.Arguments)
-				case llmtypes.ToolCallResponse:
+				case llms.ToolCallResponse:
 					fmt.Printf("  [部分 %d - 工具响应]: %s\n", j+1, p)
 				default:
 					fmt.Printf("  [部分 %d - 未知类型]: %v\n", j+1, part)

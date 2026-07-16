@@ -11,8 +11,7 @@ import (
 
 	"github.com/smallnest/goskills"
 	goskillstool "github.com/smallnest/goskills/tool"
-	langgraphtool "github.com/smallnest/langgraphgo/tool"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // ToolConfig 定义工具的配置，可以从 SKILL.md 或单独的配置文件中读取
@@ -92,7 +91,7 @@ func buildToolConfigFromSkill(skill *goskills.SkillPackage) *ToolConfig {
 	return config
 }
 
-// SkillTool implements tooltypes.Tool for goskills.
+// SkillTool implements tool.Tool for goskills.
 type SkillTool struct {
 	name        string
 	description string
@@ -103,7 +102,7 @@ type SkillTool struct {
 	skill       *goskills.SkillPackage // 保留对 skill 包的引用以获取工具定义
 }
 
-var _ tooltypes.Tool = &SkillTool{}
+var _ tool.Tool = &SkillTool{}
 var _ interface{ Schema() map[string]any } = &SkillTool{}
 
 func (t *SkillTool) Name() string {
@@ -214,7 +213,7 @@ func (t *SkillTool) Call(ctx context.Context, input string) (string, error) {
 		if err := json.Unmarshal([]byte(input), &params); err != nil {
 			return "", fmt.Errorf("failed to unmarshal run_shell_script arguments: %w", err)
 		}
-		return langgraphtool.RunShellScript(params.ScriptPath, params.Args)
+		return tool.RunShellScript(params.ScriptPath, params.Args)
 
 	case "run_python_code":
 		var params struct {
@@ -335,9 +334,9 @@ func (t *SkillTool) Call(ctx context.Context, input string) (string, error) {
 				if strings.HasSuffix(scriptPath, ".py") {
 					return goskillstool.RunPythonScript(scriptPath, args)
 				} else if strings.HasSuffix(scriptPath, ".ts") || strings.HasSuffix(scriptPath, ".js") {
-					return langgraphtool.RunTypeScriptScript(scriptPath, args)
+					return tool.RunTypeScriptScript(scriptPath, args)
 				} else {
-					return langgraphtool.RunShellScript(scriptPath, args)
+					return tool.RunShellScript(scriptPath, args)
 				}
 			}
 
@@ -353,9 +352,9 @@ func (t *SkillTool) Call(ctx context.Context, input string) (string, error) {
 			if strings.HasSuffix(scriptPath, ".py") {
 				return goskillstool.RunPythonScript(scriptPath, params.Args)
 			} else if strings.HasSuffix(scriptPath, ".ts") || strings.HasSuffix(scriptPath, ".js") {
-				return langgraphtool.RunTypeScriptScript(scriptPath, params.Args)
+				return tool.RunTypeScriptScript(scriptPath, params.Args)
 			} else {
-				return langgraphtool.RunShellScript(scriptPath, params.Args)
+				return tool.RunShellScript(scriptPath, params.Args)
 			}
 		}
 		return "", fmt.Errorf("unknown tool: %s", originalName)
@@ -370,10 +369,10 @@ type SkillsToToolsOptions struct {
 	ToolConfig *ToolConfig
 }
 
-// SkillsToTools converts a goskills.SkillPackage to a slice of tooltypes.Tool.
+// SkillsToTools converts a goskills.SkillPackage to a slice of tool.Tool.
 // 自动从 SKILL.md 读取工具定义，如果没有定义则自动生成。
 // 支持通过 ToolConfig 覆盖或补充 SKILL.md 中的定义。
-func SkillsToTools(skill *goskills.SkillPackage, opts ...SkillsToToolsOptions) ([]tooltypes.Tool, error) {
+func SkillsToTools(skill *goskills.SkillPackage, opts ...SkillsToToolsOptions) ([]tool.Tool, error) {
 	var config *ToolConfig
 
 	// 1. 首先尝试从 SKILL.md 自动构建配置
@@ -400,7 +399,7 @@ func SkillsToTools(skill *goskills.SkillPackage, opts ...SkillsToToolsOptions) (
 	}
 
 	availableTools, scriptMap := goskills.GenerateToolDefinitions(skill)
-	var result []tooltypes.Tool
+	var result []tool.Tool
 
 	for _, t := range availableTools {
 		if t.Function.Name == "" {

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // SimpleMockModel is a simple mock model for demonstration
@@ -16,7 +16,7 @@ type SimpleMockModel struct {
 	turnCount int
 }
 
-func (m *SimpleMockModel) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+func (m *SimpleMockModel) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	m.turnCount++
 
 	// Extract tool information from options
@@ -49,14 +49,14 @@ func (m *SimpleMockModel) GenerateContent(ctx context.Context, messages []llmtyp
 		response = fmt.Sprintf("I'm ready to help! (Turn %d)", m.turnCount)
 	}
 
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
 			{Content: response},
 		},
 	}, nil
 }
 
-func (m *SimpleMockModel) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *SimpleMockModel) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -172,7 +172,7 @@ func main() {
 	// SetTools - replace all tools at once
 	newTool1 := &CalculatorTool{}
 	newTool2 := &WeatherTool{}
-	agent.SetTools([]tooltypes.Tool{newTool1, newTool2})
+	agent.SetTools([]tool.Tool{newTool1, newTool2})
 	fmt.Printf("After SetTools: %d tools\n", len(agent.GetTools()))
 
 	// ClearTools - remove all tools

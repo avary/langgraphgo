@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/goskills"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -220,14 +220,14 @@ func TestSkillsToTools(t *testing.T) {
 
 	t.Run("function_signature", func(t *testing.T) {
 		// Verify the function exists by checking its type
-		var _ func(*goskills.SkillPackage, ...SkillsToToolsOptions) ([]tooltypes.Tool, error) = SkillsToTools
+		var _ func(*goskills.SkillPackage, ...SkillsToToolsOptions) ([]tool.Tool, error) = SkillsToTools
 		// This will compile if the function exists with the correct signature
 	})
 }
 
-// TestSkillTool_ImplementsInterface verifies SkillTool implements tooltypes.Tool
+// TestSkillTool_ImplementsInterface verifies SkillTool implements tool.Tool
 func TestSkillTool_ImplementsInterface(t *testing.T) {
-	var _ tooltypes.Tool = &SkillTool{}
+	var _ tool.Tool = &SkillTool{}
 	tool := &SkillTool{
 		name:        "test",
 		description: "test description",

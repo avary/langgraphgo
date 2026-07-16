@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 // Example demonstrates how to use CreatePlanningAgentMap to build
@@ -17,14 +17,14 @@ func Example_planningAgent() {
 			Name:        "fetch_data",
 			Description: "Fetch data from external API or database",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				// Simulate fetching data
 				fmt.Println("Fetching data from API...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Data fetched successfully: [item1, item2, item3]")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Data fetched successfully: [item1, item2, item3]")},
 				}
 
 				return map[string]any{
@@ -36,14 +36,14 @@ func Example_planningAgent() {
 			Name:        "validate_data",
 			Description: "Validate the integrity and format of data",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				// Simulate validation
 				fmt.Println("Validating data...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Data validation passed")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Data validation passed")},
 				}
 
 				return map[string]any{
@@ -55,14 +55,14 @@ func Example_planningAgent() {
 			Name:        "transform_data",
 			Description: "Transform and normalize data into required format",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				// Simulate transformation
 				fmt.Println("Transforming data...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Data transformed to JSON format")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Data transformed to JSON format")},
 				}
 
 				return map[string]any{
@@ -74,14 +74,14 @@ func Example_planningAgent() {
 			Name:        "analyze_data",
 			Description: "Perform statistical analysis on the data",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				// Simulate analysis
 				fmt.Println("Analyzing data...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Analysis complete: mean=42, median=40, std=5.2")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Analysis complete: mean=42, median=40, std=5.2")},
 				}
 
 				return map[string]any{
@@ -93,14 +93,14 @@ func Example_planningAgent() {
 			Name:        "save_results",
 			Description: "Save processed results to storage",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
+				messages := state["messages"].([]llms.MessageContent)
 
 				// Simulate saving
 				fmt.Println("Saving results...")
 
-				msg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Results saved to database")},
+				msg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Results saved to database")},
 				}
 
 				return map[string]any{
@@ -112,7 +112,7 @@ func Example_planningAgent() {
 
 	// Step 2: Create your LLM model
 	// In a real application, you would use an actual LLM like OpenAI, Anthropic, etc.
-	// var model llmtypes.Model = openai.New(...)
+	// var model llms.Model = openai.New(...)
 
 	// For this example, we'll skip the actual LLM call
 	// The LLM would receive the user request and available nodes,
@@ -223,8 +223,8 @@ func Example_planningAgentRealUsage() {
 	fmt.Println()
 	fmt.Println("// 4. Prepare initial state with user request")
 	fmt.Println("initialState := map[string]any{")
-	fmt.Println("    \"messages\": []llmtypes.MessageContent{")
-	fmt.Println("        llmtypes.TextParts(llmtypes.ChatMessageTypeHuman,")
+	fmt.Println("    \"messages\": []llms.MessageContent{")
+	fmt.Println("        llms.TextParts(llms.ChatMessageTypeHuman,")
 	fmt.Println("            \"Fetch, validate, and save the customer data\"),")
 	fmt.Println("    },")
 	fmt.Println("}")
@@ -234,7 +234,7 @@ func Example_planningAgentRealUsage() {
 	fmt.Println()
 	fmt.Println("// 6. Access results")
 	fmt.Println("mState := result")
-	fmt.Println("messages := mState[\"messages\"].([]llmtypes.MessageContent)")
+	fmt.Println("messages := mState[\"messages\"].([]llms.MessageContent)")
 
 	// Output:
 	// Real usage pattern:
@@ -255,8 +255,8 @@ func Example_planningAgentRealUsage() {
 	//
 	// // 4. Prepare initial state with user request
 	// initialState := map[string]any{
-	//     "messages": []llmtypes.MessageContent{
-	//         llmtypes.TextParts(llmtypes.ChatMessageTypeHuman,
+	//     "messages": []llms.MessageContent{
+	//         llms.TextParts(llms.ChatMessageTypeHuman,
 	//             "Fetch, validate, and save the customer data"),
 	//     },
 	// }
@@ -266,7 +266,7 @@ func Example_planningAgentRealUsage() {
 	//
 	// // 6. Access results
 	// mState := result
-	// messages := mState["messages"].([]llmtypes.MessageContent)
+	// messages := mState["messages"].([]llms.MessageContent)
 }
 
 // Example showing how the LLM generates workflow plans

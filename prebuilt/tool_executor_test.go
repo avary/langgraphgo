@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 	"github.com/stretchr/testify/assert"
 )
 
-// MockTool implements tooltypes.Tool for testing
+// MockTool implements tool.Tool for testing
 type MockTool struct {
 	name string
 }
@@ -27,7 +27,7 @@ func (t *MockTool) Call(ctx context.Context, input string) (string, error) {
 
 func TestToolExecutor(t *testing.T) {
 	mockTool := &MockTool{name: "test-tool"}
-	executor := NewToolExecutor([]tooltypes.Tool{mockTool})
+	executor := NewToolExecutor([]tool.Tool{mockTool})
 
 	// Test single invocation
 	inv := ToolInvocation{

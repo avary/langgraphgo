@@ -9,7 +9,7 @@ import (
 	"github.com/milvus-io/milvus/client/v2/entity"
 	"github.com/milvus-io/milvus/client/v2/milvusclient"
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 	"github.com/smallnest/langgraphgo/rag"
 	"github.com/smallnest/langgraphgo/rag/retriever"
 	"github.com/smallnest/langgraphgo/rag/store"
@@ -169,7 +169,7 @@ Using mock embedder for demonstration purposes...
 	// Configure RAG pipeline
 	config := rag.DefaultPipelineConfig()
 	config.Retriever = vectorRetriever
-	config.LLM = llmtypes.Wrap(llm)
+	config.LLM = llms.Wrap(llm)
 
 	// Build basic RAG pipeline
 	fmt.Println("Building RAG pipeline...")
@@ -302,7 +302,7 @@ func demonstrationMode(ctx context.Context, llm *openai.LLM) {
 	// Configure RAG pipeline
 	config := rag.DefaultPipelineConfig()
 	config.Retriever = vectorRetriever
-	config.LLM = llmtypes.Wrap(llm)
+	config.LLM = llms.Wrap(llm)
 
 	// Build basic RAG pipeline
 	fmt.Println("Building RAG pipeline with mock embedder...")

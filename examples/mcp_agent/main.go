@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/smallnest/langgraphgo/adapter/mcp"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
 )
 
@@ -66,8 +66,8 @@ func main() {
 
 	// Prepare initial state with messages
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, query),
+		"messages": []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, query),
 		},
 	}
 

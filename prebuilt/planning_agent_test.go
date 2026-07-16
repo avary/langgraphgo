@@ -5,27 +5,27 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/llms"
+	"github.com/smallnest/langgraphgo/tool"
 	"github.com/stretchr/testify/assert"
 )
 
 // MockPlanningLLM is a mock LLM that returns a workflow plan
 type MockPlanningLLM struct {
 	planJSON      string
-	responses     []llmtypes.ContentResponse
+	responses     []llms.ContentResponse
 	callCount     int
-	capturedCalls [][]llmtypes.MessageContent
+	capturedCalls [][]llms.MessageContent
 }
 
-func (m *MockPlanningLLM) GenerateContent(ctx context.Context, messages []llmtypes.MessageContent, options ...llmtypes.CallOption) (*llmtypes.ContentResponse, error) {
+func (m *MockPlanningLLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
 	m.capturedCalls = append(m.capturedCalls, messages)
 
 	// First call is the planning call
 	if m.callCount == 0 {
 		m.callCount++
-		return &llmtypes.ContentResponse{
-			Choices: []*llmtypes.ContentChoice{
+		return &llms.ContentResponse{
+			Choices: []*llms.ContentChoice{
 				{
 					Content: m.planJSON,
 				},
@@ -40,14 +40,14 @@ func (m *MockPlanningLLM) GenerateContent(ctx context.Context, messages []llmtyp
 		return &resp, nil
 	}
 
-	return &llmtypes.ContentResponse{
-		Choices: []*llmtypes.ContentChoice{
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
 			{Content: "No more responses"},
 		},
 	}, nil
 }
 
-func (m *MockPlanningLLM) Call(ctx context.Context, prompt string, options ...llmtypes.CallOption) (string, error) {
+func (m *MockPlanningLLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	return "", nil
 }
 
@@ -58,10 +58,10 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 			Name:        "research",
 			Description: "Research and gather information",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
-				researchMsg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Research completed")},
+				messages := state["messages"].([]llms.MessageContent)
+				researchMsg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Research completed")},
 				}
 				return map[string]any{
 					"messages": append(messages, researchMsg),
@@ -72,10 +72,10 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 			Name:        "analyze",
 			Description: "Analyze the gathered information",
 			Function: func(ctx context.Context, state map[string]any) (map[string]any, error) {
-				messages := state["messages"].([]llmtypes.MessageContent)
-				analyzeMsg := llmtypes.MessageContent{
-					Role:  llmtypes.ChatMessageTypeAI,
-					Parts: []llmtypes.ContentPart{llmtypes.TextPart("Analysis completed")},
+				messages := state["messages"].([]llms.MessageContent)
+				analyzeMsg := llms.MessageContent{
+					Role:  llms.ChatMessageTypeAI,
+					Parts: []llms.ContentPart{llms.TextPart("Analysis completed")},
 				}
 				return map[string]any{
 					"messages": append(messages, analyzeMsg),
@@ -100,18 +100,18 @@ func TestCreatePlanningAgentMap_SimpleWorkflow(t *testing.T) {
 	// Setup Mock LLM
 	mockLLM := &MockPlanningLLM{
 		planJSON:  planJSON,
-		responses: []llmtypes.ContentResponse{},
+		responses: []llms.ContentResponse{},
 	}
 
 	// Create Planning Agent
-	agent, err := CreatePlanningAgentMap(mockLLM, testNodes, []tooltypes.Tool{})
+	agent, err := CreatePlanningAgentMap(mockLLM, testNodes, []tool.Tool{})
 	assert.NoError(t, err)
 	assert.NotNil(t, agent)
 
 	// Initial State
 	initialState := map[string]any{
-		"messages": []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Please research and analyze"),
+		"messages": []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "Please research and analyze"),
 		},
 	}
 

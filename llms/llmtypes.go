@@ -1,11 +1,11 @@
-// Package llmtypes defines langgraphgo's own LLM message, tool, and model
+// Package llms defines langgraphgo's own LLM message, tool, and model
 // vocabulary. These types are owned by the framework and carry no dependency on
 // any provider library.
 //
 // Interop with github.com/tmc/langchaingo lives in langchain.go, the only file
 // in this package that imports langchaingo. Provider implementations are bridged
 // into the framework with Wrap; the reverse conversion is ToLangchain.
-package llmtypes
+package llms
 
 import (
 	"context"

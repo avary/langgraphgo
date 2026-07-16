@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/smallnest/langgraphgo/log"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 // ExecutionLanguage defines the programming language for code execution
@@ -44,7 +44,7 @@ const (
 // CodeExecutor handles the execution of programmatic tool calling code
 type CodeExecutor struct {
 	Language   ExecutionLanguage
-	Tools      []tooltypes.Tool
+	Tools      []tool.Tool
 	Timeout    time.Duration
 	WorkDir    string
 	Mode       ExecutionMode
@@ -61,12 +61,12 @@ type ExecutionResult struct {
 
 // NewCodeExecutor creates a new code executor for PTC
 // Default mode is ModeDirect for simplicity
-func NewCodeExecutor(language ExecutionLanguage, toolList []tooltypes.Tool) *CodeExecutor {
+func NewCodeExecutor(language ExecutionLanguage, toolList []tool.Tool) *CodeExecutor {
 	return NewCodeExecutorWithMode(language, toolList, ModeDirect)
 }
 
 // NewCodeExecutorWithMode creates a new code executor with specified execution mode
-func NewCodeExecutorWithMode(language ExecutionLanguage, toolList []tooltypes.Tool, mode ExecutionMode) *CodeExecutor {
+func NewCodeExecutorWithMode(language ExecutionLanguage, toolList []tool.Tool, mode ExecutionMode) *CodeExecutor {
 	executor := &CodeExecutor{
 		Language: language,
 		Tools:    toolList,

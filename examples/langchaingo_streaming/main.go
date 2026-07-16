@@ -13,13 +13,13 @@ import (
 	"sync"
 
 	"github.com/smallnest/langgraphgo/graph"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 )
 
 // StreamingState holds the streaming callback function
 type StreamingState struct {
-	Messages       []llmtypes.MessageContent
+	Messages       []llms.MessageContent
 	StreamCallback func(chunk string)
 }
 
@@ -27,7 +27,7 @@ type StreamingState struct {
 func basicStreamingExample() {
 	fmt.Println("\n=== Example 1: Basic Streaming ===")
 
-	var llm llmtypes.Model
+	var llm llms.Model
 	var err error
 
 	llm, err = openai.New()
@@ -42,12 +42,12 @@ func basicStreamingExample() {
 	g.AddNode("stream_chat", "stream_chat", func(ctx context.Context, state StreamingState) (StreamingState, error) {
 		// Add streaming function to the LLM call
 		_, err := llm.GenerateContent(ctx, state.Messages,
-			llmtypes.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
+			llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 				// Call the streaming callback for each chunk
 				state.StreamCallback(string(chunk))
 				return nil
 			}),
-			llmtypes.WithTemperature(0.7),
+			llms.WithTemperature(0.7),
 		)
 		if err != nil {
 			return state, fmt.Errorf("LLM generation failed: %w", err)
@@ -67,8 +67,8 @@ func basicStreamingExample() {
 	// Prepare state with streaming callback
 	fullResponse := strings.Builder{}
 	state := StreamingState{
-		Messages: []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Explain Go's concurrency model in simple terms."),
+		Messages: []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "Explain Go's concurrency model in simple terms."),
 		},
 		StreamCallback: func(chunk string) {
 			// Print each chunk as it arrives
@@ -145,7 +145,7 @@ func streamingWithEventsExample() {
 	node := g.AddNode("stream_with_events", "stream_with_events", func(ctx context.Context, state StreamingState) (StreamingState, error) {
 		// Stream the response with progress events
 		response, err := llm.GenerateContent(ctx, state.Messages,
-			llmtypes.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
+			llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 				// Save chunk to listener (thread-safe)
 				progressListener.mu.Lock()
 				// Make a copy of chunk since the underlying array may be reused
@@ -161,7 +161,7 @@ func streamingWithEventsExample() {
 				state.StreamCallback(string(chunk))
 				return nil
 			}),
-			llmtypes.WithTemperature(0.8),
+			llms.WithTemperature(0.8),
 		)
 		if err != nil {
 			return state, fmt.Errorf("LLM generation failed: %w", err)
@@ -169,7 +169,7 @@ func streamingWithEventsExample() {
 
 		// Add the full response to messages
 		state.Messages = append(state.Messages,
-			llmtypes.TextParts(llmtypes.ChatMessageTypeAI, response.Choices[0].Content),
+			llms.TextParts(llms.ChatMessageTypeAI, response.Choices[0].Content),
 		)
 
 		return state, nil
@@ -187,8 +187,8 @@ func streamingWithEventsExample() {
 
 	// Prepare state
 	state := StreamingState{
-		Messages: []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, "Write a short haiku about programming."),
+		Messages: []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, "Write a short haiku about programming."),
 		},
 		StreamCallback: func(chunk string) {
 			fmt.Print(chunk)
@@ -222,9 +222,9 @@ func multiStepStreamingExample() {
 
 	// Step 1: Analyze with streaming
 	g.AddNode("analyze", "analyze", func(ctx context.Context, data map[string]any) (map[string]any, error) {
-		messages := []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, "You are a helpful assistant. Analyze the given topic briefly."),
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, data["topic"].(string)),
+		messages := []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeSystem, "You are a helpful assistant. Analyze the given topic briefly."),
+			llms.TextParts(llms.ChatMessageTypeHuman, data["topic"].(string)),
 		}
 
 		fmt.Println("\n[Step 1] Analysis:")
@@ -233,12 +233,12 @@ func multiStepStreamingExample() {
 		// Accumulate streaming output
 		var analysisBuilder strings.Builder
 		_, err := llm.GenerateContent(ctx, messages,
-			llmtypes.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
+			llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 				fmt.Print(string(chunk))
 				analysisBuilder.Write(chunk)
 				return nil
 			}),
-			llmtypes.WithMaxTokens(100),
+			llms.WithMaxTokens(100),
 		)
 		if err != nil {
 			return nil, err
@@ -252,9 +252,9 @@ func multiStepStreamingExample() {
 
 	// Step 2: Expand with streaming
 	g.AddNode("expand", "expand", func(ctx context.Context, data map[string]any) (map[string]any, error) {
-		messages := []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeSystem, "Provide more details about the topic based on the analysis."),
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, fmt.Sprintf("Topic: %s\nAnalysis: %s", data["topic"], data["analysis"])),
+		messages := []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeSystem, "Provide more details about the topic based on the analysis."),
+			llms.TextParts(llms.ChatMessageTypeHuman, fmt.Sprintf("Topic: %s\nAnalysis: %s", data["topic"], data["analysis"])),
 		}
 
 		fmt.Println("\n[Step 2] Expansion:")
@@ -263,12 +263,12 @@ func multiStepStreamingExample() {
 		// Accumulate streaming output
 		var expansionBuilder strings.Builder
 		_, err := llm.GenerateContent(ctx, messages,
-			llmtypes.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
+			llms.WithStreamingFunc(func(_ context.Context, chunk []byte) error {
 				fmt.Print(string(chunk))
 				expansionBuilder.Write(chunk)
 				return nil
 			}),
-			llmtypes.WithMaxTokens(150),
+			llms.WithMaxTokens(150),
 		)
 		if err != nil {
 			return nil, err

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/smallnest/langgraphgo/llmtypes"
+	"github.com/smallnest/langgraphgo/llms"
 )
 
 //nolint:gocognit,dupl,cyclop // This is a comprehensive test that needs to check multiple scenarios with similar setup
@@ -31,23 +31,23 @@ func TestConditionalEdges(t *testing.T) {
 				})
 
 				g.AddNode("calculator", "calculator", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-					messages := state["messages"].([]llmtypes.MessageContent)
-					state["messages"] = append(messages, llmtypes.TextParts("ai", "Calculating: 2+2=4"))
+					messages := state["messages"].([]llms.MessageContent)
+					state["messages"] = append(messages, llms.TextParts("ai", "Calculating: 2+2=4"))
 					return state, nil
 				})
 
 				g.AddNode("general", "general", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-					messages := state["messages"].([]llmtypes.MessageContent)
-					state["messages"] = append(messages, llmtypes.TextParts("ai", "General response"))
+					messages := state["messages"].([]llms.MessageContent)
+					state["messages"] = append(messages, llms.TextParts("ai", "General response"))
 					return state, nil
 				})
 
 				// Add conditional edge from start
 				g.AddConditionalEdge("start", func(ctx context.Context, state map[string]any) string {
-					messages := state["messages"].([]llmtypes.MessageContent)
+					messages := state["messages"].([]llms.MessageContent)
 					if len(messages) > 0 {
 						lastMessage := messages[len(messages)-1]
-						if content, ok := lastMessage.Parts[0].(llmtypes.TextContent); ok {
+						if content, ok := lastMessage.Parts[0].(llms.TextContent); ok {
 							if strings.Contains(content.Text, "calculate") || strings.Contains(content.Text, "math") {
 								return "calculator"
 							}
@@ -63,12 +63,12 @@ func TestConditionalEdges(t *testing.T) {
 				g.SetEntryPoint("start")
 				return g
 			},
-			initialState: map[string]any{"messages": []llmtypes.MessageContent{
-				llmtypes.TextParts("human", "I need to calculate something"),
+			initialState: map[string]any{"messages": []llms.MessageContent{
+				llms.TextParts("human", "I need to calculate something"),
 			}},
-			expectedResult: map[string]any{"messages": []llmtypes.MessageContent{
-				llmtypes.TextParts("human", "I need to calculate something"),
-				llmtypes.TextParts("ai", "Calculating: 2+2=4"),
+			expectedResult: map[string]any{"messages": []llms.MessageContent{
+				llms.TextParts("human", "I need to calculate something"),
+				llms.TextParts("ai", "Calculating: 2+2=4"),
 			}},
 			expectError: false,
 		},
@@ -82,22 +82,22 @@ func TestConditionalEdges(t *testing.T) {
 				})
 
 				g.AddNode("calculator", "calculator", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-					messages := state["messages"].([]llmtypes.MessageContent)
-					state["messages"] = append(messages, llmtypes.TextParts("ai", "Calculating: 2+2=4"))
+					messages := state["messages"].([]llms.MessageContent)
+					state["messages"] = append(messages, llms.TextParts("ai", "Calculating: 2+2=4"))
 					return state, nil
 				})
 
 				g.AddNode("general", "general", func(ctx context.Context, state map[string]any) (map[string]any, error) {
-					messages := state["messages"].([]llmtypes.MessageContent)
-					state["messages"] = append(messages, llmtypes.TextParts("ai", "General response"))
+					messages := state["messages"].([]llms.MessageContent)
+					state["messages"] = append(messages, llms.TextParts("ai", "General response"))
 					return state, nil
 				})
 
 				g.AddConditionalEdge("start", func(ctx context.Context, state map[string]any) string {
-					messages := state["messages"].([]llmtypes.MessageContent)
+					messages := state["messages"].([]llms.MessageContent)
 					if len(messages) > 0 {
 						lastMessage := messages[len(messages)-1]
-						if content, ok := lastMessage.Parts[0].(llmtypes.TextContent); ok {
+						if content, ok := lastMessage.Parts[0].(llms.TextContent); ok {
 							if strings.Contains(content.Text, "calculate") || strings.Contains(content.Text, "math") {
 								return "calculator"
 							}
@@ -112,12 +112,12 @@ func TestConditionalEdges(t *testing.T) {
 				g.SetEntryPoint("start")
 				return g
 			},
-			initialState: map[string]any{"messages": []llmtypes.MessageContent{
-				llmtypes.TextParts("human", "Tell me a story"),
+			initialState: map[string]any{"messages": []llms.MessageContent{
+				llms.TextParts("human", "Tell me a story"),
 			}},
-			expectedResult: map[string]any{"messages": []llmtypes.MessageContent{
-				llmtypes.TextParts("human", "Tell me a story"),
-				llmtypes.TextParts("ai", "General response"),
+			expectedResult: map[string]any{"messages": []llms.MessageContent{
+				llms.TextParts("human", "Tell me a story"),
+				llms.TextParts("ai", "General response"),
 			}},
 			expectError: false,
 		},
@@ -229,8 +229,8 @@ func TestConditionalEdges(t *testing.T) {
 			if !tt.expectError {
 				// Check if the result has "messages" field for message-based tests
 				if _, hasMessages := result["messages"]; hasMessages {
-					resultMessages := result["messages"].([]llmtypes.MessageContent)
-					expectedMessages := tt.expectedResult.(map[string]any)["messages"].([]llmtypes.MessageContent)
+					resultMessages := result["messages"].([]llms.MessageContent)
+					expectedMessages := tt.expectedResult.(map[string]any)["messages"].([]llms.MessageContent)
 					if len(resultMessages) != len(expectedMessages) {
 						t.Errorf("Expected %d messages, got %d", len(expectedMessages), len(resultMessages))
 					} else {
@@ -238,8 +238,8 @@ func TestConditionalEdges(t *testing.T) {
 							if resultMessages[i].Role != expectedMessages[i].Role {
 								t.Errorf("Message %d: expected role %s, got %s", i, expectedMessages[i].Role, resultMessages[i].Role)
 							}
-							expectedText := expectedMessages[i].Parts[0].(llmtypes.TextContent).Text
-							actualText := resultMessages[i].Parts[0].(llmtypes.TextContent).Text
+							expectedText := expectedMessages[i].Parts[0].(llms.TextContent).Text
+							actualText := resultMessages[i].Parts[0].(llms.TextContent).Text
 							if actualText != expectedText {
 								t.Errorf("Message %d: expected text %q, got %q", i, expectedText, actualText)
 							}

@@ -9,10 +9,10 @@ import (
 
 	"github.com/smallnest/goskills"
 	adapter "github.com/smallnest/langgraphgo/adapter/goskills"
+	"github.com/smallnest/langgraphgo/llms"
 	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
-	"github.com/smallnest/langgraphgo/llmtypes"
 	"github.com/smallnest/langgraphgo/prebuilt"
-	"github.com/smallnest/langgraphgo/tooltypes"
+	"github.com/smallnest/langgraphgo/tool"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 	}
 
 	// 3. Convert Skills to Tools
-	var allTools []tooltypes.Tool
+	var allTools []tool.Tool
 	var allSystemMessages strings.Builder
 
 	allSystemMessages.WriteString("You are a helpful assistant that can use skills.\n\n")
@@ -94,8 +94,8 @@ func main() {
 	input := "Please use the available skill to say hello to the world."
 
 	resp, err := agent.Invoke(ctx, map[string]any{
-		"messages": []llmtypes.MessageContent{
-			llmtypes.TextParts(llmtypes.ChatMessageTypeHuman, input),
+		"messages": []llms.MessageContent{
+			llms.TextParts(llms.ChatMessageTypeHuman, input),
 		},
 	})
 	if err != nil {
