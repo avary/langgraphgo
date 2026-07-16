@@ -166,6 +166,25 @@
 //		},
 //	})
 //
+// # Typed vs Map Constructors
+//
+// Every agent ships two entry points that are parallel full implementations,
+// not thin wrappers around each other. Pick by how you model state:
+//
+//   - Create<X>AgentMap: operates on map[string]any and registers a MapSchema
+//     with reducers (e.g. "messages" uses AppendReducer), so parallel nodes and
+//     message accumulation merge automatically. No accessor functions needed —
+//     pass only the model/tools/config. Best for quick starts and the common
+//     case; this is the API most examples use.
+//   - Create<X>Agent[S]: generic over your own state type S for compile-time
+//     safety. You inject getter/setter closures (CreatePEVAgent needs ~8 pairs)
+//     and it registers no reducers — each setter returns the fully-computed next
+//     state. Best when you already have a strongly-typed state struct.
+//
+// The two are not interchangeable via a single generic adapter: the Map variants
+// carry reducer-based merge semantics that the typed variants deliberately leave
+// to the caller's setters. Choose the Map form unless you need typed state.
+//
 // # RAG (Retrieval-Augmented Generation)
 //
 // ## Basic RAG Agent
