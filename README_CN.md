@@ -13,10 +13,6 @@
 
 官网: [http://lango.rpcx.io](http://lango.rpcx.io)
 
-## 单元测试覆盖率
-
-![](coverage.svg)
-
 ## 🌐 基于 LangGraphGo 开发的网站展示
 
 以下是使用 LangGraphGo 构建的实际应用案例：

@@ -1,4 +1,4 @@
-.PHONY: help all build test test-race test-coverage treemap test-verbose lint fmt vet clean deps tidy check examples docs install-tools benchmark modernize
+.PHONY: help all build test test-race test-coverage test-verbose lint fmt vet clean deps tidy check examples docs install-tools benchmark modernize
 
 # Variables
 GOCMD=go
@@ -61,12 +61,6 @@ test-coverage:
 	@echo "$(COLOR_GREEN)Coverage report generated: $(COVERAGE_FILE)$(COLOR_RESET)"
 	$(GOCMD) tool cover -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML)
 	@echo "$(COLOR_GREEN)HTML coverage report: $(COVERAGE_HTML)$(COLOR_RESET)"
-
-
-
-treemap: test-coverage
-	go-cover-treemap -coverprofile $(COVERAGE_FILE) > coverage.svg
-	@echo "$(COLOR_GREEN)SVG coverage report: coverage.svg$(COLOR_RESET)"
 
 ## test-verbose: Run tests with verbose output
 test-verbose:
