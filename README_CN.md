@@ -40,7 +40,8 @@ go get github.com/smallnest/langgraphgo
     - **并行执行**: 支持节点的并发执行（扇出），并具备线程安全的状态合并。
     - **运行时配置**: 通过 `RunnableConfig` 传播回调、标签和元数据。
     - **泛型类型 (Generic Types)**: 支持泛型 StateGraph 实现的类型安全状态管理。
-    - **LangChain 兼容**: 与 `langchaingo` 无缝协作。
+    - **原生 LLM Provider**: 内置不依赖 langchaingo 的 `nativeopenai` 和 `openairesponses` Provider，以及 `doubao`、`qwen`。
+    - **LangChain 兼容**: 框架自有的 `llms` 和 `tool` 类型，并通过一个轻量的 langchaingo 适配层 (`llms.Wrap`) 实现无缝互操作。
 
 - **持久化与可靠性**:
     - **Checkpointers**: 提供 Redis、Postgres、SQLite 和文件实现，用于持久化状态。
@@ -74,8 +75,7 @@ import (
 	"log"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 )
 
 func main() {

@@ -1,5 +1,38 @@
 # Changelog
 
+## [Unreleased]
+
+### LangChainGo Decoupling
+- **Native LLM Providers**: Added langchaingo-free LLM providers under `llms/` (#94, #96)
+  - `nativeopenai`: OpenAI Chat Completions provider with no langchaingo dependency
+  - `openairesponses`: native provider for the OpenAI Responses API
+  - `doubao` and `qwen` providers dropped their langchaingo dependency
+- **Framework-Owned Types**: The framework now owns its LLM and tool vocabulary
+  - `llms` package defines the message, tool, and model types, with a thin
+    langchaingo adapter layer (`Wrap`/`ToLangchain`) for interop
+  - `tool.Tool` is the framework's own tool interface, no longer aliasing
+    `langchaingo/tools`
+  - `memory/langchainadapter` isolates the langchaingo memory shim so the core
+    `memory` package stays dependency-free (#100)
+- **Examples Decoupled**: Examples now build against the framework's own `llms`
+  and `tool` packages instead of langchaingo
+
+### Refactoring
+- **Package Consolidation**: Merged the `tooltypes` and `llmtypes` packages into
+  `tool` and `llms` respectively, so consumers reference `tool.Tool` and `llms.X`
+  directly
+- **Planning Agents**: Unified the plan-execute agent option surface (#101)
+- **RAG Slimming**: Applied a RAG module audit — dropped the dead reranker,
+  removed duplication, and deprecated an unused wrapper (#103)
+- **Go 1.25 Modernization**: Modernized Go idioms for Go 1.25
+
+### Tooling
+- Migrated `.golangci.yaml` to the golangci-lint v2 configuration format
+
+### Removed
+- Removed the `docs/`, `showcases/`, and `weekly/` directories (including the
+  `showcases` git submodule)
+
 ## [0.8.0] - 2026-01-25
 
 ### RAG Enhancements

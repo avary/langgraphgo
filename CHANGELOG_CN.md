@@ -1,5 +1,34 @@
 # 更新日志
 
+## [未发布]
+
+### 解耦 LangChainGo
+- **原生 LLM Provider**: 在 `llms/` 下新增了不依赖 langchaingo 的 LLM Provider (#94, #96)
+  - `nativeopenai`: 不依赖 langchaingo 的 OpenAI Chat Completions Provider
+  - `openairesponses`: OpenAI Responses API 的原生 Provider
+  - `doubao` 和 `qwen` Provider 移除了对 langchaingo 的依赖
+- **框架自有类型**: 框架现在拥有自己的 LLM 和工具类型体系
+  - `llms` 包定义了消息、工具和模型类型，并通过一个轻量的 langchaingo 适配层
+    (`Wrap`/`ToLangchain`) 实现互操作
+  - `tool.Tool` 成为框架自己的工具接口，不再是 `langchaingo/tools` 的别名
+  - `memory/langchainadapter` 隔离了 langchaingo 记忆适配层，使核心 `memory`
+    包保持零依赖 (#100)
+- **示例解耦**: 示例现在基于框架自有的 `llms` 和 `tool` 包构建，不再依赖 langchaingo
+
+### 重构
+- **包合并**: 将 `tooltypes` 和 `llmtypes` 包分别合并进 `tool` 和 `llms`，
+  使用方直接引用 `tool.Tool` 和 `llms.X`
+- **规划 Agent**: 统一了 plan-execute agent 的 option 接口 (#101)
+- **RAG 精简**: 基于 RAG 模块审计，移除了无用的 reranker、去除重复代码，
+  并废弃了一个未使用的 wrapper (#103)
+- **Go 1.25 现代化**: 将代码更新为 Go 1.25 的惯用写法
+
+### 工具链
+- 将 `.golangci.yaml` 迁移到 golangci-lint v2 配置格式
+
+### 移除
+- 移除了 `docs/`、`showcases/` 和 `weekly/` 目录（含 `showcases` git submodule）
+
 ## [0.8.0] - 2025-01-17
 
 ### 向量存储与 RAG 增强

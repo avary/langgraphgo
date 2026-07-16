@@ -41,7 +41,8 @@ go get github.com/smallnest/langgraphgo
     - **Parallel Execution**: Concurrent node execution (fan-out) with thread-safe state merging.
     - **Runtime Configuration**: Propagate callbacks, tags, and metadata via `RunnableConfig`.
     - **Generic Types**: Type-safe state management with generic StateGraph implementations.
-    - **LangChain Compatible**: Works seamlessly with `langchaingo`.
+    - **Native LLM Providers**: Built-in `nativeopenai` and `openairesponses` providers with no langchaingo dependency, plus `doubao` and `qwen`.
+    - **LangChain Compatible**: Framework-owned `llms` and `tool` types with a thin langchaingo adapter (`llms.Wrap`) for seamless interop.
 
 - **Persistence & Reliability**:
     - **Checkpointers**: Redis, Postgres, SQLite, and File implementations for durable state.
@@ -75,8 +76,7 @@ import (
 	"log"
 
 	"github.com/smallnest/langgraphgo/graph"
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
+	openai "github.com/smallnest/langgraphgo/llms/nativeopenai"
 )
 
 func main() {
