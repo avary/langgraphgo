@@ -23,7 +23,6 @@
 
 | [Insight](https://insight.rpcx.io) | [NoteX](https://notex.rpcx.io) |
 | :--------------------------------: | :----------------------------: |
-|       ![](docs/insight.png)        |      ![](docs/notex.png)       |
 
 **Insight** - AI 驱动的知识管理与洞察生成平台，通过 LangGraphGo 构建智能分析流程，帮助用户从海量信息中提取关键洞察。
 
